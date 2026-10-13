@@ -17,7 +17,6 @@
     whiteCar.setAttribute('aria-hidden', String(colour !== 'white'));
     swap.setAttribute('aria-pressed', String(colour === 'white'));
     swap.setAttribute('aria-label', 'Move across the Porsche to reveal white paint. Press Enter to switch the full colour.');
-    $$('.swatch').forEach(b => {const active=b.dataset.colour===colour;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
   }
   function revealAt(event) {
     if (chosenColour === 'white') return;
@@ -51,12 +50,11 @@
   window.addEventListener('blur', endReveal);
   window.addEventListener('scroll', endReveal, {passive:true});
   finePointer.addEventListener('change', () => {endReveal();swap.classList.toggle('cursor-ready', finePointer.matches && chosenColour === 'black');});
-  // Full-colour switching remains an explicit keyboard or swatch action, never a hover action.
+  // Full-colour switching remains an explicit keyboard action, never a hover action.
   swap.addEventListener('click', event => {
     if(event.detail !== 0 || event.pointerType) return;
     chosenColour = chosenColour === 'black' ? 'white' : 'black';showColour(chosenColour);
   });
-  $$('.swatch').forEach(b => b.addEventListener('click', () => {chosenColour=b.dataset.colour;showColour(chosenColour);}));
   const menu = $('.menu-button'), nav = $('#mobile-nav');
   function closeMenu() {menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Open navigation');nav.hidden=true;}
   menu.addEventListener('click', () => {const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close navigation':'Open navigation');nav.hidden=!open;});
