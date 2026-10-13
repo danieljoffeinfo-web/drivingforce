@@ -29,3 +29,6 @@ The calculator uses standard amortisation with an editable illustrative annual r
 
 ## Local colour reveal
 Mouse movement reveals only a soft-edged area of the white photo underneath the pointer. The rest of the car stays black and the reveal fades when the pointer leaves. On touchscreens, swipe over the car to reveal the local area. Colour swatches and the Enter key provide an explicit whole-car alternative.
+
+## Cursor design
+The paint reveal has a custom red inspection lens, precise centre point and REVEAL badge for mouse users. The pointer position and paint mask are aligned without a trailing animation. It hides when leaving the car, scrolling or changing window focus. Touch and keyboard controls are preserved; reduced-motion preferences disable cursor transitions.

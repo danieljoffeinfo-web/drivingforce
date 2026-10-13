@@ -3,9 +3,14 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
   const frame = $('#car-frame'), swap = $('#car-swap'), whiteCar = $('.car-white');
+  const revealCursor = $('#reveal-cursor');
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  swap.classList.toggle('cursor-ready', finePointer.matches);
   let chosenColour = 'black';
   let touchingCar = false;
   function showColour(colour) {
+    revealCursor.classList.remove('is-visible');
+    swap.classList.toggle('cursor-ready', finePointer.matches && colour === 'black');
     frame.classList.remove('is-revealing');
     frame.classList.toggle('is-white', colour === 'white');
     $('.car-black').setAttribute('aria-hidden', String(colour === 'white'));
@@ -17,6 +22,11 @@
   }
   function revealAt(event) {
     if (chosenColour === 'white') return;
+    if (event.pointerType === 'mouse' && finePointer.matches) {
+      revealCursor.style.setProperty('--cursor-x', `${event.clientX}px`);
+      revealCursor.style.setProperty('--cursor-y', `${event.clientY}px`);
+      revealCursor.classList.add('is-visible');
+    }
     // Match pointer coordinates to the overlaid photograph, including its responsive crop.
     const bounds = whiteCar.getBoundingClientRect();
     frame.style.setProperty('--reveal-x', `${event.clientX - bounds.left}px`);
@@ -26,6 +36,7 @@
     $('#colour-label').textContent = 'MOVE TO REVEAL';
   }
   function endReveal() {
+    revealCursor.classList.remove('is-visible');
     touchingCar = false;
     frame.classList.remove('is-revealing');
     $('#colour-label').textContent = chosenColour === 'white' ? '02 — WHITE' : '01 — BLACK';
@@ -40,6 +51,9 @@
   swap.addEventListener('pointercancel', endReveal);
   swap.addEventListener('pointerup', event => {if(event.pointerType === 'touch') endReveal();});
   swap.addEventListener('blur', endReveal);
+  window.addEventListener('blur', endReveal);
+  window.addEventListener('scroll', endReveal, {passive:true});
+  finePointer.addEventListener('change', () => {endReveal();swap.classList.toggle('cursor-ready', finePointer.matches && chosenColour === 'black');});
   // Full-colour switching remains an explicit keyboard or swatch action, never a hover action.
   swap.addEventListener('click', event => {
     if(event.detail !== 0 || event.pointerType) return;
