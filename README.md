@@ -1,5 +1,5 @@
 # Driving Force homepage
-A responsive, buildless homepage using the supplied black and white Porsche photos and supplied logo, with a cursor-following local white-paint reveal with a soft circular edge and explicit colour controls, a 49-vehicle searchable collection, finance estimator, and finance / selling / service / about sections.
+A responsive, buildless homepage using the supplied black and white Porsche photos and supplied logo, with a gradual black-to-white hover transition and a small neutral cursor, a 49-vehicle searchable collection, finance estimator, and finance / selling / service / about sections.
 
 ## Run locally
 Run `python3 -m http.server 4173 --directory dist` from this folder and open http://localhost:4173.
@@ -14,7 +14,7 @@ Run `python3 -m http.server 4173 --directory dist` from this folder and open htt
 ## Content and boundaries
 Inventory source: https://driving-force.co.za/wp-content/themes/vmg-motors-theme/filterData.php (the public feed used by https://driving-force.co.za/showroom/).
 The inventory is a static snapshot, not a live integration. Refresh vehicles.json and associated images to update the collection. Vehicle enquiries link to original vehicle pages. Finance applications, service bookings and valuations link to the original dealership website. No visitor data is collected by this homepage.
-The hero features supplied Porsche Turbo S creative. It is not represented as a stock listing and its colour controls do not claim the inventory cars are available in those colours.
+The hero features supplied Porsche Turbo S creative. It is not represented as a stock listing and its colour transition does not claim the inventory cars are available in those colours.
 The calculator uses standard amortisation with an editable illustrative annual rate, no balloon, no fees and no insurance. It is an estimate and not a credit offer.
 
 ## Verification
@@ -27,8 +27,8 @@ The calculator uses standard amortisation with an editable illustrative annual r
 - Keyboard colour toggle, mobile menu and in-page links checked.
 - JavaScript syntax checked; local server returned HTTP 200.
 
-## Local colour reveal
-Mouse movement reveals only a soft-edged area of the white photo underneath the pointer. The rest of the car stays black and the reveal fades when the pointer leaves. On touchscreens, swipe over the car to reveal the local area. Colour swatches and the Enter key provide an explicit whole-car alternative.
+## Colour transition
+Hovering over the car starts a smooth 1.2-second transition to the full white photo, even if the pointer stays still. Leaving the car smoothly returns it to black. On touchscreens, hold the car to show white and release to return to black. Enter toggles the full colour for keyboard users. Reduced-motion preferences remove the transition.
 
 ## Cursor design
-The paint reveal has a custom red inspection lens, precise centre point and REVEAL badge for mouse users. The pointer position and paint mask are aligned without a trailing animation. It hides when leaving the car, scrolling or changing window focus. Touch and keyboard controls are preserved; reduced-motion preferences disable cursor transitions.
+A small, thin neutral ring follows the mouse over the car. It hides when leaving the car, scrolling or changing window focus. There are no colour swatches or extra cursor decorations.

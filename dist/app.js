@@ -16,7 +16,7 @@
     $('.car-black').setAttribute('aria-hidden', String(colour === 'white'));
     whiteCar.setAttribute('aria-hidden', String(colour !== 'white'));
     swap.setAttribute('aria-pressed', String(colour === 'white'));
-    swap.setAttribute('aria-label', 'Move across the Porsche to reveal white paint. Press Enter to switch the full colour.');
+    swap.setAttribute('aria-label', 'Hover over or hold the Porsche to turn it white. Press Enter to toggle the colour.');
   }
   function revealAt(event) {
     if (chosenColour === 'white') return;
@@ -25,11 +25,6 @@
       revealCursor.style.setProperty('--cursor-y', `${event.clientY}px`);
       revealCursor.classList.add('is-visible');
     }
-    // Match pointer coordinates to the overlaid photograph, including its responsive crop.
-    const bounds = whiteCar.getBoundingClientRect();
-    frame.style.setProperty('--reveal-x', `${event.clientX - bounds.left}px`);
-    frame.style.setProperty('--reveal-y', `${event.clientY - bounds.top}px`);
-    frame.style.setProperty('--reveal-radius', `${Math.max(68, Math.min(145, bounds.width * 0.14))}px`);
     frame.classList.add('is-revealing');
   }
   function endReveal() {
@@ -50,7 +45,7 @@
   window.addEventListener('blur', endReveal);
   window.addEventListener('scroll', endReveal, {passive:true});
   finePointer.addEventListener('change', () => {endReveal();swap.classList.toggle('cursor-ready', finePointer.matches && chosenColour === 'black');});
-  // Full-colour switching remains an explicit keyboard action, never a hover action.
+  // Keyboard users can keep either colour visible without holding a pointer over the car.
   swap.addEventListener('click', event => {
     if(event.detail !== 0 || event.pointerType) return;
     chosenColour = chosenColour === 'black' ? 'white' : 'black';showColour(chosenColour);
