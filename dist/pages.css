@@ -5,3 +5,8 @@
 .detail-price-block{display:flex;flex-direction:column;align-items:flex-end;gap:18px}.detail-price-block .button{font-size:14px;min-height:46px;padding:0 22px;gap:30px}.estimate-totals{margin-top:25px}.estimate-result+.button{margin-top:0;margin-bottom:2px}@media(max-width:700px){.detail-price-block{align-items:stretch;gap:15px}.detail-price-block .button{justify-content:space-between}.detail-price{margin-top:20px}}
 
 .page-main h1{text-align:left}
+
+.vehicle-visit-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:24px}
+.vehicle-visit-actions>.button{margin:0;flex-shrink:0}
+.vehicle-visit-actions>.phone-link{display:inline-flex;align-items:center;min-height:54px;margin:0;white-space:nowrap}
+@media(max-width:700px){.vehicle-visit-actions{flex-direction:column;align-items:stretch;gap:12px}.vehicle-visit-actions>.phone-link{justify-content:center;min-height:44px}}
