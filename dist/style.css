@@ -20,3 +20,10 @@
 .cursor-caption{position:absolute;left:51px;top:51px;display:flex;align-items:center;gap:6px;padding:7px 9px;background:#161616eb;border:1px solid #ffffff45;border-radius:3px;color:white;font-size:7px;font-weight:600;letter-spacing:1.5px;line-height:1;white-space:nowrap}.cursor-caption i{width:4px;height:4px;background:#ed3040;border-radius:50%}
 @media(hover:hover) and (pointer:fine){.reveal-cursor{display:block}.car-hitarea.cursor-ready{cursor:none}}
 @media(prefers-reduced-motion:reduce){.reveal-cursor,.cursor-lens{transition:none}}
+
+/* Keep the hero focused on the car, with its two actions below the photograph. */
+.hero-bottom{flex-direction:column;justify-content:center;gap:18px;margin-top:62px;padding-bottom:46px}
+.hero-bottom .hover-hint{position:static;left:auto;bottom:auto;transform:none;background:transparent;padding:0;color:#626262}
+.hero-bottom>.button{position:static;left:auto;transform:none}
+.hero-bottom>.button:hover{transform:translateY(-2px)}
+@media(max-width:600px){.hero-bottom{margin-top:24px;gap:18px;padding-bottom:34px}.hero-bottom .hover-hint{font-size:7px;letter-spacing:1px}}

@@ -17,7 +17,6 @@
     whiteCar.setAttribute('aria-hidden', String(colour !== 'white'));
     swap.setAttribute('aria-pressed', String(colour === 'white'));
     swap.setAttribute('aria-label', 'Move across the Porsche to reveal white paint. Press Enter to switch the full colour.');
-    $('#colour-label').textContent = colour === 'white' ? '02 — WHITE' : '01 — BLACK';
     $$('.swatch').forEach(b => {const active=b.dataset.colour===colour;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
   }
   function revealAt(event) {
@@ -33,13 +32,11 @@
     frame.style.setProperty('--reveal-y', `${event.clientY - bounds.top}px`);
     frame.style.setProperty('--reveal-radius', `${Math.max(68, Math.min(145, bounds.width * 0.14))}px`);
     frame.classList.add('is-revealing');
-    $('#colour-label').textContent = 'MOVE TO REVEAL';
   }
   function endReveal() {
     revealCursor.classList.remove('is-visible');
     touchingCar = false;
     frame.classList.remove('is-revealing');
-    $('#colour-label').textContent = chosenColour === 'white' ? '02 — WHITE' : '01 — BLACK';
   }
   swap.addEventListener('pointerenter', event => {if(event.pointerType !== 'touch') revealAt(event);});
   swap.addEventListener('pointermove', event => {if(event.pointerType !== 'touch' || touchingCar) revealAt(event);});
