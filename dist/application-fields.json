@@ -1,0 +1,2163 @@
+[
+  {
+    "title": "Personal details",
+    "fields": [
+      {
+        "id": "title",
+        "label": "Title",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Advocate",
+            "label": "Advocate"
+          },
+          {
+            "value": "Doctor",
+            "label": "Doctor"
+          },
+          {
+            "value": "Mr",
+            "label": "Mr"
+          },
+          {
+            "value": "Professor",
+            "label": "Professor"
+          },
+          {
+            "value": "Reverend",
+            "label": "Reverend"
+          },
+          {
+            "value": "Miss",
+            "label": "Miss"
+          },
+          {
+            "value": "Mrs",
+            "label": "Mrs"
+          },
+          {
+            "value": "Unknown",
+            "label": "Unknown"
+          },
+          {
+            "value": "Ms",
+            "label": "Ms"
+          },
+          {
+            "value": "SIR",
+            "label": "SIR"
+          },
+          {
+            "value": "Messrs ",
+            "label": "Messrs"
+          },
+          {
+            "value": "Mr and Mrs",
+            "label": "Mr and Mrs"
+          },
+          {
+            "value": "Attorney ",
+            "label": "Attorney"
+          },
+          {
+            "value": "Sister ",
+            "label": "Sister"
+          },
+          {
+            "value": "Major ",
+            "label": "Major"
+          },
+          {
+            "value": "Commandant ",
+            "label": "Commandant"
+          },
+          {
+            "value": "Colonel ",
+            "label": "Colonel"
+          },
+          {
+            "value": "Brigadier ",
+            "label": "Brigadier"
+          },
+          {
+            "value": "General ",
+            "label": "General"
+          },
+          {
+            "value": "Captain ",
+            "label": "Captain"
+          }
+        ]
+      },
+      {
+        "id": "name",
+        "label": "Full Names",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "surname",
+        "label": "Surname",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "gender",
+        "label": "Gender",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Male",
+            "label": "Male"
+          },
+          {
+            "value": "Female",
+            "label": "Female"
+          }
+        ]
+      },
+      {
+        "id": "ethnicity",
+        "label": "Ethnicity",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "White",
+            "label": "White"
+          },
+          {
+            "value": "Coloured",
+            "label": "Coloured"
+          },
+          {
+            "value": "Black",
+            "label": "Black"
+          },
+          {
+            "value": "Asian",
+            "label": "Asian"
+          },
+          {
+            "value": "Indian",
+            "label": "Indian"
+          }
+        ]
+      },
+      {
+        "id": "nationality",
+        "label": "Nationality",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "SOUTH AFRICA",
+            "label": "SOUTH AFRICA"
+          },
+          {
+            "value": "AFGANISTAN",
+            "label": "AFGANISTAN"
+          },
+          {
+            "value": "ALBANIA",
+            "label": "ALBANIA"
+          },
+          {
+            "value": "ALGERIA",
+            "label": "ALGERIA"
+          },
+          {
+            "value": "AMERICAN SAMOA",
+            "label": "AMERICAN SAMOA"
+          },
+          {
+            "value": "ANDORRA",
+            "label": "ANDORRA"
+          },
+          {
+            "value": "ANGOLA",
+            "label": "ANGOLA"
+          },
+          {
+            "value": "ANTIGUA (WEST INDIES)",
+            "label": "ANTIGUA (WEST INDIES)"
+          },
+          {
+            "value": "ARGENTINA",
+            "label": "ARGENTINA"
+          },
+          {
+            "value": "AUSTRALIA",
+            "label": "AUSTRALIA"
+          },
+          {
+            "value": "AUSTRIA",
+            "label": "AUSTRIA"
+          },
+          {
+            "value": "AZORES",
+            "label": "AZORES"
+          },
+          {
+            "value": "BAHAMAS",
+            "label": "BAHAMAS"
+          },
+          {
+            "value": "BAHRAIN",
+            "label": "BAHRAIN"
+          },
+          {
+            "value": "BANGLADESH",
+            "label": "BANGLADESH"
+          },
+          {
+            "value": "BARBADOS",
+            "label": "BARBADOS"
+          },
+          {
+            "value": "BELEARIC ISLAND (SPAIN)",
+            "label": "BELEARIC ISLAND (SPAIN)"
+          },
+          {
+            "value": "BELGIUM",
+            "label": "BELGIUM"
+          },
+          {
+            "value": "BELIZE",
+            "label": "BELIZE"
+          },
+          {
+            "value": "BENIN",
+            "label": "BENIN"
+          },
+          {
+            "value": "BERMUDA",
+            "label": "BERMUDA"
+          },
+          {
+            "value": "BHUTAN",
+            "label": "BHUTAN"
+          },
+          {
+            "value": "BOLIVIA",
+            "label": "BOLIVIA"
+          },
+          {
+            "value": "BOTSWANA",
+            "label": "BOTSWANA"
+          },
+          {
+            "value": "BRAZIL",
+            "label": "BRAZIL"
+          },
+          {
+            "value": "BRUNEI",
+            "label": "BRUNEI"
+          },
+          {
+            "value": "BULGARIA",
+            "label": "BULGARIA"
+          },
+          {
+            "value": "BURUNDI",
+            "label": "BURUNDI"
+          },
+          {
+            "value": "CAMEROON (UNITED REPUBLIC OF)",
+            "label": "CAMEROON (UNITED REPUBLIC OF)"
+          },
+          {
+            "value": "CANADA",
+            "label": "CANADA"
+          },
+          {
+            "value": "CAPE VERDE",
+            "label": "CAPE VERDE"
+          },
+          {
+            "value": "CAYMAN ISLAND (WEST INDIES)",
+            "label": "CAYMAN ISLAND (WEST INDIES)"
+          },
+          {
+            "value": "CENTRAL AFRICAN REPUBLIC",
+            "label": "CENTRAL AFRICAN REPUBLIC"
+          },
+          {
+            "value": "CHAD",
+            "label": "CHAD"
+          },
+          {
+            "value": "CHILE",
+            "label": "CHILE"
+          },
+          {
+            "value": "CHINA",
+            "label": "CHINA"
+          },
+          {
+            "value": "CHRISTMAS ISLAND",
+            "label": "CHRISTMAS ISLAND"
+          },
+          {
+            "value": "COCOS (KEELING) ISLAND",
+            "label": "COCOS (KEELING) ISLAND"
+          },
+          {
+            "value": "COLUMBIA",
+            "label": "COLUMBIA"
+          },
+          {
+            "value": "COMOROS",
+            "label": "COMOROS"
+          },
+          {
+            "value": "CONGO (PEOPLE DEMOCRATIC REPUBLIC OF)",
+            "label": "CONGO (PEOPLE DEMOCRATIC REPUBLIC OF)"
+          },
+          {
+            "value": "COOK ISLAND",
+            "label": "COOK ISLAND"
+          },
+          {
+            "value": "COSTA RICA",
+            "label": "COSTA RICA"
+          },
+          {
+            "value": "CUBA",
+            "label": "CUBA"
+          },
+          {
+            "value": "CYPRUS",
+            "label": "CYPRUS"
+          },
+          {
+            "value": "DENMARK",
+            "label": "DENMARK"
+          },
+          {
+            "value": "DJIBOUTI",
+            "label": "DJIBOUTI"
+          },
+          {
+            "value": "DOMINICA (WEST INDIES)",
+            "label": "DOMINICA (WEST INDIES)"
+          },
+          {
+            "value": "DOMINICAN REPUBLIC",
+            "label": "DOMINICAN REPUBLIC"
+          },
+          {
+            "value": "EAST TIMOR",
+            "label": "EAST TIMOR"
+          },
+          {
+            "value": "ECUADOR",
+            "label": "ECUADOR"
+          },
+          {
+            "value": "EGYPT",
+            "label": "EGYPT"
+          },
+          {
+            "value": "EL SALVADOR",
+            "label": "EL SALVADOR"
+          },
+          {
+            "value": "EQUATORIAL GUINEA",
+            "label": "EQUATORIAL GUINEA"
+          },
+          {
+            "value": "ETHIOPIA",
+            "label": "ETHIOPIA"
+          },
+          {
+            "value": "FALKLAND ISLAND",
+            "label": "FALKLAND ISLAND"
+          },
+          {
+            "value": "FEAROE ISLAND",
+            "label": "FEAROE ISLAND"
+          },
+          {
+            "value": "FIJI",
+            "label": "FIJI"
+          },
+          {
+            "value": "FINLAND",
+            "label": "FINLAND"
+          },
+          {
+            "value": "FRANCE",
+            "label": "FRANCE"
+          },
+          {
+            "value": "FRENCH GUIANA",
+            "label": "FRENCH GUIANA"
+          },
+          {
+            "value": "FRENCH POLYNESIA",
+            "label": "FRENCH POLYNESIA"
+          },
+          {
+            "value": "GABON",
+            "label": "GABON"
+          },
+          {
+            "value": "GAMBIA",
+            "label": "GAMBIA"
+          },
+          {
+            "value": "GERMANY (DEMOCRATIC)",
+            "label": "GERMANY (DEMOCRATIC)"
+          },
+          {
+            "value": "GHANA",
+            "label": "GHANA"
+          },
+          {
+            "value": "GIBRALTAR",
+            "label": "GIBRALTAR"
+          },
+          {
+            "value": "GRANADA (WEST INDIES)",
+            "label": "GRANADA (WEST INDIES)"
+          },
+          {
+            "value": "GREECE",
+            "label": "GREECE"
+          },
+          {
+            "value": "GREENLAND",
+            "label": "GREENLAND"
+          },
+          {
+            "value": "GUADELOUPE (MARIE-GALANTE AND ST BARTHELEM)",
+            "label": "GUADELOUPE (MARIE-GALANTE AND ST BARTHELEM)"
+          },
+          {
+            "value": "GUAM",
+            "label": "GUAM"
+          },
+          {
+            "value": "GUATEMALA",
+            "label": "GUATEMALA"
+          },
+          {
+            "value": "GUINEA",
+            "label": "GUINEA"
+          },
+          {
+            "value": "GUINEA-BISSAU",
+            "label": "GUINEA-BISSAU"
+          },
+          {
+            "value": "GUYANA",
+            "label": "GUYANA"
+          },
+          {
+            "value": "HAITI",
+            "label": "HAITI"
+          },
+          {
+            "value": "HONDURAS",
+            "label": "HONDURAS"
+          },
+          {
+            "value": "HONG KONG",
+            "label": "HONG KONG"
+          },
+          {
+            "value": "HUNGARY",
+            "label": "HUNGARY"
+          },
+          {
+            "value": "ICELAND",
+            "label": "ICELAND"
+          },
+          {
+            "value": "INDIA",
+            "label": "INDIA"
+          },
+          {
+            "value": "INDONESIA",
+            "label": "INDONESIA"
+          },
+          {
+            "value": "IRAN",
+            "label": "IRAN"
+          },
+          {
+            "value": "IRAQ",
+            "label": "IRAQ"
+          },
+          {
+            "value": "IRELAND",
+            "label": "IRELAND"
+          },
+          {
+            "value": "ISREAL",
+            "label": "ISREAL"
+          },
+          {
+            "value": "ITALY",
+            "label": "ITALY"
+          },
+          {
+            "value": "JAMAICA",
+            "label": "JAMAICA"
+          },
+          {
+            "value": "JAPAN",
+            "label": "JAPAN"
+          },
+          {
+            "value": "JORDAN",
+            "label": "JORDAN"
+          },
+          {
+            "value": "KENYA",
+            "label": "KENYA"
+          },
+          {
+            "value": "KIRIBATI",
+            "label": "KIRIBATI"
+          },
+          {
+            "value": "KOREA (NORTH DEMOCRATIC PEOPLE REPUBLIC)",
+            "label": "KOREA (NORTH DEMOCRATIC PEOPLE REPUBLIC)"
+          },
+          {
+            "value": "KOREA (SOUTH DEMOCRATIC PEOPLE REPUBLIC)",
+            "label": "KOREA (SOUTH DEMOCRATIC PEOPLE REPUBLIC)"
+          },
+          {
+            "value": "KUWAIT",
+            "label": "KUWAIT"
+          },
+          {
+            "value": "LAO (PEOPLE DEMOCRATIC REPUBLIC)",
+            "label": "LAO (PEOPLE DEMOCRATIC REPUBLIC)"
+          },
+          {
+            "value": "LEBANON",
+            "label": "LEBANON"
+          },
+          {
+            "value": "LESOTHO",
+            "label": "LESOTHO"
+          },
+          {
+            "value": "LIBERIA",
+            "label": "LIBERIA"
+          },
+          {
+            "value": "LIBYA",
+            "label": "LIBYA"
+          },
+          {
+            "value": "LIECHTENSTEIN",
+            "label": "LIECHTENSTEIN"
+          },
+          {
+            "value": "LUXEMBORG",
+            "label": "LUXEMBORG"
+          },
+          {
+            "value": "MACAU",
+            "label": "MACAU"
+          },
+          {
+            "value": "MADAGASCAR",
+            "label": "MADAGASCAR"
+          },
+          {
+            "value": "MALAWI (REPUBLIC OF)",
+            "label": "MALAWI (REPUBLIC OF)"
+          },
+          {
+            "value": "MALAYSIA",
+            "label": "MALAYSIA"
+          },
+          {
+            "value": "MALDIVES",
+            "label": "MALDIVES"
+          },
+          {
+            "value": "MALI (REPUBLIC OF)",
+            "label": "MALI (REPUBLIC OF)"
+          },
+          {
+            "value": "MALTA-GOZO",
+            "label": "MALTA-GOZO"
+          },
+          {
+            "value": "MARTINIQUE (FRENCH WEST INDIES)",
+            "label": "MARTINIQUE (FRENCH WEST INDIES)"
+          },
+          {
+            "value": "MAURITANIA",
+            "label": "MAURITANIA"
+          },
+          {
+            "value": "MAURITIUS",
+            "label": "MAURITIUS"
+          },
+          {
+            "value": "MEXICO",
+            "label": "MEXICO"
+          },
+          {
+            "value": "MONACO",
+            "label": "MONACO"
+          },
+          {
+            "value": "MONGOLIA",
+            "label": "MONGOLIA"
+          },
+          {
+            "value": "MONTSERRAT (WEST INDIES)",
+            "label": "MONTSERRAT (WEST INDIES)"
+          },
+          {
+            "value": "MOROCCO",
+            "label": "MOROCCO"
+          },
+          {
+            "value": "MOZAMBIQUE",
+            "label": "MOZAMBIQUE"
+          },
+          {
+            "value": "NAMIBIA",
+            "label": "NAMIBIA"
+          },
+          {
+            "value": "NAURU ISLAND",
+            "label": "NAURU ISLAND"
+          },
+          {
+            "value": "NEPAL",
+            "label": "NEPAL"
+          },
+          {
+            "value": "NETHERLANDS",
+            "label": "NETHERLANDS"
+          },
+          {
+            "value": "NETHERLANDS ANTILLES",
+            "label": "NETHERLANDS ANTILLES"
+          },
+          {
+            "value": "NEW CALEDONIA",
+            "label": "NEW CALEDONIA"
+          },
+          {
+            "value": "NEW ZEALAND",
+            "label": "NEW ZEALAND"
+          },
+          {
+            "value": "NICARAGUA",
+            "label": "NICARAGUA"
+          },
+          {
+            "value": "NIGER",
+            "label": "NIGER"
+          },
+          {
+            "value": "NIGERIA",
+            "label": "NIGERIA"
+          },
+          {
+            "value": "NIUE ISLAND",
+            "label": "NIUE ISLAND"
+          },
+          {
+            "value": "NORFOLK ISLAND",
+            "label": "NORFOLK ISLAND"
+          },
+          {
+            "value": "NORWAY",
+            "label": "NORWAY"
+          },
+          {
+            "value": "OMAN",
+            "label": "OMAN"
+          },
+          {
+            "value": "PAKISTAN",
+            "label": "PAKISTAN"
+          },
+          {
+            "value": "PALAU ISLANDS",
+            "label": "PALAU ISLANDS"
+          },
+          {
+            "value": "PANAMA",
+            "label": "PANAMA"
+          },
+          {
+            "value": "PAPUA NEW GUINEA",
+            "label": "PAPUA NEW GUINEA"
+          },
+          {
+            "value": "PARAGUAY",
+            "label": "PARAGUAY"
+          },
+          {
+            "value": "PERU",
+            "label": "PERU"
+          },
+          {
+            "value": "PHILLIPINES",
+            "label": "PHILLIPINES"
+          },
+          {
+            "value": "POLAND",
+            "label": "POLAND"
+          },
+          {
+            "value": "PORTUGAL",
+            "label": "PORTUGAL"
+          },
+          {
+            "value": "PUERTO RICO",
+            "label": "PUERTO RICO"
+          },
+          {
+            "value": "QATAR",
+            "label": "QATAR"
+          },
+          {
+            "value": "REUNION",
+            "label": "REUNION"
+          },
+          {
+            "value": "ROMANIA",
+            "label": "ROMANIA"
+          },
+          {
+            "value": "RWANDA",
+            "label": "RWANDA"
+          },
+          {
+            "value": "SAMOA",
+            "label": "SAMOA"
+          },
+          {
+            "value": "SAN MARINO",
+            "label": "SAN MARINO"
+          },
+          {
+            "value": "SAO TOME AND PRINCIPE",
+            "label": "SAO TOME AND PRINCIPE"
+          },
+          {
+            "value": "SAUDI ARABIA",
+            "label": "SAUDI ARABIA"
+          },
+          {
+            "value": "SENEGAL",
+            "label": "SENEGAL"
+          },
+          {
+            "value": "SEYCHELLES",
+            "label": "SEYCHELLES"
+          },
+          {
+            "value": "SIERRA LEONNE",
+            "label": "SIERRA LEONNE"
+          },
+          {
+            "value": "SINGAPORE",
+            "label": "SINGAPORE"
+          },
+          {
+            "value": "SOLOMON ISLANDS",
+            "label": "SOLOMON ISLANDS"
+          },
+          {
+            "value": "SOMALIA",
+            "label": "SOMALIA"
+          },
+          {
+            "value": "SPAIN",
+            "label": "SPAIN"
+          },
+          {
+            "value": "SRI LANKA (CEYLON)",
+            "label": "SRI LANKA (CEYLON)"
+          },
+          {
+            "value": "ST HELENA",
+            "label": "ST HELENA"
+          },
+          {
+            "value": "ST KITTS-NEVAS ANGUILLA",
+            "label": "ST KITTS-NEVAS ANGUILLA"
+          },
+          {
+            "value": "ST LUCIA",
+            "label": "ST LUCIA"
+          },
+          {
+            "value": "SURINAM REPUBLIC",
+            "label": "SURINAM REPUBLIC"
+          },
+          {
+            "value": "SWAZI HOMELAND",
+            "label": "SWAZI HOMELAND"
+          },
+          {
+            "value": "SWEDEN",
+            "label": "SWEDEN"
+          },
+          {
+            "value": "SWITZERLAND",
+            "label": "SWITZERLAND"
+          },
+          {
+            "value": "SYRIAN ARAB REPUBLIC",
+            "label": "SYRIAN ARAB REPUBLIC"
+          },
+          {
+            "value": "TAIWAN",
+            "label": "TAIWAN"
+          },
+          {
+            "value": "TANZANIA (UNITED REPUBLIC OF)",
+            "label": "TANZANIA (UNITED REPUBLIC OF)"
+          },
+          {
+            "value": "THAILAND",
+            "label": "THAILAND"
+          },
+          {
+            "value": "TOGO (REPUBLIC OF)",
+            "label": "TOGO (REPUBLIC OF)"
+          },
+          {
+            "value": "TOKELAU ISLANDS",
+            "label": "TOKELAU ISLANDS"
+          },
+          {
+            "value": "TONGA",
+            "label": "TONGA"
+          },
+          {
+            "value": "TRINIDAD AND TOBAGO",
+            "label": "TRINIDAD AND TOBAGO"
+          },
+          {
+            "value": "TUNISIA",
+            "label": "TUNISIA"
+          },
+          {
+            "value": "TURKEY",
+            "label": "TURKEY"
+          },
+          {
+            "value": "TURKS AND CAICOS ISLANDS",
+            "label": "TURKS AND CAICOS ISLANDS"
+          },
+          {
+            "value": "TUVALU ISLANDS",
+            "label": "TUVALU ISLANDS"
+          },
+          {
+            "value": "UGANDA",
+            "label": "UGANDA"
+          },
+          {
+            "value": "UKRAINE",
+            "label": "UKRAINE"
+          },
+          {
+            "value": "UNITED ARAB EMIRATES",
+            "label": "UNITED ARAB EMIRATES"
+          },
+          {
+            "value": "UNITED KINGDOM",
+            "label": "UNITED KINGDOM"
+          },
+          {
+            "value": "UNITED STATES VIRGIN ISLANDS",
+            "label": "UNITED STATES VIRGIN ISLANDS"
+          },
+          {
+            "value": "URUGUAY",
+            "label": "URUGUAY"
+          },
+          {
+            "value": "USA",
+            "label": "USA"
+          },
+          {
+            "value": "VANUATU ISLAND",
+            "label": "VANUATU ISLAND"
+          },
+          {
+            "value": "VENEZUELA",
+            "label": "VENEZUELA"
+          },
+          {
+            "value": "VIETNAM",
+            "label": "VIETNAM"
+          },
+          {
+            "value": "WALLIS FUTUNA ISLANDS",
+            "label": "WALLIS FUTUNA ISLANDS"
+          },
+          {
+            "value": "WESTERN SAHARA",
+            "label": "WESTERN SAHARA"
+          },
+          {
+            "value": "YEMEN",
+            "label": "YEMEN"
+          },
+          {
+            "value": "ZAMBIA",
+            "label": "ZAMBIA"
+          },
+          {
+            "value": "ZIMBABWE",
+            "label": "ZIMBABWE"
+          },
+          {
+            "value": "ANGUILLA",
+            "label": "ANGUILLA"
+          },
+          {
+            "value": "ARMENIA",
+            "label": "ARMENIA"
+          },
+          {
+            "value": "ANTARCTICA",
+            "label": "ANTARCTICA"
+          },
+          {
+            "value": "ARUBA",
+            "label": "ARUBA"
+          },
+          {
+            "value": "ALAND ISLAND",
+            "label": "ALAND ISLAND"
+          },
+          {
+            "value": "AZERBAIJAN",
+            "label": "AZERBAIJAN"
+          },
+          {
+            "value": "BOSNIA AND HERZEGOVINA",
+            "label": "BOSNIA AND HERZEGOVINA"
+          },
+          {
+            "value": "BURNKINA FASO",
+            "label": "BURNKINA FASO"
+          },
+          {
+            "value": "BONAIRE",
+            "label": "BONAIRE"
+          },
+          {
+            "value": "BOUVET ISLAND",
+            "label": "BOUVET ISLAND"
+          },
+          {
+            "value": "BELARUS",
+            "label": "BELARUS"
+          },
+          {
+            "value": "CONGO, THE DEMOCRATIC REPUBLIC OF THE CONGO",
+            "label": "CONGO, THE DEMOCRATIC REPUBLIC OF THE CONGO"
+          },
+          {
+            "value": "COTE D_IVOIRE",
+            "label": "COTE D_IVOIRE"
+          },
+          {
+            "value": "CURACAO",
+            "label": "CURACAO"
+          },
+          {
+            "value": "ESTONIA",
+            "label": "ESTONIA"
+          },
+          {
+            "value": "ERITREA",
+            "label": "ERITREA"
+          },
+          {
+            "value": "MICRONESIA (FEDERATED STATES OF)",
+            "label": "MICRONESIA (FEDERATED STATES OF)"
+          },
+          {
+            "value": "GEORGIA",
+            "label": "GEORGIA"
+          },
+          {
+            "value": "GUERNSEY",
+            "label": "GUERNSEY"
+          },
+          {
+            "value": "SOUTH GEORGIA AND SOUTH SANDWICH ISLANDS",
+            "label": "SOUTH GEORGIA AND SOUTH SANDWICH ISLANDS"
+          },
+          {
+            "value": "HEARD ISLAND AND MC DONALD ISLANDS",
+            "label": "HEARD ISLAND AND MC DONALD ISLANDS"
+          },
+          {
+            "value": "CROATIA",
+            "label": "CROATIA"
+          },
+          {
+            "value": "ISLE OF MAN",
+            "label": "ISLE OF MAN"
+          },
+          {
+            "value": "BRITISH INDIAN OCEAN TERRITORY",
+            "label": "BRITISH INDIAN OCEAN TERRITORY"
+          },
+          {
+            "value": "JERSEY",
+            "label": "JERSEY"
+          },
+          {
+            "value": "KYRGYZSTAN",
+            "label": "KYRGYZSTAN"
+          },
+          {
+            "value": "CAMBODIA",
+            "label": "CAMBODIA"
+          },
+          {
+            "value": "KAZAKSTAN",
+            "label": "KAZAKSTAN"
+          },
+          {
+            "value": "LITHUANIA",
+            "label": "LITHUANIA"
+          },
+          {
+            "value": "LATVIA",
+            "label": "LATVIA"
+          },
+          {
+            "value": "MOLDOVA, REPUBLIC OF",
+            "label": "MOLDOVA, REPUBLIC OF"
+          },
+          {
+            "value": "MONTENEGRO, REPULIC OF",
+            "label": "MONTENEGRO, REPULIC OF"
+          },
+          {
+            "value": "MARSHALL ISLANDS",
+            "label": "MARSHALL ISLANDS"
+          },
+          {
+            "value": "MACEDONIA,THE FORMER YUGOSLAV REPUBLIC OF",
+            "label": "MACEDONIA,THE FORMER YUGOSLAV REPUBLIC OF"
+          },
+          {
+            "value": "MYANMAR",
+            "label": "MYANMAR"
+          },
+          {
+            "value": "NORTHERN MARIANA ISLANDS",
+            "label": "NORTHERN MARIANA ISLANDS"
+          },
+          {
+            "value": "SAINT PIERRE & MIQUELON",
+            "label": "SAINT PIERRE & MIQUELON"
+          },
+          {
+            "value": "PITCAIRN",
+            "label": "PITCAIRN"
+          },
+          {
+            "value": "PALESTINIAN TERRITORY, OCCUPIED",
+            "label": "PALESTINIAN TERRITORY, OCCUPIED"
+          },
+          {
+            "value": "SERBIA, REPUBLIC OF",
+            "label": "SERBIA, REPUBLIC OF"
+          },
+          {
+            "value": "RUSSIAN FEDERATION",
+            "label": "RUSSIAN FEDERATION"
+          },
+          {
+            "value": "SUDAN",
+            "label": "SUDAN"
+          },
+          {
+            "value": "SLOVENIA",
+            "label": "SLOVENIA"
+          },
+          {
+            "value": "SVALBARD & JAN MAYEN",
+            "label": "SVALBARD & JAN MAYEN"
+          },
+          {
+            "value": "SLOVAKIA",
+            "label": "SLOVAKIA"
+          },
+          {
+            "value": "SOUTH SUDAN",
+            "label": "SOUTH SUDAN"
+          },
+          {
+            "value": "TURKS & CAICOS ISLANDS",
+            "label": "TURKS & CAICOS ISLANDS"
+          },
+          {
+            "value": "FRENCH SOUTHERN TERRITORIES",
+            "label": "FRENCH SOUTHERN TERRITORIES"
+          },
+          {
+            "value": "TAJIKISTAN",
+            "label": "TAJIKISTAN"
+          },
+          {
+            "value": "TIMOR LESTE",
+            "label": "TIMOR LESTE"
+          },
+          {
+            "value": "TURKMENISTAN",
+            "label": "TURKMENISTAN"
+          },
+          {
+            "value": "UNITED STATES MINOR OUTLYING ISLANDS",
+            "label": "UNITED STATES MINOR OUTLYING ISLANDS"
+          },
+          {
+            "value": "UZBEKISTAN",
+            "label": "UZBEKISTAN"
+          },
+          {
+            "value": "HOLY SEE (VATICAN CITY STATE)",
+            "label": "HOLY SEE (VATICAN CITY STATE)"
+          },
+          {
+            "value": "SAINT VINCENT & THE GRENADINES",
+            "label": "SAINT VINCENT & THE GRENADINES"
+          },
+          {
+            "value": "VIRGIN ISLANDS (BRITISH)",
+            "label": "VIRGIN ISLANDS (BRITISH)"
+          },
+          {
+            "value": "KOSOVO",
+            "label": "KOSOVO"
+          },
+          {
+            "value": "MAYOTTE",
+            "label": "MAYOTTE"
+          },
+          {
+            "value": "COUNTRY UNKNOWN",
+            "label": "COUNTRY UNKNOWN"
+          },
+          {
+            "value": "CZECH REPUBLIC",
+            "label": "CZECH REPUBLIC"
+          },
+          {
+            "value": "FEDERAL REPUBLIC OF YUGOSLAVIA",
+            "label": "FEDERAL REPUBLIC OF YUGOSLAVIA"
+          },
+          {
+            "value": "KOREA",
+            "label": "KOREA"
+          },
+          {
+            "value": "KOREA (REPUBLIC OF)",
+            "label": "KOREA (REPUBLIC OF)"
+          },
+          {
+            "value": "SAINT KITTS AND NEVIS",
+            "label": "SAINT KITTS AND NEVIS"
+          }
+        ]
+      },
+      {
+        "id": "id",
+        "label": "ID or passport number",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "method",
+        "label": "Contact Method",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Phone Call",
+            "label": "Cell phone"
+          },
+          {
+            "value": "SMS",
+            "label": "Home phone"
+          },
+          {
+            "value": "WhatsApp",
+            "label": "Work phone"
+          },
+          {
+            "value": "Email",
+            "label": "Email"
+          }
+        ]
+      },
+      {
+        "id": "phone",
+        "label": "Phone Number",
+        "type": "tel",
+        "required": true
+      },
+      {
+        "id": "altPhone",
+        "label": "Alternative Phone Number",
+        "type": "tel",
+        "required": false
+      },
+      {
+        "id": "email",
+        "label": "Email",
+        "type": "email",
+        "required": true
+      },
+      {
+        "id": "language",
+        "label": "Language",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Afrikaans",
+            "label": "Afrikaans"
+          },
+          {
+            "value": "English",
+            "label": "English"
+          },
+          {
+            "value": "Zulu",
+            "label": "Zulu"
+          },
+          {
+            "value": "Tswana",
+            "label": "Tswana"
+          },
+          {
+            "value": "Xhosa",
+            "label": "Xhosa"
+          },
+          {
+            "value": "South Sotho",
+            "label": "South Sotho"
+          },
+          {
+            "value": "IsiNdebele ",
+            "label": "IsiNdebele"
+          },
+          {
+            "value": "NorthernSotho ",
+            "label": "NorthernSotho"
+          },
+          {
+            "value": "SiSwati ",
+            "label": "SiSwati"
+          },
+          {
+            "value": "Tshivenda ",
+            "label": "Tshivenda"
+          },
+          {
+            "value": "Xitsonga ",
+            "label": "Xitsonga"
+          }
+        ]
+      },
+      {
+        "id": "maritalStatus",
+        "label": "Marital Status",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Divorced",
+            "label": "Divorced"
+          },
+          {
+            "value": "Married",
+            "label": "Married"
+          },
+          {
+            "value": "Single",
+            "label": "Single"
+          },
+          {
+            "value": "Widow/er",
+            "label": "Widow/er"
+          },
+          {
+            "value": "Separated",
+            "label": "Separated"
+          },
+          {
+            "value": "Matrimonial Property Act",
+            "label": "Matrimonial Property Act"
+          },
+          {
+            "value": "Antenuptial Contract",
+            "label": "Antenuptial Contract"
+          }
+        ]
+      },
+      {
+        "id": "dependants",
+        "label": "Dependants",
+        "type": "number",
+        "required": false,
+        "min": 0
+      }
+    ]
+  },
+  {
+    "title": "Your address",
+    "fields": [
+      {
+        "id": "homeAddress",
+        "label": "Home Address",
+        "type": "textarea",
+        "required": true
+      },
+      {
+        "id": "currentPeriod",
+        "label": "Current Address Period",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "previousAddress",
+        "label": "Previous Address",
+        "type": "textarea",
+        "required": false
+      },
+      {
+        "id": "previousPeriod",
+        "label": "Previous Address Period",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "postalAddress",
+        "label": "Postal Address",
+        "type": "textarea",
+        "required": false
+      },
+      {
+        "id": "propertyStatus",
+        "label": "Property Status",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Owner - Bonded",
+            "label": "Owner - Bonded"
+          },
+          {
+            "value": "Owner - Bond Free",
+            "label": "Owner - Bond Free"
+          },
+          {
+            "value": "Tenant",
+            "label": "Tenant"
+          },
+          {
+            "value": "Lodger",
+            "label": "Lodger"
+          },
+          {
+            "value": "Living With Parents",
+            "label": "Living With Parents"
+          }
+        ]
+      },
+      {
+        "id": "bondHolder",
+        "label": "Bond Holder",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "postCode",
+        "label": "Post Code",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "purchasePrice",
+        "label": "Purchase Price",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "amountOutstanding",
+        "label": "Amount Outstanding",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "propertyValue",
+        "label": "Property Value",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "monthlyInstalment",
+        "label": "Monthly Instalment",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "purchaseDate",
+        "label": "Purchase Date",
+        "type": "date",
+        "required": false
+      }
+    ]
+  },
+  {
+    "title": "Next of kin",
+    "fields": [
+      {
+        "id": "nextOfKinName",
+        "label": "Next Of Kin Name",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "nextOfKinRelationship",
+        "label": "Next Of Kin Relationship",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "nextOfKinContact",
+        "label": "Next Of Kin Contact",
+        "type": "tel",
+        "required": false
+      },
+      {
+        "id": "nextOfKinAddress",
+        "label": "Next Of Kin Address",
+        "type": "textarea",
+        "required": false
+      }
+    ]
+  },
+  {
+    "title": "Employment",
+    "fields": [
+      {
+        "id": "currentEmployer",
+        "label": "Current Employer",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "occupation",
+        "label": "Occupation",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "employmentPeriod",
+        "label": "Employment Period",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "employerPhoneNumber",
+        "label": "Employer Phone Number",
+        "type": "tel",
+        "required": false
+      },
+      {
+        "id": "employerAddress",
+        "label": "Employer Address",
+        "type": "textarea",
+        "required": false
+      },
+      {
+        "id": "paymentDate",
+        "label": "Payment Date",
+        "type": "date",
+        "required": false
+      },
+      {
+        "id": "paymentFrequency",
+        "label": "Payment Frequency",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Monthly",
+            "label": "Monthly"
+          },
+          {
+            "value": "Annually",
+            "label": "Annually"
+          },
+          {
+            "value": "Quarterly",
+            "label": "Quarterly"
+          },
+          {
+            "value": "Bi-Annually",
+            "label": "Bi-Annually"
+          }
+        ]
+      },
+      {
+        "id": "employmentType",
+        "label": "Employment Type",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Permanent",
+            "label": "Permanent"
+          },
+          {
+            "value": "Contractual",
+            "label": "Contractual"
+          },
+          {
+            "value": "Part time",
+            "label": "Part time"
+          },
+          {
+            "value": "Student",
+            "label": "Student"
+          },
+          {
+            "value": "Self employed",
+            "label": "Self employed"
+          },
+          {
+            "value": "Pensioner",
+            "label": "Pensioner"
+          },
+          {
+            "value": "Unemployed",
+            "label": "Unemployed"
+          },
+          {
+            "value": "Company",
+            "label": "Company"
+          },
+          {
+            "value": "Full Time",
+            "label": "Full Time"
+          },
+          {
+            "value": "UNKNOWN",
+            "label": "UNKNOWN"
+          }
+        ]
+      },
+      {
+        "id": "previousEmployer",
+        "label": "Previous Employer",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "previousEmploymentPeriod",
+        "label": "Previous Employment Period",
+        "type": "text",
+        "required": false
+      }
+    ]
+  },
+  {
+    "title": "Banking and finance",
+    "fields": [
+      {
+        "id": "bankName",
+        "label": "Bank Name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "branchName",
+        "label": "Branch Name",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "branchCode",
+        "label": "Branch Code",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "accountHolder",
+        "label": "Account Holder",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "accountNumber",
+        "label": "Account Number",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "accountType",
+        "label": "Account Type",
+        "type": "select",
+        "required": true,
+        "options": [
+          {
+            "value": "Current/Cheque Account",
+            "label": "Current/Cheque Account"
+          },
+          {
+            "value": "Savings Account",
+            "label": "Savings Account"
+          },
+          {
+            "value": "Transmission Account",
+            "label": "Transmission Account"
+          },
+          {
+            "value": "Credit Card Account",
+            "label": "Credit Card Account"
+          }
+        ]
+      },
+      {
+        "id": "agreement",
+        "label": "Agreement",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Instalment Sale Agreement",
+            "label": "Instalment Sale Agreement"
+          },
+          {
+            "value": "Lease Agreement",
+            "label": "Lease Agreement"
+          },
+          {
+            "value": "Buy-Back",
+            "label": "Buy-Back"
+          }
+        ]
+      },
+      {
+        "id": "rateIndicator",
+        "label": "Rate Indicator",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Linked",
+            "label": "Linked"
+          },
+          {
+            "value": "Fixed",
+            "label": "Fixed"
+          }
+        ]
+      },
+      {
+        "id": "payInAdvance",
+        "label": "Pay In Advance",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      },
+      {
+        "id": "repaymentPeriod",
+        "label": "Repayment Period",
+        "type": "select",
+        "required": true,
+        "options": [
+          {
+            "value": "6",
+            "label": "6 months"
+          },
+          {
+            "value": "12",
+            "label": "12 months"
+          },
+          {
+            "value": "18",
+            "label": "18 months"
+          },
+          {
+            "value": "24",
+            "label": "24 months"
+          },
+          {
+            "value": "30",
+            "label": "30 months"
+          },
+          {
+            "value": "36",
+            "label": "36 months"
+          },
+          {
+            "value": "42",
+            "label": "42 months"
+          },
+          {
+            "value": "48",
+            "label": "48 months"
+          },
+          {
+            "value": "54",
+            "label": "54 months"
+          },
+          {
+            "value": "60",
+            "label": "60 months"
+          },
+          {
+            "value": "66",
+            "label": "66 months"
+          },
+          {
+            "value": "72",
+            "label": "72 months"
+          },
+          {
+            "value": "78",
+            "label": "78 months"
+          },
+          {
+            "value": "84",
+            "label": "84 months"
+          },
+          {
+            "value": "90",
+            "label": "90 months"
+          },
+          {
+            "value": "96",
+            "label": "96 months"
+          }
+        ]
+      },
+      {
+        "id": "financeInitiationFees",
+        "label": "Finance Initiation Fees",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      },
+      {
+        "id": "deposit",
+        "label": "Deposit (R)",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "netTradeIn",
+        "label": "Net trade-in value (after settling the existing loan)",
+        "type": "number",
+        "min": 0,
+        "max": 10000000
+      },
+      {
+        "id": "interestRate",
+        "label": "Annual interest rate (%)",
+        "type": "number",
+        "required": false,
+        "min": 0,
+        "max": 30
+      },
+      {
+        "id": "residualValue",
+        "label": "Requested residual / balloon value (R)",
+        "type": "number",
+        "required": false,
+        "min": 0
+      }
+    ]
+  },
+  {
+    "title": "Your income",
+    "fields": [
+      {
+        "id": "incomeSource",
+        "label": "Income Source",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Salary",
+            "label": "Salary"
+          },
+          {
+            "value": "Pension",
+            "label": "Pension"
+          },
+          {
+            "value": "Investments",
+            "label": "Investments"
+          },
+          {
+            "value": "Policy",
+            "label": "Policy"
+          },
+          {
+            "value": "Retirement Annuity",
+            "label": "Retirement Annuity"
+          },
+          {
+            "value": "Donation/Gift",
+            "label": "Donation/Gift"
+          },
+          {
+            "value": "Inheritance",
+            "label": "Inheritance"
+          },
+          {
+            "value": "Self Employed",
+            "label": "Self Employed"
+          }
+        ]
+      },
+      {
+        "id": "grossSalary",
+        "label": "Gross Salary",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "monthlyComission",
+        "label": "Monthly commission",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "vehicleAllowance",
+        "label": "Vehicle Allowance",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "netSalary",
+        "label": "Net Salary",
+        "type": "number",
+        "required": true,
+        "min": 0
+      },
+      {
+        "id": "otherIncome",
+        "label": "Other Income",
+        "type": "number",
+        "required": false,
+        "min": 0
+      }
+    ]
+  },
+  {
+    "title": "Expenses and declarations",
+    "fields": [
+      {
+        "id": "bondRepayment",
+        "label": "Bond Repayment",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "transportation",
+        "label": "Transportation",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "vehicleInstalments",
+        "label": "Vehicle Instalments",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "education",
+        "label": "Education",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "creditCards",
+        "label": "Credit Cards",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "householdExpenses",
+        "label": "Household Expenses",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "clothingAccounts",
+        "label": "Clothing Accounts",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "utilitiesRatesTaxes",
+        "label": "Utilities Rates Taxes",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "policyInsurance",
+        "label": "Policy Insurance",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "loans",
+        "label": "Loans",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "furnitureAccounts",
+        "label": "Furniture Accounts",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "bankingCosts",
+        "label": "Banking Costs",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "telephoneInternet",
+        "label": "Telephone Internet",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "foodEntertainment",
+        "label": "Food Entertainment",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "medical",
+        "label": "Medical",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "maintenance",
+        "label": "Maintenance",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "other",
+        "label": "Other",
+        "type": "number",
+        "required": false,
+        "min": 0
+      },
+      {
+        "id": "totalMonthlyExpenses",
+        "label": "Total Monthly Expenses",
+        "type": "number",
+        "required": false,
+        "min": 0,
+        "readonly": true
+      },
+      {
+        "id": "disposableIncome",
+        "label": "Disposable Income",
+        "type": "number",
+        "required": false,
+        "min": 0,
+        "readonly": true
+      },
+      {
+        "id": "surety",
+        "label": "Surety",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      },
+      {
+        "id": "guarantor",
+        "label": "Guarantorship",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      },
+      {
+        "id": "coDebtor",
+        "label": "Co Debtor",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      },
+      {
+        "id": "liabilityDetails",
+        "label": "Liability Details",
+        "type": "textarea",
+        "required": false
+      },
+      {
+        "id": "debtReview",
+        "label": "Debt Review",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      },
+      {
+        "id": "administration",
+        "label": "Administration",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      },
+      {
+        "id": "judgment",
+        "label": "Judgment",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      },
+      {
+        "id": "sequestration",
+        "label": "Sequestration",
+        "type": "select",
+        "required": false,
+        "options": [
+          {
+            "value": "Yes",
+            "label": "Yes"
+          },
+          {
+            "value": "No",
+            "label": "No"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Documents and review",
+    "fields": []
+  }
+]

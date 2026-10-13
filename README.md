@@ -1,37 +1,54 @@
-# Driving Force homepage
-A responsive, buildless homepage using the supplied black and white Porsche photos and supplied logo, with a gradual black-to-white hover and scroll transition, a small neutral cursor, and a full 49-vehicle searchable collection, finance estimator, and finance / selling / service / about sections.
+# Driving Force showroom
 
-## Run locally
-Run `python3 -m http.server 4173 --directory dist` from this folder and open http://localhost:4173.
+Responsive website with all 49 vehicles, native vehicle pages, payment estimates and a full eight-step credit application. Navigation stays on this website; telephone, email and map directions use their appropriate external apps.
 
-## Files
-- `dist/index.html`: page structure and content
-- `dist/style.css`: responsive design
-- `dist/app.js`: colour transition, navigation, filters, sorting, full inventory and finance estimate
-- `dist/vehicles.json`: inventory snapshot from 13 October 2026
-- `dist/assets/`: supplied photographs and logo, downloaded dealership photographs, self-hosted Google fonts
+## Run and verify
 
-## Content and boundaries
-Inventory source: https://driving-force.co.za/wp-content/themes/vmg-motors-theme/filterData.php (the public feed used by https://driving-force.co.za/showroom/).
-The inventory is a static snapshot, not a live integration. Refresh vehicles.json and associated images to update the collection. Vehicle enquiries link to original vehicle pages. Finance applications, service bookings and valuations link to the original dealership website. No visitor data is collected by this homepage.
-The hero features supplied Porsche Turbo S creative. It is not represented as a stock listing and its colour transition does not claim the inventory cars are available in those colours.
-The calculator uses standard amortisation with an editable illustrative annual rate, no balloon, no fees and no insurance. It is an estimate and not a credit offer.
+Requires Node.js 24. No dependencies or build step are needed.
+
+- `npm run dev` serves the website and its API at http://localhost:4173.
+- `npm test` checks finance arithmetic, application validation, document handling and mocked delivery responses.
+- Deploy with Vercel. `dist` is the static output directory and `api/finance-application.js` is the Node function.
+
+The local API uses the real delivery service for valid submissions. Tests mock that service and do not send applications.
+
+## Main files
+
+- `dist/index.html`, `style.css`, `app.js`: homepage, hero transition, all inventory, filtering and sorting.
+- `dist/vehicle.html`, `vehicle.js`: individual vehicles, estimates and showroom calls to action.
+- `dist/finance.html`, `application.js`, `application-fields.json`: eight-step application, review, optional documents and explicit consent.
+- `dist/finance-utils.js`: shared amortisation and formatting.
+- `dist/pages.css`, `site.js`: native page styling and navigation.
+- `dist/visit.html`, `contact.html`, `privacy.html`: showroom information, sales/workshop contact and privacy information.
+- `lib/finance-application.cjs`, `api/finance-application.js`: server validation and application delivery.
+- `dist/vehicles.json`, `dist/assets/`: inventory snapshot and self-hosted images/fonts.
+
+## Finance application
+
+The field structure follows Driving Force's publicly linked EazyFin application (company 278), with personal, address, next-of-kin, employment, banking, income, expenses/declarations, and document/review steps. It is rebuilt natively, not embedded. Net trade-in is included explicitly, and marketing consent is optional and unchecked.
+
+Applications are sent server-side to the same VMG delivery endpoint used by the existing application, with the fixed dealer recipient `info@drivingforce.biz`. Field values are escaped in the email. Supporting PDF/JPG/PNG documents are optional (six files and 3 MB combined), validated for size, declared type and file signature. The application details are in the email body; this implementation does not generate the original EazyFin PDF or create a CRM lead.
+
+No application details are saved in browser storage or an application database, and payloads are not logged. The browser holds the draft only while the page stays open. The server enforces required fields, explicit declarations, same-origin JSON requests, a fixed recipient, a delivery timeout, and per-instance request throttling and retry deduplication. The latter are best-effort controls, not a distributed rate-limit store. Hosting request metadata may still be retained by Vercel, and submitted data is retained by the dealer and delivery provider under their own processes.
+
+The live delivery endpoint has been inspected, but no actual finance application has been sent during development. Unit tests use mocked success/failure/timeout responses. A controlled, authorised dealer delivery test remains necessary to verify receipt end to end. A successful provider response confirms hand-off to that provider, not credit approval or inbox receipt.
+
+## Inventory and estimates
+
+Inventory is a static snapshot from 13 October 2026, sourced from the public Driving Force inventory feed. Refresh `vehicles.json` and associated images to update availability. There are no user-facing links to the old dealership website.
+
+Calculators use standard amortisation, editable illustrative interest, deposit and net trade-in, and no fees, insurance or balloon payment. Quotes are estimates, not credit offers. The selected vehicle's advertised price is read-only on its detail page. Application terms can be reviewed by the finance team, including any residual value requested in the full form.
+
+## Hero and controls
+
+The supplied black and white Porsche creative fades progressively on hover and as the user scrolls. Leaving the car returns it to the current scroll colour. Keyboard and reduced-motion support remain available. The car uses a small neutral ring cursor. Header links and category tabs use simple text and underline states; finance fields have open underline styling.
 
 ## Verification
-- Rendered at desktop and mobile breakpoints; no horizontal document overflow after refinement.
-- All local images and assets load.
-- Search and category intersection: Porsche SUVs returns two Cayennes.
-- Empty search state and clear filters work.
-- All 49 vehicles display without a load-more control; filtering, empty-state reset and sorting operate on the full collection.
-- Finance: R450,000 financed over 72 months at 12% gives approximately R8,798/month; 0% gives R6,250. Deposit above vehicle price produces an error.
-- Keyboard colour toggle, mobile menu and in-page links checked.
-- JavaScript syntax checked; local server returned HTTP 200.
 
-## Colour transition
-Scrolling through the hero gradually increases the white photo opacity, completing while the car is still visible. Scrolling back to the top returns it to black. Hovering or holding the car smoothly takes it fully white; leaving or releasing returns it to the current scroll position’s colour. Enter toggles a full-white override for keyboard users. Reduced-motion preferences remove the easing. Resize and restored scroll positions are handled.
-
-## Cursor design
-A small, thin neutral ring follows the mouse over the car. It hides when leaving the car, scrolling or changing window focus. There are no colour swatches or extra cursor decorations.
-
-## Control styling
-Header links and category tabs remain available with simple text and underline focus states. Category counts have no box. The finance calculator has no outer card or rectangular field borders; fields use subtle underlines with a stronger focus underline.
+- All 49 cards have a native View vehicle call to action.
+- Vehicle estimates, prefilled finance navigation and showroom links checked in the browser.
+- Eight application steps walked through with synthetic details; no application sent.
+- Desktop and mobile layouts inspected; no horizontal overflow on vehicle/application pages.
+- Application consent boxes remain unchecked, document constraints and expense totals checked.
+- All local page/asset paths and old-site link removal audited.
+- Automated finance and delivery-handler tests pass without external email calls.
