@@ -1,5 +1,5 @@
 # Driving Force homepage
-A responsive, buildless homepage using the supplied black and white Porsche photos and supplied logo, with an accessible colour-switch interaction, a 49-vehicle searchable collection, finance estimator, and finance / selling / service / about sections.
+A responsive, buildless homepage using the supplied black and white Porsche photos and supplied logo, with a cursor-following local white-paint reveal with a soft circular edge and explicit colour controls, a 49-vehicle searchable collection, finance estimator, and finance / selling / service / about sections.
 
 ## Run locally
 Run `python3 -m http.server 4173 --directory dist` from this folder and open http://localhost:4173.
@@ -26,3 +26,6 @@ The calculator uses standard amortisation with an editable illustrative annual r
 - Finance: R450,000 financed over 72 months at 12% gives approximately R8,798/month; 0% gives R6,250. Deposit above vehicle price produces an error.
 - Keyboard colour toggle, mobile menu and in-page links checked.
 - JavaScript syntax checked; local server returned HTTP 200.
+
+## Local colour reveal
+Mouse movement reveals only a soft-edged area of the white photo underneath the pointer. The rest of the car stays black and the reveal fades when the pointer leaves. On touchscreens, swipe over the car to reveal the local area. Colour swatches and the Enter key provide an explicit whole-car alternative.

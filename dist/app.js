@@ -2,20 +2,49 @@
   'use strict';
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
-  const frame = $('#car-frame'), swap = $('#car-swap');
+  const frame = $('#car-frame'), swap = $('#car-swap'), whiteCar = $('.car-white');
   let chosenColour = 'black';
+  let touchingCar = false;
   function showColour(colour) {
+    frame.classList.remove('is-revealing');
     frame.classList.toggle('is-white', colour === 'white');
     $('.car-black').setAttribute('aria-hidden', String(colour === 'white'));
-    $('.car-white').setAttribute('aria-hidden', String(colour !== 'white'));
+    whiteCar.setAttribute('aria-hidden', String(colour !== 'white'));
     swap.setAttribute('aria-pressed', String(colour === 'white'));
-    swap.setAttribute('aria-label', `Change Porsche from ${colour} to ${colour === 'black' ? 'white' : 'black'}`);
+    swap.setAttribute('aria-label', 'Move across the Porsche to reveal white paint. Press Enter to switch the full colour.');
     $('#colour-label').textContent = colour === 'white' ? '02 — WHITE' : '01 — BLACK';
     $$('.swatch').forEach(b => {const active=b.dataset.colour===colour;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
   }
-  swap.addEventListener('pointerenter', e => {if(e.pointerType === 'mouse') showColour('white');});
-  swap.addEventListener('pointerleave', e => {if(e.pointerType === 'mouse') showColour(chosenColour);});
-  swap.addEventListener('click', () => {chosenColour = chosenColour === 'black' ? 'white' : 'black';showColour(chosenColour);});
+  function revealAt(event) {
+    if (chosenColour === 'white') return;
+    // Match pointer coordinates to the overlaid photograph, including its responsive crop.
+    const bounds = whiteCar.getBoundingClientRect();
+    frame.style.setProperty('--reveal-x', `${event.clientX - bounds.left}px`);
+    frame.style.setProperty('--reveal-y', `${event.clientY - bounds.top}px`);
+    frame.style.setProperty('--reveal-radius', `${Math.max(68, Math.min(145, bounds.width * 0.14))}px`);
+    frame.classList.add('is-revealing');
+    $('#colour-label').textContent = 'MOVE TO REVEAL';
+  }
+  function endReveal() {
+    touchingCar = false;
+    frame.classList.remove('is-revealing');
+    $('#colour-label').textContent = chosenColour === 'white' ? '02 — WHITE' : '01 — BLACK';
+  }
+  swap.addEventListener('pointerenter', event => {if(event.pointerType !== 'touch') revealAt(event);});
+  swap.addEventListener('pointermove', event => {if(event.pointerType !== 'touch' || touchingCar) revealAt(event);});
+  swap.addEventListener('pointerdown', event => {
+    if(event.pointerType === 'touch') {touchingCar = true; swap.setPointerCapture(event.pointerId);}
+    revealAt(event);
+  });
+  swap.addEventListener('pointerleave', endReveal);
+  swap.addEventListener('pointercancel', endReveal);
+  swap.addEventListener('pointerup', event => {if(event.pointerType === 'touch') endReveal();});
+  swap.addEventListener('blur', endReveal);
+  // Full-colour switching remains an explicit keyboard or swatch action, never a hover action.
+  swap.addEventListener('click', event => {
+    if(event.detail !== 0 || event.pointerType) return;
+    chosenColour = chosenColour === 'black' ? 'white' : 'black';showColour(chosenColour);
+  });
   $$('.swatch').forEach(b => b.addEventListener('click', () => {chosenColour=b.dataset.colour;showColour(chosenColour);}));
   const menu = $('.menu-button'), nav = $('#mobile-nav');
   function closeMenu() {menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Open navigation');nav.hidden=true;}
