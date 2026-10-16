@@ -3,7 +3,13 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/dev.cjs",
-    "test": "node --test test/*.test.cjs"
+    "test": "node --test test/*.test.cjs",
+    "test:browser": "node scripts/verify-browser.cjs"
   },
-  "engines": { "node": "24.x" }
+  "engines": {
+    "node": "24.x"
+  },
+  "devDependencies": {
+    "playwright": "1.60.0"
+  }
 }

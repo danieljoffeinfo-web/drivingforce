@@ -1,0 +1,110 @@
+/* Vehicle pages: preserve the existing brand and give the car first priority. */
+.vehicle-page .page-main{max-width:1480px;padding:34px 4% 72px}
+.vehicle-breadcrumb{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:30px}
+.vehicle-breadcrumb .back-link{margin:0;min-height:44px;display:inline-flex;align-items:center}
+.vehicle-breadcrumb>span{font-size:10px;letter-spacing:1.3px;color:#626262}
+.vehicle-hero{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:5%;align-items:start}
+.vehicle-gallery{min-width:0}
+.photo-open{display:block;position:relative;width:100%;padding:0;border:0;background:var(--soft);overflow:hidden}
+.vehicle-page .detail-photo{width:100%;aspect-ratio:1.5;object-fit:contain;height:auto;background:var(--soft)}
+.photo-expand{position:absolute;bottom:18px;right:18px;display:flex;align-items:center;gap:23px;min-height:44px;padding:0 16px;background:#fff;color:var(--ink);font-size:12px;font-weight:500}
+.photo-expand>span{font-size:22px}
+.photo-open:hover .photo-expand{background:var(--ink);color:#fff}
+.photo-caption{display:flex;justify-content:space-between;gap:16px;padding-top:15px;font-size:11px;color:#626262;line-height:1.5}
+.detail-eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--font);font-size:10px;line-height:1.6;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;margin:0 0 18px;color:#626262}
+.vehicle-summary h1{font-family:var(--font);font-size:clamp(30px,3vw,46px);font-weight:600;letter-spacing:-1.5px;line-height:1.08;text-align:left;white-space:normal;margin:0 0 16px;overflow-wrap:anywhere;text-wrap:balance}
+.vehicle-summary .detail-variant{font-size:12px;line-height:1.7;color:#626262;margin:0;letter-spacing:.2px}
+.vehicle-offer{margin:26px 0 22px}
+.detail-label{display:block;font-size:11px;color:#626262;margin-bottom:7px}
+.vehicle-page .detail-price{display:block;font-size:clamp(28px,2.7vw,40px);font-weight:500;letter-spacing:-1.2px;line-height:1.2;margin:0}
+.vehicle-key-facts{margin:0 0 22px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0}
+.vehicle-key-facts>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:7px 0;font-size:13px}
+.vehicle-key-facts dt{color:#626262}
+.vehicle-key-facts dd{font-weight:500;margin:0;text-align:right}
+.vehicle-summary .full-width{margin:0 0 10px;min-height:50px;font-size:13px}
+.detail-call{display:block;text-align:center;padding:12px 0;font-size:12px;text-decoration:underline;text-underline-offset:4px}
+.finance-jump{display:flex;justify-content:space-between;align-items:center;min-height:48px;margin-top:13px;padding-top:13px;border-top:1px solid var(--line);font-size:12px;font-weight:500}
+.finance-jump span{font-size:20px}
+.vehicle-section-links{display:flex;gap:34px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:45px 0 46px}
+.vehicle-section-links a{display:flex;align-items:center;min-height:58px;font-size:12px;color:#626262;border-bottom:2px solid transparent}
+.vehicle-section-links a:hover{border-color:var(--red);color:var(--ink)}
+.vehicle-detail-body{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:5%;align-items:start}
+.vehicle-section{scroll-margin-top:126px;padding:0 0 36px;margin:0 0 34px;border-bottom:1px solid var(--line)}
+.vehicle-section h2,.vehicle-visit h2{font-family:var(--font);font-size:28px;line-height:1.2;letter-spacing:-.8px;font-weight:600;margin:0 0 22px}
+.vehicle-description p{font-size:15px;line-height:1.85;color:#555;max-width:70ch;margin:0 0 18px;text-wrap:pretty}
+.vehicle-description p:last-child{margin-bottom:0}
+.vehicle-page .detail-specs{display:grid;grid-template-columns:1fr 1fr;gap:0 30px;margin:0}
+.vehicle-page .detail-specs>div{padding:16px 0;border-bottom:1px solid #eee}
+.vehicle-page .detail-specs dt{font-size:11px;color:#626262;margin-bottom:7px}
+.vehicle-page .detail-specs dd{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.vehicle-equipment{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;padding:0;list-style:none;margin:0 0 24px}
+.vehicle-equipment li{display:flex;gap:12px;align-items:baseline;font-size:14px;line-height:1.6}
+.vehicle-equipment li>span{color:#626262}
+.vehicle-page .stock-note{font-size:11px;line-height:1.8;color:#626262;margin:18px 0 0}
+.vehicle-page .vehicle-finance{position:static;scroll-margin-top:126px;background:var(--soft);padding:30px;border:0}
+.vehicle-finance .detail-eyebrow{font-size:9px;margin-bottom:12px}
+.vehicle-page .vehicle-finance>h2{font-size:44px;line-height:1.05;margin:0}
+.vehicle-finance .form-intro{font-size:13px;margin:14px 0 24px}
+.vehicle-finance .form-grid{gap:20px}
+.vehicle-finance .form-grid label{font-size:11px;color:#626262}
+.vehicle-finance .estimate-result strong{font-size:34px}
+.vehicle-finance .estimate-result p>span{white-space:nowrap}
+.vehicle-finance .estimate-note{font-size:11px;color:#626262}
+.vehicle-finance .estimate-totals>div{font-size:11px;gap:12px}
+.vehicle-page .vehicle-visit{display:flex;align-items:center;justify-content:space-between;gap:30px;border-top:1px solid var(--line);margin-top:54px;padding-top:34px}
+.vehicle-visit .detail-eyebrow{font-size:9px;margin:0 0 12px}
+.vehicle-visit h2{margin-bottom:14px}
+.vehicle-visit p{margin:0;font-size:13px}
+.vehicle-page .vehicle-visit-actions{margin:0;gap:20px}
+.vehicle-photo-dialog{border:0;background:#161616;color:#fff;max-width:min(1100px,94vw);width:94vw;max-height:92dvh;padding:20px;overflow:auto}
+.vehicle-photo-dialog::backdrop{background:rgba(0,0,0,.83)}
+.vehicle-photo-dialog img{width:100%;max-height:72dvh;object-fit:contain;height:auto}
+.photo-dialog-top{display:flex;justify-content:space-between;align-items:center;gap:20px;font-size:13px;margin-bottom:14px}
+.photo-close{display:flex;align-items:center;justify-content:center;gap:18px;min-width:90px;min-height:44px;border:1px solid #777;background:none;color:#fff;padding:0 12px;font-size:12px}
+.photo-close span{font-size:26px}
+.vehicle-photo-dialog>p{font-size:11px;color:#ddd;margin:18px 0 0}
+.vehicle-photo-dialog button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+body:has(.vehicle-photo-dialog[open]){overflow:hidden}
+@media(max-width:1050px){
+  .vehicle-hero,.vehicle-detail-body{grid-template-columns:minmax(0,1.25fr) minmax(300px,1fr);gap:4%}
+  .vehicle-summary h1{font-size:34px;letter-spacing:-1px}
+  .vehicle-summary .detail-eyebrow{margin-bottom:12px}
+  .vehicle-offer{margin-top:20px}
+  .vehicle-page .vehicle-finance{padding:24px}
+  .vehicle-page .vehicle-visit{align-items:flex-start}
+  .vehicle-page .vehicle-visit-actions{flex-direction:column;align-items:stretch}
+}
+@media(max-width:760px){
+  .vehicle-page .page-main{padding:16px 5% 44px}
+  .vehicle-breadcrumb{margin-bottom:16px;gap:12px}
+  .vehicle-breadcrumb>span{font-size:8px;letter-spacing:.6px}
+  .vehicle-breadcrumb .back-link{font-size:12px}
+  .vehicle-hero,.vehicle-detail-body{grid-template-columns:1fr;gap:30px}
+  .vehicle-summary h1{font-size:36px;max-width:20ch}
+  .vehicle-summary .detail-eyebrow{font-size:10px;margin-bottom:14px}
+  .photo-expand{bottom:12px;right:12px;min-height:40px;padding:0 12px;font-size:10px;gap:12px}
+  .photo-caption{font-size:10px;padding-top:11px}
+  .vehicle-page .detail-price{font-size:34px}
+  .vehicle-key-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 0}
+  .vehicle-key-facts>div{display:block;padding:0;font-size:12px}
+  .vehicle-key-facts dt{font-size:10px;margin-bottom:8px}
+  .vehicle-key-facts dd{text-align:left}
+  .vehicle-summary .full-width{min-height:52px}
+  .vehicle-section-links{margin:30px 0;gap:0;justify-content:space-between}
+  .vehicle-section-links a{font-size:11px;min-height:52px}
+  .vehicle-section{margin-bottom:28px;padding-bottom:28px;scroll-margin-top:110px}
+  .vehicle-section h2{font-size:26px}
+  .vehicle-description p{font-size:14px;line-height:1.85}
+  .vehicle-page .detail-specs{gap:0 20px}
+  .vehicle-page .detail-specs dd{font-size:13px}
+  .vehicle-equipment{gap:14px 16px}
+  .vehicle-equipment li{font-size:12px;gap:8px}
+  .vehicle-page .vehicle-finance{padding:26px 22px;scroll-margin-top:110px}
+  .vehicle-page .vehicle-finance>h2{font-size:44px}
+  .vehicle-page .vehicle-visit{display:block;margin-top:36px;padding-top:28px}
+  .vehicle-page .vehicle-visit-actions{margin-top:22px;gap:10px}
+  .vehicle-photo-dialog{padding:12px}
+  .photo-dialog-top{font-size:11px;gap:12px}
+  .photo-close{min-width:75px;gap:10px}
+}
+@media(prefers-reduced-motion:reduce){.vehicle-page *{scroll-behavior:auto}}

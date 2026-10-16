@@ -47,3 +47,28 @@
 /* Keep the collection close to the brand strip after removing its introduction. */
 .showroom.section-pad{padding-top:36px}
 @media(max-width:600px){.showroom.section-pad{padding-top:24px}}
+
+/* Inventory cards: one clear link, uncrowded names and a consistent price row. */
+.vehicle-grid{gap:40px 28px}
+.vehicle-card-link{height:100%;border-bottom:1px solid var(--line)}
+.vehicle-card .vehicle-image{aspect-ratio:1.5;background:var(--soft)}
+.vehicle-card .vehicle-info{padding:19px 0 0}
+.vehicle-meta{display:flex;gap:12px;font-size:10px;letter-spacing:.6px;color:#626262;margin:0 0 12px;text-transform:uppercase}
+.vehicle-meta>span+span{border-left:1px solid #bbb;padding-left:12px}
+.vehicle-card h3{font-size:22px;line-height:1.2;letter-spacing:-.7px;font-weight:600;margin:0 0 10px;text-wrap:balance}
+.vehicle-card .vehicle-variant{font-size:11px;line-height:1.65;min-height:36px;margin:0 0 14px;color:#626262}
+.vehicle-card .vehicle-specs{padding:0;border:0;font-size:11px;gap:10px;flex-wrap:wrap;color:#626262}
+.vehicle-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);margin-top:20px;min-height:70px}
+.vehicle-card .vehicle-price{font-size:22px;line-height:1.2;letter-spacing:-.7px;font-weight:500}
+.vehicle-card .vehicle-view{display:inline-flex;align-items:center;gap:12px;margin:0;padding:0;width:auto;min-height:44px;font-size:11px;font-weight:500;white-space:nowrap}
+.vehicle-card .vehicle-view>span{font-size:24px;transition:transform .2s}
+.vehicle-card-link:hover .vehicle-view{color:var(--red)}
+.vehicle-card-link:hover .vehicle-view>span{transform:translate(2px,-2px)}
+.vehicle-card-link:focus-visible{outline-offset:7px}
+@media(min-width:601px) and (max-width:1150px){.vehicle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.vehicle-grid{gap:32px}.vehicle-card h3{font-size:25px}.vehicle-card .vehicle-variant{min-height:0;font-size:12px}.vehicle-card .vehicle-specs{font-size:11px}.vehicle-card .vehicle-price{font-size:24px}.vehicle-card .vehicle-view{font-size:12px}.vehicle-card-bottom{min-height:70px}}
+@media(prefers-reduced-motion:reduce){.vehicle-card .vehicle-image img,.vehicle-card .vehicle-view>span{transition:none;transform:none!important}}
+.vehicle-card>a.vehicle-card-link{display:flex;flex-direction:column}
+.vehicle-card .vehicle-info{display:flex;flex:1;flex-direction:column}
+.vehicle-card .vehicle-specs{margin-bottom:20px}
+.vehicle-card-bottom{margin-top:auto}

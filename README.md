@@ -4,7 +4,7 @@ Responsive website with all 49 vehicles, native vehicle pages, payment estimates
 
 ## Run and verify
 
-Requires Node.js 24. No dependencies or build step are needed.
+Requires Node.js 24. No runtime dependencies or build step are needed. Playwright is a development dependency for browser verification.
 
 - `npm run dev` serves the website and its API at http://localhost:4173.
 - `npm test` checks finance arithmetic, application validation, document handling and mocked delivery responses.
@@ -52,3 +52,11 @@ The supplied black and white Porsche creative fades progressively on hover and a
 - Application consent boxes remain unchecked, document constraints and expense totals checked.
 - All local page/asset paths and old-site link removal audited.
 - Automated finance and delivery-handler tests pass without external email calls.
+
+## Vehicle descriptions and browsing
+
+Every listing has reviewed descriptions and an exact display name. Nine incorporate matched archived Driving Force listings; forty use only verified inventory fields. See `research/description-review.md` and the per-vehicle ledger `research/description-sources.json` for sources and data limitations. Existing inventory facts are preserved.
+
+Cards use a single accessible vehicle link, separate model/variant and price rows, and larger text. Detail pages include photo enlargement, overview, specifications, sourced equipment where available, stock-specific email enquiries and the existing finance application handoff. No enquiry is sent until a visitor chooses to send an email or submit an application.
+
+For reproducible browser checks, run `npm ci`, `npx playwright install chromium --only-shell`, then `npm run test:browser`. Set `PLAYWRIGHT_BROWSERS_PATH` if the browser is stored outside the default cache. Local browser tests serve project files in memory and need no running server. For read-only production checks, set `TEST_BASE_URL=https://www.driving-force.co.za`. Both modes block non-GET requests and write screenshots/reports under ignored `evidence/`.

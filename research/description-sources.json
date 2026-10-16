@@ -1,0 +1,770 @@
+{
+  "reviewed": "2026-10-16",
+  "total": 49,
+  "archived": 9,
+  "inventoryOnly": 40,
+  "vehicles": [
+    {
+      "id": 2746,
+      "stockCode": "TP12828",
+      "vehicle": "2020 Porsche 911 Carrera S",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/porsche-911-tp12828-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2706,
+      "stockCode": "TP12989",
+      "vehicle": "2022 BMW X6",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/bmw-x6-tp12989-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2731,
+      "stockCode": "TP13022",
+      "vehicle": "2016 Ford Mustang GT",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/ford-mustang-tp13022-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2526,
+      "stockCode": "TP12769",
+      "vehicle": "2017 Porsche Cayenne GTS",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/porsche-cayenne-tp12769-278/",
+      "archiveUrl": "https://web.archive.org/web/20260510202514id_/https://driving-force.co.za/vehicles/porsche-cayenne-tp12769-278/",
+      "archiveSha256": "15cd01e01e8af52fddc044f4166dc8040af31c94e0d7c5c6b128de0c9c72fcdc",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    },
+    {
+      "id": 2724,
+      "stockCode": "TP12983",
+      "vehicle": "2014 Jaguar F-Type S",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/jaguar-f-type-tp12983-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2744,
+      "stockCode": "TP13031",
+      "vehicle": "2017 Mercedes-Benz C200 Cabriolet",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mercedes-benz-c-class-tp13031-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2747,
+      "stockCode": "TP13040",
+      "vehicle": "2020 Nissan Qashqai",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/nissan-qashqai-tp13040-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2748,
+      "stockCode": "TP13038",
+      "vehicle": "2017 MINI Cooper",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mini-cooper-tp13038-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2745,
+      "stockCode": "TP13033",
+      "vehicle": "2019 Opel Mokka",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/opel-mokka-tp13033-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2749,
+      "stockCode": "TP13036",
+      "vehicle": "2020 Audi RS4 Avant",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/audi-rs4-tp13036-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2743,
+      "stockCode": "TP13028",
+      "vehicle": "2022 BMW X1",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/bmw-x1-tp13028-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2742,
+      "stockCode": "TP12973",
+      "vehicle": "2014 Land Rover Discovery 4",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/land-rover-discovery-tp12973-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2741,
+      "stockCode": "TP13025",
+      "vehicle": "2014 Toyota Fortuner",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/toyota-fortuner-tp13025-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2740,
+      "stockCode": "TP13001",
+      "vehicle": "2019 Audi A5 Cabriolet",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/audi-a5-tp13001-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2739,
+      "stockCode": "TP12832",
+      "vehicle": "2018 Range Rover Sport",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/land-rover-range-rover-sport-tp12832-278/",
+      "archiveUrl": "https://web.archive.org/web/20260612105907id_/https://driving-force.co.za/vehicles/land-rover-range-rover-sport-tp12832-278/",
+      "archiveSha256": "47eb9b5923802febb4897d2ced816f22017dbd75f6e3f17e30ddcfad9ccf4af8",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    },
+    {
+      "id": 2738,
+      "stockCode": "TP12424",
+      "vehicle": "2025 Toyota Quantum",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/toyota-quantum-tp12424-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2736,
+      "stockCode": "TP13000",
+      "vehicle": "2018 Range Rover Evoque Convertible",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/land-rover-evoque-tp13000-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2732,
+      "stockCode": "TP13024",
+      "vehicle": "2018 Mercedes-Benz GLC 250d",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mercedes-benz-glc-tp13024-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2730,
+      "stockCode": "TP13008",
+      "vehicle": "2013 Volkswagen Golf Cabriolet",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/volkswagen-golf-vi-tp13008-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2728,
+      "stockCode": "TP13009",
+      "vehicle": "2015 Peugeot RCZ",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/peugeot-rcz-tp13009-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2727,
+      "stockCode": "TP13010",
+      "vehicle": "2012 Jeep Wrangler Unlimited Sahara",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/jeep-wrangler-tp13010-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2726,
+      "stockCode": "TP13011",
+      "vehicle": "2019 Mercedes-Benz GLE Coupe",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mercedes-benz-gle-tp13011-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2725,
+      "stockCode": "TP13012",
+      "vehicle": "2021 Range Rover Sport",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/land-rover-range-rover-sport-tp13012-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2723,
+      "stockCode": "TP12837",
+      "vehicle": "2023 Toyota Quantum VX",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/toyota-quantum-tp12837-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2721,
+      "stockCode": "TP12861",
+      "vehicle": "2017 Volkswagen Tiguan",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/volkswagen-tiguan-tp12861-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2710,
+      "stockCode": "TP12994",
+      "vehicle": "2019 Toyota Fortuner",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/toyota-fortuner-tp12994-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2708,
+      "stockCode": "TP12993",
+      "vehicle": "2014 Hyundai i10",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/hyundai-i10-tp12993-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2705,
+      "stockCode": "TP12988",
+      "vehicle": "2020 Mercedes-Benz GLA 200",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mercedes-benz-gla-tp12988-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2703,
+      "stockCode": "TP12980",
+      "vehicle": "2019 Audi RS5 Sportback",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/audi-a5-tp12980-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2698,
+      "stockCode": "TP12982",
+      "vehicle": "2014 Mercedes-Benz ML 500",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mercedes-benz-m-class-tp12982-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2701,
+      "stockCode": "TP12985",
+      "vehicle": "2015 BMW M135i",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/bmw-1-series-tp12985-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2702,
+      "stockCode": "TP12986",
+      "vehicle": "2018 BMW 320d",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/bmw-3-series-tp12986-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2695,
+      "stockCode": "TP12979",
+      "vehicle": "2017 Audi Q5",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/audi-q5-tp12979-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2693,
+      "stockCode": "TP12975",
+      "vehicle": "2019 Jaguar F-Pace",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/jaguar-f-pace-tp12975-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2694,
+      "stockCode": "TP12977",
+      "vehicle": "2018 Volvo XC60",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/volvo-xc60-tp12977-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2689,
+      "stockCode": "TP12853",
+      "vehicle": "2018 Ford Ranger Wildtrak",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/ford-ranger-tp12853-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2684,
+      "stockCode": "TP12816",
+      "vehicle": "2019 MINI JCW Countryman",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mini-cooper-countryman-tp12816-278/",
+      "archiveUrl": "https://web.archive.org/web/20260612112015id_/https://driving-force.co.za/vehicles/mini-cooper-countryman-tp12816-278/",
+      "archiveSha256": "553e92609c19eeacc79e25e2f74512ced88c75ea26d62025ea5a7ee323c7301d",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    },
+    {
+      "id": 2682,
+      "stockCode": "TP12969",
+      "vehicle": "2016 Jeep Grand Cherokee",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/jeep-grand-cherokee-tp12969-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2662,
+      "stockCode": "TP12950",
+      "vehicle": "2019 Hyundai H-1",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/hyundai-h-1-tp12950-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2657,
+      "stockCode": "TP12942",
+      "vehicle": "2009 BMW 335i",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/bmw-3-series-tp12942-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2653,
+      "stockCode": "TP12932",
+      "vehicle": "2014 Audi A1 Sportback",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/audi-a1-tp12932-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2636,
+      "stockCode": "TP12911",
+      "vehicle": "2020 Mercedes-AMG A45 S",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mercedes-benz-a-class-tp12911-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2616,
+      "stockCode": "TP12775",
+      "vehicle": "2017 Audi Q5",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/audi-q5-tp12775-278/",
+      "archiveUrl": "https://web.archive.org/web/20260510210615id_/https://driving-force.co.za/vehicles/audi-q5-tp12775-278/",
+      "archiveSha256": "3ec426a2438090bffbd9840472c2b637ff967765d3bc08751ef37aa23ba8c16a",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    },
+    {
+      "id": 2602,
+      "stockCode": "TP12849",
+      "vehicle": "2021 Jeep Wrangler Unlimited Rubicon",
+      "sourceType": "inventory-facts",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/jeep-wrangler-tp12849-278/",
+      "archiveUrl": null,
+      "archiveSha256": null,
+      "matchedOn": [
+        "exact inventory record"
+      ],
+      "equipmentDataAvailable": false,
+      "notes": "Original copy limited to recorded year, make, variant, body type, fuel, transmission, colour, mileage, price and stock reference. No equipment or history claims added."
+    },
+    {
+      "id": 2583,
+      "stockCode": "TP12835",
+      "vehicle": "2017 Renault Clio Dynamique",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/renault-clio-v-tp12835-278/",
+      "archiveUrl": "https://web.archive.org/web/20260612105622id_/https://driving-force.co.za/vehicles/renault-clio-v-tp12835-278/",
+      "archiveSha256": "ae2fbaaa163936146b9d9ec439a81036cb3bfb44f8df5de6e7c51aa4c04a7122",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    },
+    {
+      "id": 2580,
+      "stockCode": "TP12831",
+      "vehicle": "2012 Jeep Wrangler Sahara",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/jeep-wrangler-tp12831-278/",
+      "archiveUrl": "https://web.archive.org/web/20260612120643id_/https://driving-force.co.za/vehicles/jeep-wrangler-tp12831-278/",
+      "archiveSha256": "19209ddd3c5a4a67d08345b6192c1d06a96cbb59920f7a3ca5a9d8d1543a6068",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    },
+    {
+      "id": 2571,
+      "stockCode": "TP12822",
+      "vehicle": "2014 Jeep Wrangler Unlimited Rubicon",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/jeep-wrangler-tp12822-278/",
+      "archiveUrl": "https://web.archive.org/web/20260612111148id_/https://driving-force.co.za/vehicles/jeep-wrangler-tp12822-278/",
+      "archiveSha256": "75dd68e16868dd6106d2f0ed2f08e484972be144e55424717bf604c0c4744e37",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    },
+    {
+      "id": 2540,
+      "stockCode": "TP12783",
+      "vehicle": "2015 Mercedes-AMG S63",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/mercedes-benz-s-class-tp12783-278/",
+      "archiveUrl": "https://web.archive.org/web/20260510195947id_/https://driving-force.co.za/vehicles/mercedes-benz-s-class-tp12783-278/",
+      "archiveSha256": "4a69c1fc79ce8247929684d9ab0c6360026b10a5fb7b2de39430dc3a4a0d196e",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    },
+    {
+      "id": 2437,
+      "stockCode": "TP12687",
+      "vehicle": "2015 Porsche Cayenne GTS",
+      "sourceType": "original-listing",
+      "inventoryDate": "2026-10-13",
+      "originalUrl": "https://driving-force.co.za/vehicles/porsche-cayenne-tp12687-278/",
+      "archiveUrl": "https://web.archive.org/web/20260420070340id_/https://driving-force.co.za/vehicles/porsche-cayenne-tp12687-278/",
+      "archiveSha256": "41adfa411b5e7afc339294e3b6d082d83cd267c013dd24c28d1a3d2d52226c0e",
+      "matchedOn": [
+        "stock reference",
+        "year",
+        "variant",
+        "primary image asset"
+      ],
+      "equipmentDataAvailable": true,
+      "notes": "Original text paraphrased; dated prices, mileage, condition, service history, warranties and unsupported comparisons excluded. Current inventory facts retained."
+    }
+  ]
+}
