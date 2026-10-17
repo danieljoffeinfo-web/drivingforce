@@ -6,7 +6,7 @@
   const expenses = ['bondRepayment','transportation','vehicleInstalments','education','creditCards','householdExpenses','clothingAccounts','utilitiesRatesTaxes','policyInsurance','loans','furnitureAccounts','bankingCosts','telephoneInternet','foodEntertainment','medical','maintenance','other'];
   let currentStep = 0, documents = [], submitting = false;
   const submissionId = crypto.randomUUID();
-  Promise.all([fetch('application-fields.json').then(r=>{if(!r.ok)throw Error();return r.json();}),fetch('vehicles.json').then(r=>{if(!r.ok)throw Error();return r.json();})]).then(([steps,data])=>{
+  Promise.all([fetch('application-fields.json').then(r=>{if(!r.ok)throw Error();return r.json();}),DFInventory.load()]).then(([steps,data])=>{
     const fields = steps.flatMap(step=>step.fields);
     function input(field) {
       const id = 'app-'+field.id, required = field.required?'required':'';

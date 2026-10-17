@@ -2,7 +2,7 @@
   const {money,escapeHtml:e,vehicleTitle,estimate} = DF;
   const root = document.querySelector('#vehicle-content');
   const id = new URLSearchParams(location.search).get('id');
-  fetch('vehicles.json').then(response => {if(!response.ok)throw new Error();return response.json();}).then(data => {
+  DFInventory.load().then(data => {
     const car = data.vehicles.find(item => String(item.id) === id);
     if (!car) {root.innerHTML = '<div class="page-message"><h1>Let’s find your next drive.</h1><p>This vehicle could not be found in the current collection.</p><a class="button button-black" href="index.html#showroom">Back to the showroom <span>↗</span></a></div>';return;}
     document.title = `${car.year} ${vehicleTitle(car)} | Driving Force`;

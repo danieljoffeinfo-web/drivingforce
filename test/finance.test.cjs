@@ -39,17 +39,17 @@ test('uploaded documents must match their declared type and fit the total limit'
 test('application values are escaped and cannot choose email recipients',async()=>{
   const body=payload();body.fields.name='<script>test</script>';body.ToList='unexpected@example.com';
   const html=messageFor(validate(body)).message;assert.ok(!html.includes('<script>'));assert.ok(html.includes('&lt;script&gt;'));
-  let sent;const handler=createHandler({fetchImpl:async(url,options)=>{sent={url,...JSON.parse(options.body)};return {ok:true,text:async()=>'{"success":true}'};}});
+  let sent;const handler=createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,fetchImpl:async(url,options)=>{sent={url,...JSON.parse(options.body)};return {ok:true,text:async()=>'{"success":true}'};}});
   const res=response();await handler(request(body),res);
   assert.equal(res.statusCode,200);assert.equal(res.data.accepted,true);assert.equal(sent.notification.ToList,'info@drivingforce.biz');assert.equal(sent.notification.BccList,'');assert.equal(res.headers['Cache-Control'],'no-store');
 });
 test('errors and timeouts never report a submitted application',async()=>{
   for(const fetchImpl of [async()=>({ok:false,text:async()=>'failure'}),async()=>({ok:true,text:async()=>'{"success":false}'}),async()=>{throw Error('timeout');}]){
-    const res=response();await createHandler({fetchImpl})(request(payload()),res);assert.equal(res.statusCode,502);assert.equal(res.data.accepted,undefined);
+    const res=response();await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,fetchImpl})(request(payload()),res);assert.equal(res.statusCode,502);assert.equal(res.data.accepted,undefined);
   }
 });
 test('cross-origin and invalid requests are rejected before delivery',async()=>{
-  let calls=0;const handler=createHandler({fetchImpl:async()=>{calls++;throw Error();}});
+  let calls=0;const handler=createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,fetchImpl:async()=>{calls++;throw Error();}});
   const badOrigin=request(payload());badOrigin.headers.origin='https://another.test';const a=response();await handler(badOrigin,a);assert.equal(a.statusCode,403);
   const b=response();await handler(request({}),b);assert.equal(b.statusCode,400);
   const c=response();await handler({...request(payload()),method:'GET'},c);assert.equal(c.statusCode,405);assert.equal(calls,0);
@@ -60,4 +60,9 @@ test('application uses visible trade-in details and recomputes expense totals',(
   const application=validate(body);assert.equal(application.tradeIn,20000);
   const html=messageFor(application).message;assert.ok(html.includes('Expenses: R 7'));assert.ok(html.includes('Disposable income: R 14'));
   assert.throws(()=>validate({...body,fields:{...body.fields,deposit:'2390000'}}));
+});
+test('vehicle selections are checked against the live admin inventory',()=>{
+  const added={...require('../dist/vehicles.json').vehicles[0],id:9001,stock_code:'NEW1'};
+  assert.equal(validate({...payload(),vehicleId:'9001'},[added]).vehicle.stock_code,'NEW1');
+  assert.throws(()=>validate(payload(),[added]),/available vehicle/);
 });

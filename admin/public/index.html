@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Stock admin | Driving Force</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="admin.css">
+<script src="admin.js" defer></script>
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><span class="mark" aria-hidden="true"></span>Driving Force <span class="tag">Stock admin</span></div>
+  <button id="sign-out" class="link" type="button" hidden>Sign out</button>
+</header>
+
+<main id="login-view" class="login" hidden>
+  <form id="login-form" class="card narrow">
+    <h1>Sign in</h1>
+    <p class="muted">Manage the vehicles shown on the Driving Force website.</p>
+    <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+    <p class="error" role="alert"></p>
+    <button class="button" type="submit">Sign in</button>
+  </form>
+</main>
+
+<main id="app-view" hidden>
+  <section class="toolbar">
+    <div>
+      <h1>Vehicles on the website</h1>
+      <p class="muted" id="summary">Loading…</p>
+    </div>
+    <div class="actions">
+      <input id="search" type="search" placeholder="Search make, model or stock code" aria-label="Search vehicles">
+      <button id="add-open" class="button" type="button">+ Add vehicle</button>
+    </div>
+  </section>
+  <p class="notice" id="notice" role="status" hidden></p>
+  <ul id="list" class="list" aria-live="polite"></ul>
+</main>
+
+<dialog id="add-dialog" aria-labelledby="add-title">
+  <form id="add-form" class="add-form" novalidate>
+    <div class="dialog-head"><h2 id="add-title">Add a vehicle</h2><button type="button" class="link" data-close>Cancel</button></div>
+    <div class="photo-field">
+      <label class="photo-drop"><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required><img alt="" hidden><span>Choose a photo<br><small>JPG, PNG or WebP</small></span></label>
+    </div>
+    <div class="grid">
+      <label>Make<input name="make" required placeholder="e.g. BMW" maxlength="40"></label>
+      <label>Model<input name="model" required placeholder="e.g. X5" maxlength="60"></label>
+      <label class="wide">Variant<input name="variant" required placeholder="e.g. xDrive30d M Sport" maxlength="100"></label>
+      <label class="wide">Display name <small>(optional)</small><input name="displayName" placeholder="e.g. BMW X5 xDrive30d" maxlength="80"></label>
+      <label>Year<input name="year" required inputmode="numeric" placeholder="2022"></label>
+      <label>Price (R)<input name="price" required inputmode="numeric" placeholder="899995"></label>
+      <label>Mileage (km)<input name="mileage" required inputmode="numeric" placeholder="45000"></label>
+      <label>Colour<input name="colour" required placeholder="e.g. Black" maxlength="30"></label>
+      <label>Stock code<input name="stockCode" required placeholder="e.g. TP13001" maxlength="30"></label>
+      <label>Body type<select name="bodyType" required></select></label>
+      <label>Transmission<select name="transmission" required></select></label>
+      <label>Fuel type<select name="fuelType" required></select></label>
+      <label class="wide">Description <small>(optional — leave blank to write one automatically; blank line between paragraphs)</small><textarea name="description" rows="4" maxlength="3000"></textarea></label>
+      <label class="wide">Equipment <small>(optional — one item per line)</small><textarea name="features" rows="3"></textarea></label>
+    </div>
+    <p class="error" role="alert"></p>
+    <div class="dialog-foot"><button type="button" class="button ghost" data-close>Cancel</button><button class="button" type="submit">Publish to website</button></div>
+  </form>
+</dialog>
+
+<dialog id="remove-dialog" aria-labelledby="remove-title">
+  <form method="dialog" class="confirm">
+    <h2 id="remove-title">Take this vehicle off the website?</h2>
+    <p id="remove-name"></p>
+    <p class="error" role="alert"></p>
+    <div class="dialog-foot"><button value="cancel" class="button ghost">Keep it</button><button value="confirm" id="remove-confirm" class="button danger">Remove vehicle</button></div>
+  </form>
+</dialog>
+</body>
+</html>

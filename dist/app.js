@@ -122,7 +122,7 @@
   $$('.filter').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.category;updateTabs();renderInventory();}));
   $('#vehicle-search').addEventListener('input',()=>{renderInventory();});
   $('#vehicle-sort').addEventListener('change',()=>{renderInventory();});
-  fetch('vehicles.json').then(r=>{if(!r.ok)throw new Error('Inventory unavailable');return r.json();}).then(data=>{inventory=data.vehicles;$('#all-count').textContent=inventory.length;renderInventory();}).catch(()=>{$('#result-count').textContent='The collection could not be loaded.';$('#vehicle-grid').innerHTML='<div class="empty-state"><h3>Your next drive is waiting.</h3><p>Visit the full Driving Force showroom to browse current stock.</p><a class="button button-black" href="visit.html" >Visit the showroom <span>↗</span></a></div>';});
+  DFInventory.load().then(data=>{inventory=data.vehicles;$('#all-count').textContent=inventory.length;renderInventory();}).catch(()=>{$('#result-count').textContent='The collection could not be loaded.';$('#vehicle-grid').innerHTML='<div class="empty-state"><h3>Your next drive is waiting.</h3><p>Visit the full Driving Force showroom to browse current stock.</p><a class="button button-black" href="visit.html" >Visit the showroom <span>↗</span></a></div>';});
   function calculate(){
     const price=Number($('#calc-price').value), deposit=Number($('#calc-deposit').value), rate=Number($('#calc-rate').value)/1200, term=Number($('#calc-term').value);
     const valid=['#calc-price','#calc-deposit','#calc-rate'].every(s=>$(s).value!==''&&$(s).checkValidity())&&deposit<=price;
