@@ -9,4 +9,4 @@ A separate Vercel project (`driving-force-admin`) for adding vehicles to, and re
 - Until the first change, the admin starts from `lib/seed-vehicles.json`, a copy of the showroom snapshot.
 - `npm test` runs the admin tests against an in-memory store.
 
-Deploy with Vercel using `admin` as the root directory. The main site ignores this folder (`.vercelignore`).
+Deploy with Vercel using `admin` as the root directory. The main site only serves `dist` and `api`, so this folder does not affect it.
