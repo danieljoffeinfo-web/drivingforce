@@ -73,6 +73,10 @@ const failures=[];
   assert.ok((await page.locator('.vehicle-card-link').first().getAttribute('href')).includes('2708'));
   await page.locator('#vehicle-search').fill('Porsche');
   assert.equal(await page.locator('.vehicle-card').count(),3);
+  const whatsapp=new URL(await page.locator('.vehicle-whatsapp').first().getAttribute('href'));
+  assert.equal(await page.locator('.vehicle-whatsapp').count(),3);
+  assert.equal(whatsapp.origin+whatsapp.pathname,'https://wa.me/27824254253');
+  assert.match(whatsapp.searchParams.get('text'),/Porsche.*stock [A-Z0-9]+/);
   await page.locator('.vehicle-card-link').first().click();
   await page.locator('.vehicle-description').waitFor();
   // Photo dialog: keyboard entry, close, focus restoration and phone-sized layout.

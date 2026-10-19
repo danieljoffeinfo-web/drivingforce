@@ -1,6 +1,6 @@
 # Driving Force showroom
 
-Responsive website with all 49 vehicles, native vehicle pages, payment estimates and a full eight-step credit application. Navigation stays on this website; telephone, email and map directions use their appropriate external apps.
+Responsive website with all 49 vehicles, native vehicle pages, payment estimates and a full eight-step credit application. Navigation stays on this website; telephone, email, WhatsApp and map directions use their appropriate external apps. Every vehicle card has a "WhatsApp us" button that opens a chat with sales on 082 425 4253 (wa.me/27824254253), prefilled with the vehicle, stock code and price.
 
 ## Run and verify
 

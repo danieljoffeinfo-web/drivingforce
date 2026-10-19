@@ -72,3 +72,13 @@
 .vehicle-card .vehicle-info{display:flex;flex:1;flex-direction:column}
 .vehicle-card .vehicle-specs{margin-bottom:20px}
 .vehicle-card-bottom{margin-top:auto}
+/* WhatsApp enquiry on every card: a separate link so the card itself still opens the vehicle page. */
+.vehicle-card{display:flex;flex-direction:column}
+.vehicle-card>a.vehicle-card-link{flex:1;height:auto}
+.vehicle-card>a.vehicle-whatsapp{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;margin-top:14px;border:1px solid var(--ink);font-size:12px;font-weight:500;letter-spacing:.3px;transition:background .2s,border-color .2s,color .2s}
+.vehicle-whatsapp svg{color:#1da851;flex:none}
+.vehicle-whatsapp:hover{background:#1da851;border-color:#1da851;color:#fff}
+.vehicle-whatsapp:hover svg{color:#fff}
+.vehicle-whatsapp:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+@media(max-width:600px){.vehicle-whatsapp{font-size:13px;min-height:50px}}
+@media(prefers-reduced-motion:reduce){.vehicle-whatsapp{transition:none}}
