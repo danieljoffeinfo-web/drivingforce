@@ -12,6 +12,9 @@
     if (root.dataset.rendered !== 'server') document.title = `${car.year} ${vehicleTitle(car)} ${car.variant} for sale in Cape Town | Driving Force`;
     const photos = photosOf(car).map(imageUrl);
     if (root.dataset.rendered !== 'server') root.innerHTML = vehicleMarkup(car, data);
+    // Enquiries go through the website form; the email link is only a fallback without scripts.
+    const enquire = document.querySelector('.vehicle-enquire');
+    if (enquire && window.DFEnquiry) enquire.addEventListener('click', event => { event.preventDefault(); DFEnquiry.open(car, enquire); });
     const photoDialog = document.querySelector('.vehicle-photo-dialog');
     let current = 0;
     function showPhoto(index) {

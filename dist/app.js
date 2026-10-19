@@ -100,7 +100,7 @@
   const money = n => 'R ' + Math.round(n).toLocaleString('en-ZA').replace(/,/g,' ');
   const escapeHtml = text => String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const title = DF.vehicleTitle;
-  const {cardMarkup,whatsappLink,wireCarousels}=DFCard;
+  const {cardMarkup,wireCarousels}=DFCard;
   function inCategory(c) {
     if(category==='all')return true;
     if(category==='suv')return c.body_type==='SUV';
@@ -118,39 +118,10 @@
     $('#vehicle-grid').innerHTML=results.map(c=>cardMarkup(c)).join('') || '<div class="empty-state"><h3>No matches. More possibilities.</h3><p>Try another make or model, or clear your filters to see the full collection.</p><button id="clear-filters" class="button button-black">Clear filters <span>↗</span></button></div>';
     if($('#clear-filters'))$('#clear-filters').addEventListener('click',()=>{category='all';$('#vehicle-search').value='';$('#vehicle-sort').value='featured';updateTabs();renderInventory();$('#vehicle-search').focus();});
   }
-  // Email enquiries post to /api/enquiry, which delivers them through Resend.
-  const enquiryDialog=$('#enquiry-dialog'), enquiryForm=$('#enquiry-form'), enquiryStatus=$('#enquiry-status');
-  let enquiryOpener=null;
+  // The email enquiry form is shared with the vehicle pages (enquiry-form.js).
   $('#vehicle-grid').addEventListener('click',event=>{
     const button=event.target.closest('.vehicle-email');if(!button)return;
-    const c=inventory.find(car=>String(car.id)===button.dataset.vehicle);if(!c)return;
-    enquiryOpener=button;enquiryForm.reset();enquiryStatus.textContent='';enquiryStatus.classList.remove('error');
-    enquiryForm.hidden=false;enquiryForm.querySelectorAll('input,textarea,button').forEach(el=>el.disabled=false);
-    enquiryForm.vehicleId.value=c.id;
-    $('#enquiry-vehicle').textContent=`${c.year} ${title(c)} · ${money(c.value)} · Stock ${c.stock_code}`;
-    enquiryForm.message.value=`Hi, I'm interested in the ${c.year} ${title(c)} (stock ${c.stock_code}). Is it still available?`;
-    $('#enquiry-whatsapp').href=whatsappLink(c);
-    enquiryDialog.showModal();enquiryForm.name.focus();
-  });
-  $('.enquiry-close').addEventListener('click',()=>enquiryDialog.close());
-  enquiryDialog.addEventListener('click',event=>{if(event.target===enquiryDialog)enquiryDialog.close();});
-  enquiryDialog.addEventListener('close',()=>{if(enquiryOpener)enquiryOpener.focus();});
-  enquiryForm.addEventListener('submit',async event=>{
-    event.preventDefault();
-    const invalid=[...enquiryForm.elements].find(el=>el.willValidate&&!el.checkValidity());
-    if(invalid){enquiryStatus.textContent=invalid.name==='email'&&invalid.value?'Enter a valid email address.':`Please enter your ${invalid.name==='message'?'message':invalid.name==='phone'?'phone number':invalid.name}.`;enquiryStatus.classList.add('error');invalid.focus();return;}
-    const submit=enquiryForm.querySelector('.enquiry-submit');
-    submit.disabled=true;enquiryStatus.classList.remove('error');enquiryStatus.textContent='Sending your enquiry…';
-    try{
-      const response=await fetch('/api/enquiry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(enquiryForm)))});
-      const result=await response.json().catch(()=>({}));
-      if(!response.ok)throw new Error(result.error||'Your enquiry could not be sent. Please WhatsApp us on 082 425 4253 or call 021 203 8888.');
-      enquiryForm.querySelectorAll('input,textarea,button:not(.enquiry-close)').forEach(el=>el.disabled=true);
-      enquiryStatus.textContent='Thank you. Your enquiry has been sent and our sales team will be in touch shortly.';
-    }catch(error){
-      submit.disabled=false;enquiryStatus.classList.add('error');
-      enquiryStatus.textContent=error instanceof TypeError?'You appear to be offline. Please WhatsApp us on 082 425 4253 or call 021 203 8888.':error.message;
-    }
+    const c=inventory.find(car=>String(car.id)===button.dataset.vehicle);if(c)DFEnquiry.open(c,button);
   });
   function updateTabs(){$$('.filter').forEach(b=>{const active=b.dataset.category===category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});}
   $$('.filter').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.category;updateTabs();renderInventory();}));

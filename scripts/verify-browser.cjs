@@ -103,12 +103,26 @@ const failures=[];
   await page.unroute('**/api/enquiry');
   await page.locator('.vehicle-card-link').first().click();
   await page.locator('.vehicle-description').waitFor();
+  // The vehicle page's enquiry button opens the website form (not the mail app) and sends to /api/enquiry.
+  await go(vehicleUrl(vehicles.find(c=>c.id===2746)));
+  let pageEnquiry=null;
+  await page.route('**/api/enquiry',route=>{pageEnquiry=route.request().postDataJSON();return route.fulfill({status:200,contentType:'application/json',body:'{"accepted":true}'});});
+  await page.locator('.vehicle-enquire').click();
+  await page.locator('#enquiry-dialog[open]').waitFor();
+  assert.match(await page.locator('#enquiry-vehicle').textContent(),/Porsche 911 Carrera S.*Stock TP12828/);
+  await page.locator('#enquiry-form [name=name]').fill('Browser Check');
+  await page.locator('#enquiry-form [name=email]').fill('check@example.com');
+  await page.locator('.enquiry-submit').click();
+  await page.locator('#enquiry-status',{hasText:'Thank you'}).waitFor();
+  assert.equal(pageEnquiry.vehicleId,'2746');assert.equal(pageEnquiry.name,'Browser Check');
+  await page.unroute('**/api/enquiry');
+  await page.keyboard.press('Escape');
   // Photo dialog: keyboard entry, close, focus restoration and phone-sized layout.
   await go(vehicleUrl(vehicles.find(c=>c.id===2746)));
   await page.locator('.photo-open').focus();await page.keyboard.press('Enter');
-  assert.ok(await page.locator('dialog').evaluate(d=>d.open));
+  assert.ok(await page.locator('.vehicle-photo-dialog').evaluate(d=>d.open));
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('dialog').evaluate(d=>d.open),false);
+  assert.equal(await page.locator('.vehicle-photo-dialog').evaluate(d=>d.open),false);
   assert.ok(await page.locator('.photo-open').evaluate(e=>e===document.activeElement));
   await page.setViewportSize({width:390,height:844});
   await page.locator('.photo-open').click();
