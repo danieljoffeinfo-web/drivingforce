@@ -1,5 +1,5 @@
 const auth=require('./auth.cjs');
-const {buildVehicle,VehicleError,bodyTypes,transmissions,fuelTypes,photosOf,parsePrice,setPrice,setPhotos}=require('./vehicles.cjs');
+const {updateDetails,buildVehicle,VehicleError,bodyTypes,transmissions,fuelTypes,photosOf,parsePrice,setPrice,setPhotos}=require('./vehicles.cjs');
 const {createStore}=require('./store.cjs');
 const {createSupabaseAuth}=require('./supabase.cjs');
 const maxPhotoBytes=3*1024*1024;
@@ -132,6 +132,11 @@ function vehiclesHandler({store=createStore(),supabase=createSupabaseAuth()}={})
         if(!car)throw new VehicleError('That vehicle is no longer listed. Please refresh.',404);
         if(body.action==='price'){
           setPrice(car,parsePrice(body.price));
+          await store.save(data.vehicles);
+          return res.status(200).json({vehicle:car});
+        }
+        if(body.action==='details'){
+          updateDetails(car,body.vehicle,data.vehicles);
           await store.save(data.vehicles);
           return res.status(200).json({vehicle:car});
         }

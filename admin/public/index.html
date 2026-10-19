@@ -49,38 +49,47 @@
       <p class="muted" id="summary">Loading…</p>
     </div>
     <div class="actions">
-      <input id="search" type="search" placeholder="Search make, model or stock code" aria-label="Search vehicles">
-      <button id="add-open" class="button" type="button">+ Add vehicle</button>
+      <input id="search" type="search" placeholder="Search make, model or stock code  ( / )" aria-label="Search vehicles">
+      <label class="size-toggle" title="Card size"><span class="sr-only">Card size</span><select id="card-size" aria-label="Card size"><option value="s">Small cards</option><option value="m">Medium cards</option><option value="l">Large cards</option></select></label>
+      <button id="add-open" class="button" type="button" title="Add vehicle (N)">+ Add vehicle</button>
     </div>
   </section>
   <p class="notice" id="notice" role="status" hidden></p>
-  <div class="order-bar" id="order-bar" hidden><span>You’ve changed the order of the vehicles.</span><div><button class="button ghost small" type="button" id="order-undo">Undo</button><button class="button small" type="button" id="order-save">Save order</button></div></div>
-  <p class="muted order-hint" id="order-hint">Drag <span aria-hidden="true">⠿</span> or use the arrows to change the order vehicles appear on the website. Type a new price and press Enter to update it.</p>
-  <ul id="list" class="list" aria-live="polite"></ul>
+  <div class="order-bar" id="order-bar" hidden><span>You’ve changed the order. It goes live when you save.</span><div><button class="button ghost small" type="button" id="order-undo">Undo</button><button class="button small" type="button" id="order-save">Save order</button></div></div>
+  <p class="muted order-hint" id="order-hint"><strong>Drag any card</strong> to move it, or type a new position in its <strong>#</strong> box. Type a price and press <strong>Enter</strong> to update it. <span class="hint-keys">Press <kbd>N</kbd> to add a vehicle, <kbd>/</kbd> to search.</span></p>
+  <ul id="list" class="card-grid size-s" aria-live="polite"></ul>
 </main>
 
-<dialog id="add-dialog" aria-labelledby="add-title">
+<dialog id="add-dialog" class="wide-dialog" aria-labelledby="add-title">
   <form id="add-form" class="add-form" novalidate>
     <div class="dialog-head"><h2 id="add-title">Add a vehicle</h2><button type="button" class="link" data-close>Cancel</button></div>
-    <div class="photo-field" id="add-photos"></div>
-    <div class="grid">
-      <label>Make<input name="make" required placeholder="e.g. BMW" maxlength="40"></label>
-      <label>Model<input name="model" required placeholder="e.g. X5" maxlength="60"></label>
-      <label class="wide">Variant<input name="variant" required placeholder="e.g. xDrive30d M Sport" maxlength="100"></label>
-      <label class="wide">Display name <small>(optional)</small><input name="displayName" placeholder="e.g. BMW X5 xDrive30d" maxlength="80"></label>
-      <label>Year<input name="year" required inputmode="numeric" placeholder="2022"></label>
-      <label>Price (R)<input name="price" required inputmode="numeric" placeholder="899995"></label>
-      <label>Mileage (km)<input name="mileage" required inputmode="numeric" placeholder="45000"></label>
-      <label>Colour<input name="colour" required placeholder="e.g. Black" maxlength="30"></label>
-      <label>Stock code<input name="stockCode" required placeholder="e.g. TP13001" maxlength="30"></label>
-      <label>Body type<select name="bodyType" required></select></label>
-      <label>Transmission<select name="transmission" required></select></label>
-      <label>Fuel type<select name="fuelType" required></select></label>
-      <label class="wide">Description <small>(optional — leave blank to write one automatically; blank line between paragraphs)</small><textarea name="description" rows="4" maxlength="3000"></textarea></label>
-      <label class="wide">Equipment <small>(optional — one item per line)</small><textarea name="features" rows="3"></textarea></label>
+    <div class="paste-box">
+      <label for="paste-text"><strong>Paste details to fill the form</strong> <small>— paste a listing, a copied card, or lines like “Price: R 459 995”. Check the highlighted fields.</small></label>
+      <textarea id="paste-text" rows="3" placeholder="e.g. 2021 BMW X5 xDrive30d M Sport · R 899 995 · 45 000 km · Automatic · Diesel · Black · Stock TP13001"></textarea>
+      <p class="paste-result" role="status"></p>
     </div>
+    <div class="form-columns">
+      <div class="photo-field" id="add-photos"></div>
+      <div class="grid">
+        <label>Make<input name="make" required placeholder="e.g. BMW" maxlength="40" list="make-options" autocomplete="off"></label>
+        <label>Model<input name="model" required placeholder="e.g. X5" maxlength="60" list="model-options" autocomplete="off"></label>
+        <label class="wide">Variant<input name="variant" required placeholder="e.g. xDrive30d M Sport" maxlength="100" autocomplete="off"></label>
+        <label>Year<input name="year" required inputmode="numeric" placeholder="2022" autocomplete="off"></label>
+        <label>Price (R)<input name="price" required inputmode="numeric" placeholder="899995" autocomplete="off"></label>
+        <label>Mileage (km)<input name="mileage" required inputmode="numeric" placeholder="45000" autocomplete="off"></label>
+        <label>Colour<input name="colour" required placeholder="e.g. Black" maxlength="30" list="colour-options" autocomplete="off"></label>
+        <label>Stock code<input name="stockCode" required placeholder="e.g. TP13001" maxlength="30" autocomplete="off"></label>
+        <label>Body type<select name="bodyType" required></select></label>
+        <label>Transmission<select name="transmission" required></select></label>
+        <label>Fuel type<select name="fuelType" required></select></label>
+        <label class="wide">Display name <small>(optional)</small><input name="displayName" placeholder="e.g. BMW X5 xDrive30d" maxlength="80" autocomplete="off"></label>
+        <label class="wide">Description <small>(optional — leave blank to write one automatically)</small><textarea name="description" rows="3" maxlength="3000"></textarea></label>
+        <label class="wide">Equipment <small>(optional — one item per line)</small><textarea name="features" rows="2"></textarea></label>
+      </div>
+    </div>
+    <datalist id="make-options"></datalist><datalist id="model-options"></datalist><datalist id="colour-options"></datalist>
     <p class="error" role="alert"></p>
-    <div class="dialog-foot"><button type="button" class="button ghost" data-close>Cancel</button><button class="button" type="submit">Publish to website</button></div>
+    <div class="dialog-foot"><span class="muted kbd-tip"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> to publish</span><button type="button" class="button ghost" data-close>Cancel</button><button class="button ghost" type="submit" value="again" id="add-again">Publish &amp; add another</button><button class="button" type="submit" value="close" id="add-submit">Publish to website</button></div>
   </form>
 </dialog>
 

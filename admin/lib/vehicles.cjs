@@ -71,4 +71,13 @@ function setPhotos(car,photos){
   car.photos=photos;car.localImage=photos[0];car.imageUrl=photos[0];
   return car;
 }
-module.exports={buildVehicle,VehicleError,bodyTypes,transmissions,fuelTypes,photosOf,parsePrice,setPrice,setPhotos,maxPhotos};
+// Applies edited details to a listed vehicle, keeping its id, photos and listing date.
+function updateDetails(car,input,inventory){
+  const next=buildVehicle(input,inventory.filter(c=>c!==car),{photos:photosOf(car)});
+  const descriptionChanged=JSON.stringify(next.description)!==JSON.stringify(car.description);
+  for(const key of ['make','model','price','year','mileage','fuelType','transmission','value','minprice','maxprice','vehicleName','variant','colour','body_type','mile','stock_code','iid','description','features'])car[key]=next[key];
+  if(next.displayName)car.displayName=next.displayName;else delete car.displayName;
+  if(descriptionChanged)car.descriptionSource='admin';
+  return car;
+}
+module.exports={updateDetails,buildVehicle,VehicleError,bodyTypes,transmissions,fuelTypes,photosOf,parsePrice,setPrice,setPhotos,maxPhotos};

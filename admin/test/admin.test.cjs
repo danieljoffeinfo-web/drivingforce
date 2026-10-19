@@ -159,3 +159,18 @@ test('photos, prices, order and removal end to end',async()=>{
   res=await call(vehicles,'GET');assert.equal(res.data.vehicles.length,49);
   assert.equal(photoFiles().length,1,'only the photo still used by the original vehicle remains');
 });
+
+test('editing details keeps the id, photos and position',async()=>{
+  const {login,vehicles}=setup();
+  const {cookie}=await signIn(login,'owner@example.com','owner-password-1');
+  const call=async(method,body,query={})=>{const res=response();await vehicles(request(method,body,{cookie,query}),res);return res;};
+  let res=await call('GET');const car=res.data.vehicles[2],other=res.data.vehicles[5];
+  const edit={make:car.make,model:car.model,variant:car.variant+' Edition',year:String(car.year),price:'123 456',mileage:String(car.mile),colour:'Midnight Blue',stockCode:car.stock_code,bodyType:car.body_type,transmission:car.transmission,fuelType:car.fuelType,displayName:'',description:car.description.join('\n\n'),features:car.features.join('\n')};
+  res=await call('PATCH',{action:'details',id:car.id,vehicle:{...edit,stockCode:other.stock_code}});assert.equal(res.statusCode,409,'stock codes stay unique');
+  res=await call('PATCH',{action:'details',id:car.id,vehicle:{...edit,year:'1800'}});assert.equal(res.statusCode,400);
+  res=await call('PATCH',{action:'details',id:car.id,vehicle:edit});assert.equal(res.statusCode,200);
+  const saved=res.data.vehicle;
+  assert.equal(saved.id,car.id);assert.equal(saved.value,123456);assert.equal(saved.colour,'Midnight Blue');assert.equal(saved.variant,car.variant+' Edition');
+  assert.equal(saved.localImage,car.localImage);assert.equal(saved.displayName,undefined);assert.deepEqual(saved.description,car.description);assert.equal(saved.descriptionSource,car.descriptionSource);
+  res=await call('GET');assert.equal(String(res.data.vehicles[2].id),String(car.id),'position is unchanged');
+});

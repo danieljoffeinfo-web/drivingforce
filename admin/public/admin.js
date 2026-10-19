@@ -5,7 +5,7 @@
   const makeLabel = value => ['BMW','MINI'].includes(value) ? value : String(value).toLowerCase().replace(/(^|[ -])\w/g, m => m.toUpperCase());
   const title = car => car.displayName || `${makeLabel(car.make)} ${makeLabel(car.model)}`;
   const photosOf = car => Array.isArray(car.photos) && car.photos.length ? car.photos : [car.localImage].filter(Boolean);
-  let vehicles = [], savedOrder = [], siteUrl = '', options = null, removing = null, me = null, dragId = null;
+  let vehicles = [], savedOrder = [], siteUrl = '', options = null, removing = null, me = null;
 
   async function api(path, init = {}) {
     const response = await fetch(path, {...init, headers: {'Content-Type': 'application/json', ...(init.headers || {})}});
@@ -28,73 +28,94 @@
         for (const [name, list] of [['bodyType', options.bodyTypes], ['transmission', options.transmissions], ['fuelType', options.fuelTypes]])
           $(`#add-form [name=${name}]`).innerHTML = '<option value="">Choose…</option>' + list.map(o => `<option>${escapeHtml(o)}</option>`).join('');
       }
-      render();
+      fillSuggestions(); render();
     } catch (error) { $('#summary').textContent = error.message; }
   }
 
-  // ---- List, prices and ordering ----
+  // ---- Grid, prices and ordering ----
   const orderChanged = () => vehicles.some((car, i) => String(car.id) !== savedOrder[i]);
+  const km = n => Number(n).toLocaleString('en-ZA').replace(/,/g, ' ') + ' km';
   function render() {
     const query = $('#search').value.trim().toLowerCase();
-    const arranging = !query;
-    const shown = vehicles.filter(car => `${car.make} ${car.model} ${car.variant} ${car.year} ${car.stock_code} ${car.displayName || ''}`.toLowerCase().includes(query));
-    $('#summary').textContent = `${vehicles.length} vehicle${vehicles.length === 1 ? '' : 's'} live on the website` + (query ? ` · ${shown.length} matching · clear the search to change the order` : '');
+    const shown = vehicles.filter(car => `${car.make} ${car.model} ${car.variant} ${car.year} ${car.stock_code} ${car.displayName || ''} ${car.colour}`.toLowerCase().includes(query));
+    $('#summary').textContent = `${vehicles.length} vehicle${vehicles.length === 1 ? '' : 's'} live on the website` + (query ? ` · ${shown.length} matching · clear the search to drag cards` : '');
     $('#order-bar').hidden = !orderChanged();
-    const last = vehicles.length - 1;
     $('#list').innerHTML = shown.map(car => {
-      const i = vehicles.indexOf(car), photos = photosOf(car);
-      const move = arranging ? `<div class="move"><span class="handle" title="Drag to reorder" aria-hidden="true">⠿</span><button class="icon" type="button" data-move="up" ${i === 0 ? 'disabled' : ''} aria-label="Move ${escapeHtml(title(car))} up">↑</button><span class="position" title="Position on the website">${i + 1}</span><button class="icon" type="button" data-move="down" ${i === last ? 'disabled' : ''} aria-label="Move ${escapeHtml(title(car))} down">↓</button><button class="icon" type="button" data-move="top" ${i === 0 ? 'disabled' : ''} title="Move to top" aria-label="Move ${escapeHtml(title(car))} to the top">⤒</button></div>` : `<div class="move"><span class="position">${i + 1}</span></div>`;
-      return `<li class="item" data-id="${escapeHtml(car.id)}">${move}<img src="${escapeHtml(imageFor(photos[0]))}" alt="" loading="lazy"><div><h3>${car.year} ${escapeHtml(title(car))}${car.descriptionSource === 'admin' ? '<span class="new">Added here</span>' : ''}</h3><p class="meta">${escapeHtml(car.variant)} · ${escapeHtml(car.colour)} · ${Number(car.mile).toLocaleString('en-ZA').replace(/,/g, ' ')} km · Stock ${escapeHtml(car.stock_code)}</p><form class="price-form" data-price="${escapeHtml(car.id)}"><label class="currency" for="price-${escapeHtml(car.id)}">R</label><input id="price-${escapeHtml(car.id)}" name="price" inputmode="numeric" value="${car.value}" aria-label="Price of ${escapeHtml(title(car))} in rand" autocomplete="off"><button class="button small" type="submit" hidden>Save price</button><span class="saved" role="status"></span></form></div><div class="row-actions"><button class="button ghost small" type="button" data-photos="${escapeHtml(car.id)}">Photos (${photos.length})</button><button class="button ghost small" type="button" data-remove="${escapeHtml(car.id)}">Remove</button></div></li>`;
+      const i = vehicles.indexOf(car), photos = photosOf(car), id = escapeHtml(car.id);
+      return `<li class="vcard${query ? ' searching' : ''}" data-id="${id}"><img src="${escapeHtml(imageFor(photos[0]))}" alt="" loading="lazy" draggable="false"><label class="pos" title="Position on the website — type a number and press Enter"><span>#</span><input name="position" inputmode="numeric" value="${i + 1}" aria-label="Position of ${escapeHtml(title(car))}" autocomplete="off"></label>${car.descriptionSource === 'admin' ? '<span class="badge">New</span>' : ''}${photos.length > 1 ? `<span class="photo-count">${photos.length} photos</span>` : ''}<div class="card-body"><h3 title="${escapeHtml(car.year + ' ' + title(car))}">${car.year} ${escapeHtml(title(car))}</h3><p class="meta" title="${escapeHtml(car.variant)}">${escapeHtml(car.variant)}</p><p class="meta">${km(car.mile)} · ${escapeHtml(car.stock_code)}</p><form class="price-form" data-price="${id}"><span class="currency">R</span><input name="price" inputmode="numeric" value="${car.value}" aria-label="Price of ${escapeHtml(title(car))} in rand" autocomplete="off"><button class="button small" type="submit" hidden>Save</button></form><span class="saved" role="status"></span></div><div class="card-actions"><button type="button" data-edit="${id}" title="Edit details">Edit</button><button type="button" data-photos="${id}" title="Manage photos">Photos</button><button type="button" data-duplicate="${id}" title="Add a similar vehicle using these details">Copy+</button><button type="button" data-copy="${id}" title="Copy the details as text">Copy</button><button type="button" class="danger" data-remove="${id}" title="Take off the website" aria-label="Remove ${escapeHtml(title(car))}">✕</button></div></li>`;
     }).join('') || `<li class="empty">${vehicles.length ? 'No vehicles match your search.' : 'No vehicles are listed yet. Add your first one.'}</li>`;
   }
   function move(id, to) {
     const from = vehicles.findIndex(car => String(car.id) === String(id));
-    if (from < 0 || to < 0 || to >= vehicles.length || to === from) return;
+    to = Math.max(0, Math.min(vehicles.length - 1, to));
+    if (from < 0 || to === from) return;
     const [car] = vehicles.splice(from, 1); vehicles.splice(to, 0, car); render();
   }
-  $('#list').addEventListener('click', event => {
-    const button = event.target.closest('[data-move]');
-    if (button) {
-      const id = button.closest('.item').dataset.id, i = vehicles.findIndex(car => String(car.id) === id);
-      move(id, {up: i - 1, down: i + 1, top: 0}[button.dataset.move]);
-      document.querySelector(`.item[data-id="${CSS.escape(id)}"] [data-move="${button.dataset.move}"]:not(:disabled)`)?.focus();
-    }
+  // Typing a position number moves the card there.
+  $('#list').addEventListener('change', event => {
+    if (event.target.name !== 'position') return;
+    const id = event.target.closest('.vcard').dataset.id, n = parseInt(event.target.value, 10);
+    if (Number.isFinite(n)) move(id, n - 1); else render();
+    document.querySelector(`.vcard[data-id="${CSS.escape(id)}"] [name=position]`)?.focus();
   });
-  // Pointer-based dragging works with a mouse and on touch screens.
-  let dropTarget = null, pointer = null;
-  function updateTarget() {
-    const item = document.elementFromPoint(pointer.x, pointer.y)?.closest('.item');
-    document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-    dropTarget = item && item.dataset.id !== dragId ? item : null;
-    dropTarget?.classList.add('drop-target');
-  }
-  // Keeps scrolling while the pointer is held near the top or bottom edge, so cars can be dragged up a long list.
-  function autoScroll() {
-    if (!dragId) return;
-    const edge = 80, speed = pointer.y < edge ? -(edge - pointer.y) / 4 : pointer.y > innerHeight - edge ? (pointer.y - innerHeight + edge) / 4 : 0;
-    if (speed) { scrollBy(0, speed); updateTarget(); }
-    requestAnimationFrame(autoScroll);
-  }
+  $('#list').addEventListener('keydown', event => {
+    if (event.target.name === 'position' && event.key === 'Enter') { event.preventDefault(); event.target.dispatchEvent(new Event('change', {bubbles: true})); }
+  });
+
+  // Drag any card. The card moves live as you drag; the drop is saved with "Save order".
+  let drag = null;
+  const cardAt = (x, y) => document.elementFromPoint(x, y)?.closest('.vcard:not(.ghost)');
   $('#list').addEventListener('pointerdown', event => {
-    const handle = event.target.closest('.handle'); if (!handle) return;
-    event.preventDefault();
-    dragId = handle.closest('.item').dataset.id; pointer = {x: event.clientX, y: event.clientY};
-    handle.setPointerCapture(event.pointerId);
-    handle.closest('.item').classList.add('dragging');
-    requestAnimationFrame(autoScroll);
+    const card = event.target.closest('.vcard');
+    if (!card || event.button !== 0 || $('#search').value.trim() || event.target.closest('input,button,select,textarea,label,form')) return;
+    drag = {card, id: card.dataset.id, startX: event.clientX, startY: event.clientY, x: event.clientX, y: event.clientY, active: false, pointerId: event.pointerId};
   });
-  $('#list').addEventListener('pointermove', event => {
-    if (!dragId) return;
-    pointer = {x: event.clientX, y: event.clientY}; updateTarget();
+  function startDrag() {
+    const rect = drag.card.getBoundingClientRect();
+    drag.active = true; drag.offsetX = drag.startX - rect.left; drag.offsetY = drag.startY - rect.top;
+    drag.ghost = drag.card.cloneNode(true); drag.ghost.classList.add('ghost'); drag.ghost.style.width = rect.width + 'px';
+    document.body.append(drag.ghost); drag.card.classList.add('dragging');
+    try { drag.card.setPointerCapture(drag.pointerId); } catch {}
+    requestAnimationFrame(dragFrame);
+  }
+  function dragFrame() {
+    if (!drag?.active) return;
+    drag.ghost.style.left = (drag.x - drag.offsetX) + 'px'; drag.ghost.style.top = (drag.y - drag.offsetY) + 'px';
+    const edge = 90, speed = drag.y < edge ? -(edge - drag.y) / 3 : drag.y > innerHeight - edge ? (drag.y - innerHeight + edge) / 3 : 0;
+    if (speed) scrollBy(0, speed);
+    const target = cardAt(drag.x, drag.y);
+    if (target && target !== drag.card) {
+      const r = target.getBoundingClientRect(), after = drag.x > r.left + r.width / 2;
+      const ref = after ? target.nextSibling : target;
+      if (ref !== drag.card && drag.card.nextSibling !== ref) $('#list').insertBefore(drag.card, ref);
+    }
+    requestAnimationFrame(dragFrame);
+  }
+  addEventListener('pointermove', event => {
+    if (!drag) return;
+    drag.x = event.clientX; drag.y = event.clientY;
+    if (!drag.active && Math.hypot(drag.x - drag.startX, drag.y - drag.startY) > 6) { event.preventDefault(); startDrag(); }
   });
   function endDrag() {
-    if (!dragId) return;
-    const id = dragId, target = dropTarget; dragId = null; dropTarget = null;
-    document.querySelectorAll('.dragging,.drop-target').forEach(el => el.classList.remove('dragging', 'drop-target'));
-    if (target) move(id, vehicles.findIndex(car => String(car.id) === target.dataset.id));
+    if (!drag) return;
+    const d = drag; drag = null;
+    if (!d.active) return;
+    d.ghost.remove(); d.card.classList.remove('dragging');
+    const byId = new Map(vehicles.map(car => [String(car.id), car]));
+    vehicles = [...$('#list').querySelectorAll('.vcard')].map(el => byId.get(el.dataset.id)).filter(Boolean);
+    render();
   }
-  $('#list').addEventListener('pointerup', endDrag);
-  $('#list').addEventListener('pointercancel', () => { dropTarget = null; endDrag(); });
+  addEventListener('pointerup', endDrag);
+  addEventListener('pointercancel', endDrag);
+  // Stop the browser starting its own image drag or text selection.
+  $('#list').addEventListener('dragstart', event => event.preventDefault());
+
+  // Card size, remembered on this device.
+  const sizeSelect = $('#card-size');
+  try { sizeSelect.value = localStorage.getItem('df-card-size') || 's'; } catch {}
+  const applySize = () => { $('#list').className = 'card-grid size-' + sizeSelect.value; };
+  sizeSelect.addEventListener('change', () => { applySize(); try { localStorage.setItem('df-card-size', sizeSelect.value); } catch {} });
+  applySize();
   $('#order-undo').addEventListener('click', () => {
     const byId = new Map(vehicles.map(car => [String(car.id), car]));
     vehicles = savedOrder.map(id => byId.get(id)).filter(Boolean); render();
@@ -113,7 +134,7 @@
     const form = event.target.closest('.price-form'); if (!form) return;
     const car = vehicles.find(c => String(c.id) === form.dataset.price);
     const changed = form.price.value.replace(/[\s,R]/g, '') !== String(car.value);
-    form.price.classList.toggle('changed', changed); form.querySelector('button').hidden = !changed; form.querySelector('.saved').textContent = '';
+    form.price.classList.toggle('changed', changed); form.querySelector('button').hidden = !changed; form.nextElementSibling.textContent = '';
   });
   $('#list').addEventListener('keydown', event => {
     const form = event.target.closest('.price-form');
@@ -122,7 +143,7 @@
   $('#list').addEventListener('submit', async event => {
     const form = event.target.closest('.price-form'); if (!form) return;
     event.preventDefault();
-    const car = vehicles.find(c => String(c.id) === form.dataset.price), status = form.querySelector('.saved'), button = form.querySelector('button');
+    const car = vehicles.find(c => String(c.id) === form.dataset.price), status = form.nextElementSibling, button = form.querySelector('button');
     if (button.hidden) return;
     button.disabled = true; status.textContent = 'Saving…';
     try {
@@ -165,8 +186,13 @@
       if (m) { const i = Number(m.dataset.i), j = i + Number(m.dataset.photoMove); [items[i], items[j]] = [items[j], items[i]]; draw(); }
       if (r) { items.splice(Number(r.dataset.photoRemove), 1); draw(); }
     });
-    grid.addEventListener('change', async event => {
-      const files = [...event.target.files]; if (!files.length) return;
+    grid.addEventListener('change', event => addFiles([...event.target.files]));
+    // Photos can also be dragged straight from the computer onto the photo area.
+    root.addEventListener('dragover', event => { if ([...event.dataTransfer.types].includes('Files')) { event.preventDefault(); root.classList.add('drop-hover'); } });
+    root.addEventListener('dragleave', event => { if (!root.contains(event.relatedTarget)) root.classList.remove('drop-hover'); });
+    root.addEventListener('drop', event => { event.preventDefault(); root.classList.remove('drop-hover'); addFiles([...event.dataTransfer.files].filter(f => /^image\//.test(f.type))); });
+    async function addFiles(files) {
+      if (!files.length) return;
       const errors = []; let done = 0;
       const queue = files.map(file => { const item = {preview: '', url: ''}; items.push(item); return {file, item}; });
       status.textContent = `Uploading 0 of ${files.length}…`;
@@ -184,7 +210,7 @@
       draw();
       await Promise.all([worker(), worker(), worker()]);
       status.textContent = errors.length ? errors.join(' ') : `${files.length} photo${files.length === 1 ? '' : 's'} added.`;
-    });
+    }
     return {
       set(urls) { items = urls.map(url => ({url, preview: imageFor(url)})); uploaded = []; status.textContent = ''; draw(); },
       urls: () => items.map(item => item.url),
@@ -207,29 +233,148 @@
   $('#sign-out').addEventListener('click', async () => { await api('/api/session', {method: 'DELETE'}).catch(() => {}); vehicles = []; $('#list').innerHTML = ''; showLogin(); });
   $('#search').addEventListener('input', render);
 
-  // ---- Add a vehicle ----
+  // ---- Suggestions, paste-to-fill and copy ----
+  const knownMakes = ['ALFA ROMEO','ASTON MARTIN','AUDI','BENTLEY','BMW','CHERY','CHEVROLET','CITROEN','FERRARI','FIAT','FORD','GWM','HAVAL','HONDA','HYUNDAI','ISUZU','JAGUAR','JEEP','KIA','LAMBORGHINI','LAND ROVER','LEXUS','MAHINDRA','MASERATI','MAZDA','MCLAREN','MERCEDES-BENZ','MINI','MITSUBISHI','NISSAN','OPEL','PEUGEOT','PORSCHE','RENAULT','ROLLS-ROYCE','SUBARU','SUZUKI','TOYOTA','VOLKSWAGEN','VOLVO'];
+  const makeAliases = {'MERCEDES': 'MERCEDES-BENZ', 'MERC': 'MERCEDES-BENZ', 'VW': 'VOLKSWAGEN', 'LANDROVER': 'LAND ROVER', 'RANGE ROVER': 'LAND ROVER'};
+  const colours = ['white','black','silver','grey','gray','blue','red','green','yellow','orange','brown','beige','gold','bronze','maroon','burgundy','purple','champagne','charcoal','navy'];
+  function fillSuggestions() {
+    const uniq = list => [...new Set(list.filter(Boolean))].sort();
+    $('#make-options').innerHTML = uniq([...knownMakes, ...vehicles.map(c => c.make)]).map(v => `<option value="${escapeHtml(v)}">`).join('');
+    $('#model-options').innerHTML = uniq(vehicles.map(c => c.model)).map(v => `<option value="${escapeHtml(v)}">`).join('');
+    $('#colour-options').innerHTML = uniq(vehicles.map(c => c.colour)).map(v => `<option value="${escapeHtml(v)}">`).join('');
+  }
+  const digits = value => String(value).replace(/[^\d]/g, '');
+  // Reads vehicle details from pasted text: "Key: value" lines first, then patterns in free text.
+  function parseDetails(text) {
+    const out = {}, t = text.replace(/ /g, ' ');
+    const keys = {make: /^make$/, model: /^model$/, variant: /^(variant|derivative|version|spec)$/, year: /^(year|model year|reg(istration)? year|first registered)$/, price: /^(price|asking price|selling price|retail price)$/, mileage: /^(mileage|odometer|kilomet(re|er)s|km)$/, colour: /^(colou?r|exterior colou?r)$/, stockCode: /^(stock|stock (code|no\.?|number|#|ref(erence)?)|ref(erence)?|ref no\.?)$/, bodyType: /^(body|body ?type|body ?style|type)$/, transmission: /^(transmission|gearbox|gear ?box)$/, fuelType: /^(fuel|fuel ?type)$/, displayName: /^(display name|title|name)$/, description: /^description$/, features: /^(equipment|features|extras)$/};
+    for (const line of t.split(/\n/)) {
+      const m = line.match(/^\s*([A-Za-z#. ]{2,30}?)\s*[:=\t]\s*(.+?)\s*$/); if (!m) continue;
+      const key = Object.keys(keys).find(k => keys[k].test(m[1].trim().toLowerCase()));
+      if (key && !out[key]) out[key] = m[2];
+    }
+    const flat = t.replace(/\n/g, ' · ');
+    if (!out.price) { const m = flat.match(/\bR\s?(\d{1,3}(?:[ ,.]\d{3})+|\d{4,})/i); if (m) out.price = m[1]; }
+    if (!out.mileage) { const m = flat.match(/(\d{1,3}(?:[ ,.]\d{3})+|\d{1,7})\s?(?:km|kms|kilomet)/i); if (m) out.mileage = m[1]; }
+    if (!out.year) { const m = flat.match(/(?<![\d ,.])((?:19[5-9]|20[0-4])\d)(?![\d,.]| ?km| \d{3}\b)/); if (m) out.year = m[1]; }
+    if (!out.stockCode) { const m = flat.match(/\bstock(?: ?(?:code|no\.?|number|ref))?\s*[:#]?\s*([A-Z0-9][A-Z0-9-]{2,})/i) || flat.match(/\b(TP\d{4,})\b/i); if (m) out.stockCode = m[1]; }
+    if (!out.transmission) { if (/\bmanual\b|\bm\/t\b|\b\d-?speed manual/i.test(flat)) out.transmission = 'Manual'; else if (/\b(auto(matic)?|a\/t|dct|dsg|pdk|cvt|tiptronic|steptronic|s ?tronic|edc)\b/i.test(flat)) out.transmission = 'Automatic'; }
+    if (!out.fuelType) { const m = flat.match(/\b(diesel|petrol|hybrid|electric)\b/i); if (m) out.fuelType = m[1]; }
+    if (!out.bodyType) {
+      const bodies = [[/double ?cab|d\/cab|dc\b/i, 'Double Cab'], [/single ?cab|s\/cab/i, 'Single Cab'], [/station ?wagon|estate|touring|avant/i, 'Station Wagon'], [/convertible|cabrio(let)?|roadster|spider|spyder/i, 'Convertible'], [/coup[eé]/i, 'Coupe'], [/hatch(back)?/i, 'Hatchback'], [/sedan|saloon/i, 'Sedan'], [/\bsuv\b/i, 'SUV'], [/bakkie|pick-? ?up/i, 'Bakkie'], [/\bmpv\b|minivan|people carrier/i, 'MPV'], [/panel ?van/i, 'Panel Van']];
+      const hit = bodies.find(([re]) => re.test(flat)); if (hit) out.bodyType = hit[1];
+    }
+    if (!out.colour) { const m = flat.match(new RegExp('\\b(' + colours.join('|') + ')\\b', 'i')); if (m) out.colour = m[1][0].toUpperCase() + m[1].slice(1).toLowerCase(); }
+    if (!out.make) {
+      const makes = [...new Set([...Object.keys(makeAliases), ...knownMakes, ...vehicles.map(c => c.make)])].sort((a, b) => b.length - a.length);
+      for (const segment of [t.split(/\n/).find(l => l.trim()) || '', ...flat.split(/\s*[·|•,\n]\s*/)]) {
+        const upper = segment.toUpperCase(), make = makes.find(mk => new RegExp('(^|[^A-Z])' + mk.replace(/[-]/g, '[- ]?') + '($|[^A-Z])').test(upper));
+        if (!make) continue;
+        out.make = makeAliases[make] || make;
+        // Words after the make: the first is the model, the rest of the title is the variant.
+        const after = segment.slice(upper.search(new RegExp(make.replace(/[-]/g, '[- ]?'))) + make.length).replace(/^[\s-]+/, '');
+        const words = after.split(/\s+(?:·|\||-|–|,)\s+|\s+R\s?\d/)[0].trim().split(/\s+/).filter(Boolean);
+        if (make === 'RANGE ROVER') words.unshift('RANGE ROVER');
+        if (!out.model && words.length) out.model = make === 'RANGE ROVER' ? 'RANGE ROVER' : words.shift();
+        else if (make === 'RANGE ROVER') words.shift();
+        if (!out.variant && words.length) out.variant = words.join(' ').replace(/\b(19|20)\d\d\b/, '').trim();
+        break;
+      }
+    }
+    for (const k of ['price', 'mileage', 'year']) if (out[k]) out[k] = digits(out[k]);
+    return out;
+  }
+  // Text for the clipboard, in the same "Key: value" form the paste box reads back.
+  function detailsText(car) {
+    return [`${car.year} ${title(car)}`, `Make: ${car.make}`, `Model: ${car.model}`, `Variant: ${car.variant}`, `Year: ${car.year}`, `Price: ${money(car.value)}`, `Mileage: ${km(car.mile)}`, `Colour: ${car.colour}`, `Body type: ${car.body_type}`, `Transmission: ${car.transmission}`, `Fuel type: ${car.fuelType}`, `Stock code: ${car.stock_code}`, car.displayName ? `Display name: ${car.displayName}` : '', car.features?.length ? `Equipment: ${car.features.join('; ')}` : ''].filter(Boolean).join('\n');
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; }
+    catch { const area = document.createElement('textarea'); area.value = text; document.body.append(area); area.select(); const ok = document.execCommand('copy'); area.remove(); return ok; }
+  }
+
+  // ---- Add, duplicate and edit a vehicle (one form) ----
   const addDialog = $('#add-dialog'), addForm = $('#add-form'), addPhotos = photoPicker($('#add-photos'));
-  let added = false;
-  $('#add-open').addEventListener('click', () => { addForm.querySelector('.error').textContent = ''; addPhotos.set([]); added = false; addDialog.showModal(); });
+  const fieldNames = ['make', 'model', 'variant', 'year', 'price', 'mileage', 'colour', 'stockCode', 'bodyType', 'transmission', 'fuelType', 'displayName', 'description', 'features'];
+  let added = false, mode = 'add', editTarget = null;
+  function setField(name, value, mark) {
+    const field = addForm.elements[name]; if (!field || value == null || value === '') return false;
+    if (field.tagName === 'SELECT') {
+      const option = [...field.options].find(o => o.value && o.value.toLowerCase() === String(value).toLowerCase());
+      if (!option) return false; field.value = option.value;
+    } else field.value = value;
+    if (mark) field.classList.add('filled');
+    return true;
+  }
+  const valuesOf = car => ({make: car.make, model: car.model, variant: car.variant, year: car.year, price: car.value, mileage: car.mile, colour: car.colour, stockCode: car.stock_code, bodyType: car.body_type, transmission: car.transmission, fuelType: car.fuelType, displayName: car.displayName || '', description: (car.description || []).join('\n\n'), features: (car.features || []).join('\n')});
+  function openForm(nextMode, car) {
+    mode = nextMode; editTarget = nextMode === 'edit' ? car : null; added = false;
+    addForm.reset(); addForm.querySelectorAll('.filled').forEach(f => f.classList.remove('filled'));
+    addForm.querySelector('.error').textContent = ''; addForm.querySelector('.paste-result').textContent = ''; $('#paste-text').value = '';
+    addPhotos.set([]);
+    if (car) {
+      const values = valuesOf(car);
+      // A duplicate keeps the specification but needs its own stock code, price check, photos and description.
+      if (nextMode === 'duplicate') { values.stockCode = ''; values.description = ''; }
+      for (const name of fieldNames) setField(name, values[name], nextMode === 'duplicate' && ['price', 'mileage', 'colour', 'year'].includes(name));
+    }
+    $('#add-title').textContent = nextMode === 'edit' ? `Edit ${car.year} ${title(car)}` : nextMode === 'duplicate' ? `Add a vehicle like the ${car.year} ${title(car)}` : 'Add a vehicle';
+    $('#add-photos').hidden = nextMode === 'edit'; addForm.querySelector('.form-columns').classList.toggle('no-photos', nextMode === 'edit');
+    $('#add-again').hidden = nextMode === 'edit';
+    $('#add-submit').textContent = nextMode === 'edit' ? 'Save changes' : 'Publish to website';
+    addDialog.showModal();
+    (nextMode === 'duplicate' ? addForm.stockCode : $('#paste-text')).focus();
+  }
+  $('#add-open').addEventListener('click', () => openForm('add'));
   addDialog.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => addDialog.close()));
   addDialog.addEventListener('close', () => { if (!added) addPhotos.cleanupAll(); });
+  addForm.addEventListener('input', event => event.target.classList?.remove('filled'));
+  $('#paste-text').addEventListener('input', () => {
+    const found = parseDetails($('#paste-text').value);
+    const filled = Object.entries(found).filter(([name, value]) => setField(name, value, true)).map(([name]) => addForm.elements[name].closest('label').firstChild.textContent.trim());
+    addForm.querySelector('.paste-result').textContent = filled.length ? `Filled ${filled.length}: ${filled.join(', ')}. Check the highlighted fields.` : '';
+  });
+  addForm.addEventListener('keydown', event => { if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); $('#add-submit').click(); } });
   addForm.addEventListener('submit', async event => {
     event.preventDefault();
-    const button = addForm.querySelector('[type=submit]'), error = addForm.querySelector('.error');
+    const again = event.submitter?.value === 'again';
+    const button = event.submitter || $('#add-submit'), label = button.textContent, error = addForm.querySelector('.error');
     error.textContent = '';
-    if (addPhotos.busy()) { error.textContent = 'Please wait for the photos to finish uploading.'; return; }
-    if (!addPhotos.urls().length) { error.textContent = 'Please add at least one photo of the vehicle.'; return; }
+    if (mode !== 'edit') {
+      if (addPhotos.busy()) { error.textContent = 'Please wait for the photos to finish uploading.'; return; }
+      if (!addPhotos.urls().length) { error.textContent = 'Please add at least one photo of the vehicle (drag them onto the photo area).'; return; }
+    }
     const missing = [...addForm.querySelectorAll('[required]')].find(field => !field.value.trim());
     if (missing) { error.textContent = `Please fill in ${missing.closest('label').firstChild.textContent.trim().toLowerCase()}.`; missing.focus(); return; }
-    const vehicle = Object.fromEntries(new FormData(addForm));
-    button.disabled = true; button.textContent = 'Publishing…';
+    const vehicle = Object.fromEntries(fieldNames.map(name => [name, addForm.elements[name].value]));
+    button.disabled = true; button.textContent = mode === 'edit' ? 'Saving…' : 'Publishing…';
     try {
+      if (mode === 'edit') {
+        const {vehicle: car} = await api('/api/vehicles', {method: 'PATCH', body: JSON.stringify({action: 'details', id: editTarget.id, vehicle})});
+        Object.assign(editTarget, car); added = true; fillSuggestions(); render(); addDialog.close();
+        notify(`Saved changes to ${car.year} ${title(car)}. The website updates within about a minute.`);
+        return;
+      }
       const {vehicle: car} = await api('/api/vehicles', {method: 'POST', body: JSON.stringify({vehicle, photos: addPhotos.urls()})});
       added = true; addPhotos.discard();
-      vehicles.unshift(car); savedOrder.unshift(String(car.id)); render(); addDialog.close(); addForm.reset();
-      notify(`${car.year} ${title(car)} is now listed at the top. It appears on the website within about a minute.`);
+      vehicles.unshift(car); savedOrder.unshift(String(car.id)); fillSuggestions(); render();
+      notify(`${car.year} ${title(car)} is now listed at position 1. It appears on the website within about a minute.`);
+      if (again) openForm('add'); else addDialog.close();
     } catch (e) { error.textContent = e.message; }
-    finally { button.disabled = false; button.textContent = 'Publish to website'; }
+    finally { button.disabled = false; button.textContent = label; }
+  });
+  $('#list').addEventListener('click', async event => {
+    const edit = event.target.closest('[data-edit]'), dup = event.target.closest('[data-duplicate]'), copy = event.target.closest('[data-copy]');
+    const find = el => vehicles.find(car => String(car.id) === el.dataset[el.dataset.edit ? 'edit' : el.dataset.duplicate ? 'duplicate' : 'copy']);
+    if (edit) openForm('edit', find(edit));
+    if (dup) openForm('duplicate', find(dup));
+    if (copy) { const car = find(copy); const ok = await copyText(detailsText(car)); copy.textContent = ok ? 'Copied ✓' : 'Failed'; setTimeout(() => { copy.textContent = 'Copy'; }, 1500); }
+  });
+  // Keyboard shortcuts: N adds a vehicle, / jumps to search.
+  addEventListener('keydown', event => {
+    if (!me || document.querySelector('dialog[open]') || event.ctrlKey || event.metaKey || event.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) return;
+    if (event.key === 'n' || event.key === 'N') { event.preventDefault(); openForm('add'); }
+    if (event.key === '/') { event.preventDefault(); $('#search').focus(); }
   });
 
   // ---- Manage photos of a listed vehicle ----

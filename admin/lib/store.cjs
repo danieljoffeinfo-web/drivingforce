@@ -5,7 +5,7 @@ const historyPrefix='inventory/history/';
 function createStore(blob=require('@vercel/blob'),fetchImpl=fetch){
   async function load(){
     const {blobs}=await blob.list({prefix:historyPrefix,limit:1000});
-    if(!blobs.length)return {retrieved:seed.retrieved,vehicles:seed.vehicles};
+    if(!blobs.length)return structuredClone({retrieved:seed.retrieved,vehicles:seed.vehicles});
     const latest=blobs.reduce((a,b)=>new Date(b.uploadedAt)>new Date(a.uploadedAt)?b:a);
     const response=await fetchImpl(latest.url,{cache:'no-store'});
     if(!response.ok)throw new Error('Inventory could not be read.');
