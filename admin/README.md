@@ -11,6 +11,7 @@ A separate Vercel project (`driving-force-admin`) for adding vehicles to, and re
 - Vehicles show as a grid of cards. Drag any card to reorder (or type a position in its # box), then Save order. Cards are large by default. Each card has inline price editing and two buttons: Edit (details and photos) and Remove.
 - The add form has make, model and colour suggestions, photo drag-and-drop, Ctrl+Enter to publish and "Publish & add another". Keyboard: N adds a vehicle, / searches.
 - Prices are edited inline on each card. The vehicle order in the admin is the order on the website's default (featured) view.
+- Safety net: the showroom Vercel project (`driving-force-showroom`) has a project-level routing rule, "Live stock list from admin", that rewrites `/vehicles.json` to the live `inventory.json`. It is set in Vercel, not in this repository, so even a deployment from a branch without the live-inventory code still shows the admin's stock.
 - The last 30 saves are kept under `inventory/history/` in the store for recovery.
 - Until the first change, the admin starts from `lib/seed-vehicles.json`, a copy of the showroom snapshot.
 - `npm test` runs the admin tests against an in-memory store.
