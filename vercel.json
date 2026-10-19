@@ -7,6 +7,9 @@
   "functions": {
     "api/finance-application.js": {
       "maxDuration": 30
+    },
+    "api/enquiry.js": {
+      "maxDuration": 20
     }
   },
   "headers": [

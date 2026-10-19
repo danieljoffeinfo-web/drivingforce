@@ -1,6 +1,6 @@
 # Driving Force showroom
 
-Responsive website with all 49 vehicles, native vehicle pages, payment estimates and a full eight-step credit application. Navigation stays on this website; telephone, email and map directions use their appropriate external apps.
+Responsive website with all 49 vehicles, native vehicle pages, payment estimates and a full eight-step credit application. Navigation stays on this website; telephone, email, WhatsApp and map directions use their appropriate external apps. Every vehicle card has a "WhatsApp us" button that opens a chat with sales on 082 425 4253 (wa.me/27824254253), prefilled with the vehicle, stock code and price.
 
 ## Run and verify
 
@@ -22,6 +22,25 @@ The local API uses the real delivery service for valid submissions. Tests mock t
 - `dist/visit.html`, `contact.html`, `privacy.html`: showroom information, sales/workshop contact and privacy information.
 - `lib/finance-application.cjs`, `api/finance-application.js`: server validation and application delivery.
 - `dist/vehicles.json`, `dist/assets/`: inventory snapshot and self-hosted images/fonts.
+
+## Vehicle enquiries
+
+Every vehicle card has two enquiry buttons:
+
+- **WhatsApp us** opens a chat with sales on 082 425 4253 (`wa.me/27824254253`), prefilled with the vehicle, stock code and price.
+- **Email us** opens a short form (name, email, optional phone, message) prefilled with the vehicle. It posts to `api/enquiry.js` (`lib/enquiry.cjs`), which sends the enquiry through [Resend](https://resend.com) with the customer's address as reply-to.
+
+Enquiries are in-house alerts, so no sending domain is verified in Resend. Email delivery needs these Vercel environment variables:
+
+| Variable | Value |
+| --- | --- |
+| `RESEND_API_KEY` | Resend API key (sensitive) |
+| `ENQUIRY_TO` | The email address that owns the Resend account. Defaults to `info@drivingforce.biz` |
+| `ENQUIRY_FROM` | Optional. Defaults to `Driving Force Website <onboarding@resend.dev>` |
+
+Without a verified domain, Resend only delivers mail sent from `onboarding@resend.dev` to the Resend account owner's address, so `ENQUIRY_TO` must be that address (or the Resend account must be registered to `info@drivingforce.biz`). Verifying a domain later only requires setting `ENQUIRY_FROM`.
+
+Until `RESEND_API_KEY` is set, the form explains that email is unavailable and points customers to WhatsApp and the sales line. Recipients and sender are server-side only; customers cannot change them. Requests must be same-origin JSON, and each instance throttles repeat senders.
 
 ## Finance application
 

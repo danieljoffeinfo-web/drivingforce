@@ -73,6 +73,26 @@ const failures=[];
   assert.ok((await page.locator('.vehicle-card-link').first().getAttribute('href')).includes('2708'));
   await page.locator('#vehicle-search').fill('Porsche');
   assert.equal(await page.locator('.vehicle-card').count(),3);
+  const whatsapp=new URL(await page.locator('.vehicle-whatsapp').first().getAttribute('href'));
+  assert.equal(await page.locator('.vehicle-whatsapp').count(),3);
+  assert.equal(whatsapp.origin+whatsapp.pathname,'https://wa.me/27824254253');
+  assert.match(whatsapp.searchParams.get('text'),/Porsche.*stock [A-Z0-9]+/);
+  // Email enquiry dialog: validation, vehicle prefill and a mocked delivery (no email is sent).
+  let enquiry=null;
+  await page.route('**/api/enquiry',route=>{enquiry=route.request().postDataJSON();return route.fulfill({status:200,contentType:'application/json',body:'{"accepted":true}'});});
+  await page.locator('.vehicle-email').first().click();
+  await page.locator('#enquiry-dialog[open]').waitFor();
+  assert.match(await page.locator('#enquiry-vehicle').textContent(),/Porsche.*Stock [A-Z0-9]+/);
+  await page.locator('.enquiry-submit').click();
+  assert.match(await page.locator('#enquiry-status').textContent(),/enter your name/);
+  await page.locator('#enquiry-form [name=name]').fill('Browser Check');
+  await page.locator('#enquiry-form [name=email]').fill('check@example.com');
+  await page.locator('.enquiry-submit').click();
+  await page.locator('#enquiry-status',{hasText:'Thank you'}).waitFor();
+  assert.equal(enquiry.name,'Browser Check');assert.ok(enquiry.vehicleId);assert.match(enquiry.message,/Porsche/);
+  await page.screenshot({path:path.join(output,'enquiry-dialog.png')});
+  await page.locator('.enquiry-close').click();
+  await page.unroute('**/api/enquiry');
   await page.locator('.vehicle-card-link').first().click();
   await page.locator('.vehicle-description').waitFor();
   // Photo dialog: keyboard entry, close, focus restoration and phone-sized layout.
