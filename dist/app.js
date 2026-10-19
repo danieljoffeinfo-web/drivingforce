@@ -104,6 +104,7 @@
   // Vehicle enquiries go to the sales WhatsApp line (082 425 4253), prefilled with the car and stock code.
   const whatsappNumber = '27824254253';
   const whatsappLink = c => `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi Driving Force, I'm interested in the ${c.year} ${title(c)} (${c.variant}, stock ${c.stock_code}) advertised at ${money(c.value)}. Is it still available?`)}`;
+  const emailIcon = '<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M3 5.5h18v13H3z M3.5 6l8.5 7 8.5-7"/></svg>';
   const whatsappIcon = '<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12.04 2a9.9 9.9 0 0 0-8.5 14.97L2 22l5.17-1.5A9.93 9.93 0 1 0 12.04 2Zm0 18.13a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.07.9.91-2.99-.2-.31a8.22 8.22 0 1 1 6.85 3.73Zm4.5-6.15c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.55.12-.16.25-.63.8-.78.97-.14.16-.29.18-.53.06a6.74 6.74 0 0 1-3.37-2.94c-.25-.44.25-.41.72-1.36.08-.16.04-.3-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47a.9.9 0 0 0-.65.3 2.74 2.74 0 0 0-.86 2.04 4.76 4.76 0 0 0 1 2.53 10.9 10.9 0 0 0 4.18 3.69c1.55.67 2.16.73 2.94.61.47-.07 1.46-.6 1.66-1.17.2-.58.2-1.07.14-1.17-.06-.1-.22-.16-.47-.28Z"/></svg>';
   function inCategory(c) {
     if(category==='all')return true;
@@ -119,9 +120,43 @@
     if(sort==='price-desc')results.sort((a,b)=>b.value-a.value);
     if(sort==='year-desc')results.sort((a,b)=>b.year-a.year);
     $('#result-count').textContent=`${results.length} vehicle${results.length===1?'':'s'} on display`;
-    $('#vehicle-grid').innerHTML=results.map(c=>`<article class="vehicle-card"><a class="vehicle-card-link" href="vehicle.html?id=${c.id}" aria-label="View ${escapeHtml(c.year+' '+title(c))}, ${money(c.value)}"><div class="vehicle-image"><img src="${escapeHtml(c.localImage)}" alt="${escapeHtml(c.year+' '+title(c)+' — '+c.colour)}" loading="lazy" width="800" height="533"></div><div class="vehicle-info"><p class="vehicle-meta"><span>${c.year}</span><span>${escapeHtml(c.body_type)}</span></p><h3>${escapeHtml(title(c))}</h3><p class="vehicle-variant">${escapeHtml(c.variant)}</p><div class="vehicle-specs"><span>${Number(c.mile).toLocaleString('en-ZA').replace(/,/g,' ')} km</span><span>${escapeHtml(c.transmission)}</span><span>${escapeHtml(c.fuelType)}</span></div><div class="vehicle-card-bottom"><span class="vehicle-price">${money(c.value)}</span><span class="vehicle-view">View vehicle <span aria-hidden="true">↗</span></span></div></div></a><a class="vehicle-whatsapp" href="${escapeHtml(whatsappLink(c))}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp us about the ${escapeHtml(c.year+' '+title(c))} (opens WhatsApp)">${whatsappIcon}<span>WhatsApp us</span></a></article>`).join('') || '<div class="empty-state"><h3>No matches. More possibilities.</h3><p>Try another make or model, or clear your filters to see the full collection.</p><button id="clear-filters" class="button button-black">Clear filters <span>↗</span></button></div>';
+    $('#vehicle-grid').innerHTML=results.map(c=>`<article class="vehicle-card"><a class="vehicle-card-link" href="vehicle.html?id=${c.id}" aria-label="View ${escapeHtml(c.year+' '+title(c))}, ${money(c.value)}"><div class="vehicle-image"><img src="${escapeHtml(c.localImage)}" alt="${escapeHtml(c.year+' '+title(c)+' — '+c.colour)}" loading="lazy" width="800" height="533"></div><div class="vehicle-info"><p class="vehicle-meta"><span>${c.year}</span><span>${escapeHtml(c.body_type)}</span></p><h3>${escapeHtml(title(c))}</h3><p class="vehicle-variant">${escapeHtml(c.variant)}</p><div class="vehicle-specs"><span>${Number(c.mile).toLocaleString('en-ZA').replace(/,/g,' ')} km</span><span>${escapeHtml(c.transmission)}</span><span>${escapeHtml(c.fuelType)}</span></div><div class="vehicle-card-bottom"><span class="vehicle-price">${money(c.value)}</span><span class="vehicle-view">View vehicle <span aria-hidden="true">↗</span></span></div></div></a><div class="vehicle-contact"><a class="vehicle-whatsapp" href="${escapeHtml(whatsappLink(c))}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp us about the ${escapeHtml(c.year+' '+title(c))} (opens WhatsApp)">${whatsappIcon}<span>WhatsApp us</span></a><button type="button" class="vehicle-email" data-vehicle="${c.id}" aria-haspopup="dialog" aria-label="Email us about the ${escapeHtml(c.year+' '+title(c))}">${emailIcon}<span>Email us</span></button></div></article>`).join('') || '<div class="empty-state"><h3>No matches. More possibilities.</h3><p>Try another make or model, or clear your filters to see the full collection.</p><button id="clear-filters" class="button button-black">Clear filters <span>↗</span></button></div>';
     if($('#clear-filters'))$('#clear-filters').addEventListener('click',()=>{category='all';$('#vehicle-search').value='';$('#vehicle-sort').value='featured';updateTabs();renderInventory();$('#vehicle-search').focus();});
   }
+  // Email enquiries post to /api/enquiry, which delivers them through Resend.
+  const enquiryDialog=$('#enquiry-dialog'), enquiryForm=$('#enquiry-form'), enquiryStatus=$('#enquiry-status');
+  let enquiryOpener=null;
+  $('#vehicle-grid').addEventListener('click',event=>{
+    const button=event.target.closest('.vehicle-email');if(!button)return;
+    const c=inventory.find(car=>String(car.id)===button.dataset.vehicle);if(!c)return;
+    enquiryOpener=button;enquiryForm.reset();enquiryStatus.textContent='';enquiryStatus.classList.remove('error');
+    enquiryForm.hidden=false;enquiryForm.querySelectorAll('input,textarea,button').forEach(el=>el.disabled=false);
+    enquiryForm.vehicleId.value=c.id;
+    $('#enquiry-vehicle').textContent=`${c.year} ${title(c)} · ${money(c.value)} · Stock ${c.stock_code}`;
+    enquiryForm.message.value=`Hi, I'm interested in the ${c.year} ${title(c)} (stock ${c.stock_code}). Is it still available?`;
+    $('#enquiry-whatsapp').href=whatsappLink(c);
+    enquiryDialog.showModal();enquiryForm.name.focus();
+  });
+  $('.enquiry-close').addEventListener('click',()=>enquiryDialog.close());
+  enquiryDialog.addEventListener('click',event=>{if(event.target===enquiryDialog)enquiryDialog.close();});
+  enquiryDialog.addEventListener('close',()=>{if(enquiryOpener)enquiryOpener.focus();});
+  enquiryForm.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const invalid=[...enquiryForm.elements].find(el=>el.willValidate&&!el.checkValidity());
+    if(invalid){enquiryStatus.textContent=invalid.name==='email'&&invalid.value?'Enter a valid email address.':`Please enter your ${invalid.name==='message'?'message':invalid.name==='phone'?'phone number':invalid.name}.`;enquiryStatus.classList.add('error');invalid.focus();return;}
+    const submit=enquiryForm.querySelector('.enquiry-submit');
+    submit.disabled=true;enquiryStatus.classList.remove('error');enquiryStatus.textContent='Sending your enquiry…';
+    try{
+      const response=await fetch('/api/enquiry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(enquiryForm)))});
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(result.error||'Your enquiry could not be sent. Please WhatsApp us on 082 425 4253 or call 021 203 8888.');
+      enquiryForm.querySelectorAll('input,textarea,button:not(.enquiry-close)').forEach(el=>el.disabled=true);
+      enquiryStatus.textContent='Thank you. Your enquiry has been sent and our sales team will be in touch shortly.';
+    }catch(error){
+      submit.disabled=false;enquiryStatus.classList.add('error');
+      enquiryStatus.textContent=error instanceof TypeError?'You appear to be offline. Please WhatsApp us on 082 425 4253 or call 021 203 8888.':error.message;
+    }
+  });
   function updateTabs(){$$('.filter').forEach(b=>{const active=b.dataset.category===category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});}
   $$('.filter').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.category;updateTabs();renderInventory();}));
   $('#vehicle-search').addEventListener('input',()=>{renderInventory();});

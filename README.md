@@ -23,6 +23,23 @@ The local API uses the real delivery service for valid submissions. Tests mock t
 - `lib/finance-application.cjs`, `api/finance-application.js`: server validation and application delivery.
 - `dist/vehicles.json`, `dist/assets/`: inventory snapshot and self-hosted images/fonts.
 
+## Vehicle enquiries
+
+Every vehicle card has two enquiry buttons:
+
+- **WhatsApp us** opens a chat with sales on 082 425 4253 (`wa.me/27824254253`), prefilled with the vehicle, stock code and price.
+- **Email us** opens a short form (name, email, optional phone, message) prefilled with the vehicle. It posts to `api/enquiry.js` (`lib/enquiry.cjs`), which sends the enquiry through [Resend](https://resend.com) with the customer's address as reply-to.
+
+Email delivery needs these Vercel environment variables:
+
+| Variable | Value |
+| --- | --- |
+| `RESEND_API_KEY` | Resend API key (sensitive) |
+| `ENQUIRY_FROM` | Sender on a domain verified in Resend, e.g. `Driving Force <enquiries@driving-force.co.za>` |
+| `ENQUIRY_TO` | Optional recipient list, comma separated. Defaults to `info@drivingforce.biz` |
+
+Until `RESEND_API_KEY` and `ENQUIRY_FROM` are set, the form explains that email is unavailable and points customers to WhatsApp and the sales line. Recipients and sender are server-side only; customers cannot change them. Requests must be same-origin JSON, and each instance throttles repeat senders.
+
 ## Finance application
 
 The field structure follows Driving Force's publicly linked EazyFin application (company 278), with personal, address, next-of-kin, employment, banking, income, expenses/declarations, and document/review steps. It is rebuilt natively, not embedded. Net trade-in is included explicitly, and marketing consent is optional and unchecked.

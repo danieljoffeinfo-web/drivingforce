@@ -2,6 +2,7 @@ const http=require('node:http');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const handler=require('../api/finance-application.js');
+const enquiryHandler=require('../api/enquiry.js');
 const root=path.resolve(__dirname,'../dist');
 const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.jpg':'image/jpeg','.webp':'image/webp','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2'};
 http.createServer(async(req,res)=>{
@@ -10,6 +11,11 @@ http.createServer(async(req,res)=>{
     let size=0;const chunks=[];
     for await(const chunk of req){size+=chunk.length;if(size>4.3*1024*1024)return res.status(413).json({error:'Application too large.'});chunks.push(chunk);}
     req.body=Buffer.concat(chunks).toString();return handler(req,res);
+  }
+  if(req.url.split('?')[0]==='/api/enquiry'){
+    let size=0;const chunks=[];
+    for await(const chunk of req){size+=chunk.length;if(size>20*1024)return res.status(413).json({error:'Enquiry too long.'});chunks.push(chunk);}
+    req.body=Buffer.concat(chunks).toString();return enquiryHandler(req,res);
   }
   let filename;try{filename=decodeURIComponent(new URL(req.url,'http://localhost').pathname);}catch{return res.status(400).end();}
   if(filename==='/')filename='/index.html';
