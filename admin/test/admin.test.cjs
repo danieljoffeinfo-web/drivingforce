@@ -197,19 +197,12 @@ test('website visits are recorded anonymously and only from the showroom',async(
   assert.equal(cleanSource('https://l.facebook.com/x'),'facebook');assert.equal(cleanSource(''),'direct');assert.equal(device('Mozilla/5.0 (iPad; CPU OS)'),'tablet');
 });
 
-test('analytics and reviews need a dashboard sign-in',async()=>{
-  const {analyticsHandler,reviewsHandler}=require('../lib/analytics.cjs');
+test('analytics needs a dashboard sign-in',async()=>{
+  const {analyticsHandler}=require('../lib/analytics.cjs');
   const {supabase,login}=setup();
   supabase.rpc=async(name,body,token)=>({name,body,token});
   const {cookie}=await signIn(login,'owner@example.com','owner-password-1');
   let res=response();await analyticsHandler({supabase})({method:'GET',url:'/api/analytics?days=7',headers:{}},res);assert.equal(res.statusCode,401);
   res=response();await analyticsHandler({supabase})({method:'GET',url:'/api/analytics?days=7',headers:{cookie}},res);
   assert.equal(res.statusCode,200);assert.equal(res.data.name,'dashboard_analytics');assert.deepEqual(res.data.body,{p_days:7});assert.ok(res.data.token,'runs as the signed-in person');
-  delete process.env.GOOGLE_PLACES_API_KEY;
-  res=response();await reviewsHandler({supabase})({method:'GET',headers:{cookie}},res);assert.deepEqual(res.data,{configured:false});
-  process.env.GOOGLE_PLACES_API_KEY='k';
-  const fetchImpl=async url=>({json:async()=>url.includes('searchText')?{places:[{id:'abc'}]}:{displayName:{text:'Driving Force'},rating:4.8,userRatingCount:212,googleMapsUri:'https://maps.google.com/?cid=1',reviews:[{rating:5,text:{text:'Great service'},authorAttribution:{displayName:'Thabo'},relativePublishTimeDescription:'a week ago'}]}});
-  res=response();await reviewsHandler({supabase,fetchImpl})({method:'GET',headers:{cookie}},res);
-  assert.equal(res.data.rating,4.8);assert.equal(res.data.count,212);assert.equal(res.data.reviews[0].author,'Thabo');
-  delete process.env.GOOGLE_PLACES_API_KEY;
 });

@@ -381,14 +381,15 @@
   const fmt = n => Number(n || 0).toLocaleString('en-ZA').replace(/,/g, ' ');
   const countryName = code => { try { return code && code !== '??' ? new Intl.DisplayNames(['en'], {type: 'region'}).of(code) : 'Unknown'; } catch { return code; } };
   const sourceName = s => ({direct: 'Direct / typed in', google: 'Google', facebook: 'Facebook', instagram: 'Instagram', bing: 'Bing'}[s] || s);
-  let analyticsLoaded = false;
+  let analyticsLoaded = false, lastDays = null, resizeTimer = null;
+  addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (lastDays && !$('#analytics-view').hidden) dailyChart(lastDays); }, 150); });
   document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => { const on = t === tab; t.classList.toggle('active', on); t.setAttribute('aria-pressed', String(on)); });
     $('#stock-view').hidden = tab.dataset.tab !== 'stock'; $('#analytics-view').hidden = tab.dataset.tab !== 'analytics';
     if (tab.dataset.tab === 'analytics' && !analyticsLoaded) loadAnalytics();
   }));
   $('#analytics-days').addEventListener('change', loadAnalytics);
-  $('#analytics-refresh').addEventListener('click', () => { loadAnalytics(); loadReviews(true); });
+  $('#analytics-refresh').addEventListener('click', loadAnalytics);
   function change(now, before) {
     if (!before) return now ? 'New this period' : 'No change';
     const pct = Math.round((now - before) / before * 100);
@@ -401,12 +402,14 @@
     el.querySelectorAll('.fill').forEach(fill => { fill.style.width = fill.dataset.width + '%'; });
   }
   function dailyChart(days) {
-    const el = $('#daily-chart'), w = 720, h = 220, pad = {l: 34, r: 6, t: 10, b: 24};
+    // Drawn at the panel's real width so the axis text is never stretched.
+    lastDays = days;
+    const el = $('#daily-chart'), w = Math.max(300, el.clientWidth || 720), h = 220, pad = {l: 34, r: 6, t: 10, b: 24};
     if (!days.length || days.every(d => !d.visitors)) { el.innerHTML = '<p class="empty-note">No visits recorded yet. Figures appear here as people use the website.</p>'; return; }
     const max = Math.max(1, ...days.map(d => d.visitors)), step = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / step) * step;
     const slot = (w - pad.l - pad.r) / days.length, bw = Math.min(24, Math.max(2, slot - 2)), y = v => pad.t + (h - pad.t - pad.b) * (1 - v / top);
     const ticks = [0, top / 2, top].map(v => `<g class="grid"><line x1="${pad.l}" x2="${w - pad.r}" y1="${y(v)}" y2="${y(v)}"/></g><g class="axis"><text x="${pad.l - 6}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text></g>`).join('');
-    const every = Math.ceil(days.length / 8);
+    const every = Math.ceil(days.length / Math.max(3, Math.floor(w / 90)));
     const bars = days.map((d, i) => {
       const x = pad.l + i * slot + (slot - bw) / 2, bh = Math.max(0, y(0) - y(d.visitors)), r = Math.min(4, bw / 2, bh);
       const date = new Date(d.day + 'T12:00:00');
@@ -414,7 +417,7 @@
       const path = bh ? `M${x},${y(0)} V${y(0) - bh + r} Q${x},${y(0) - bh} ${x + r},${y(0) - bh} H${x + bw - r} Q${x + bw},${y(0) - bh} ${x + bw},${y(0) - bh + r} V${y(0)} Z` : '';
       return `<rect class="hit" x="${pad.l + i * slot}" y="${pad.t}" width="${slot}" height="${h - pad.t - pad.b}" data-tip="${escapeHtml(date.toLocaleDateString('en-ZA', {weekday: 'short', day: 'numeric', month: 'short'}))}: ${fmt(d.visitors)} visitor${d.visitors === 1 ? '' : 's'}, ${fmt(d.pageviews)} page views${d.enquiries ? ', ' + fmt(d.enquiries) + ' enquiry clicks' : ''}" data-x="${x + bw / 2}" data-y="${y(d.visitors)}"></rect>${path ? `<path class="bar" d="${path}"/>` : ''}${i % every === 0 ? `<g class="axis"><text x="${x + bw / 2}" y="${h - 6}" text-anchor="middle">${escapeHtml(label)}</text></g>` : ''}`;
     }).join('');
-    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Visitors per day">${ticks}${bars}</svg><div class="chart-tip" hidden></div>`;
+    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Visitors per day">${ticks}${bars}</svg><div class="chart-tip" hidden></div>`;
     const tip = el.querySelector('.chart-tip'), svg = el.querySelector('svg');
     svg.addEventListener('mousemove', event => {
       const hit = event.target.closest('.hit'); if (!hit) { tip.hidden = true; return; }
@@ -441,19 +444,6 @@
       barList($('#enquiry-types'), [['WhatsApp', t.whatsapp], ['Email', t.email], ['Phone calls', t.phone], ['Finance application', t.finance]].map(([name, n]) => ({name, n})).filter(r => r.n), r => r.name, r => r.n);
       $('#analytics-summary').textContent = `Anonymous visits to driving-force.co.za since ${new Date(a.since).toLocaleDateString('en-ZA', {day: 'numeric', month: 'long', year: 'numeric'})}. No cookies, and no personal details are stored.`;
     } catch (e) { $('#analytics-error').textContent = e.message; }
-    loadReviews(false);
-  }
-  async function loadReviews(force) {
-    const el = $('#reviews');
-    if (el.dataset.loaded && !force) return;
-    el.dataset.loaded = '1'; el.innerHTML = '<p class="empty-note">Loading…</p>';
-    try {
-      const r = await api('/api/reviews');
-      if (!r.configured) { el.innerHTML = '<p class="empty-note">Not connected yet. Add a Google Places API key to the admin project (GOOGLE_PLACES_API_KEY) to show your Google rating and review count here.</p>'; return; }
-      if (r.error) { el.innerHTML = `<p class="empty-note">${escapeHtml(r.error)}</p>`; return; }
-      const stars = '★★★★★'.slice(0, Math.round(r.rating || 0)).padEnd(5, '☆');
-      el.innerHTML = `<div class="reviews-score"><span class="value">${r.rating ? r.rating.toFixed(1) : '–'}</span><span class="stars" aria-label="${r.rating} out of 5 stars">${stars}</span></div><p><strong>${fmt(r.count)}</strong> Google reviews${r.url ? ` · <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">Open on Google ↗</a>` : ''}</p>${(r.reviews || []).slice(0, 3).map(v => `<div class="review"><strong>${escapeHtml(v.author)}</strong> · ${'★'.repeat(v.rating || 0)} · <span class="muted">${escapeHtml(v.when)}</span><br>${escapeHtml(v.text)}</div>`).join('')}`;
-    } catch (e) { el.innerHTML = `<p class="empty-note">${escapeHtml(e.message)}</p>`; }
   }
 
   if (resetToken) { $('#login-view').hidden = false; showForm('#reset-form'); }

@@ -76,30 +76,4 @@ function analyticsHandler({supabase=createSupabaseAuth()}={}){
     }catch(error){console.error(error);return res.status(500).json({error:'Analytics could not be loaded. Please try again.'});}
   };
 }
-// Google rating and review count from the Places API, cached for an hour.
-let reviewsCache={at:0,data:null,placeId:process.env.GOOGLE_PLACE_ID||''};
-function reviewsHandler({supabase=createSupabaseAuth(),fetchImpl=fetch}={}){
-  return async(req,res)=>{
-    res.setHeader('Cache-Control','no-store');
-    try{
-      const user=await auth.resolveUser(req,res,supabase);
-      if(!user)return res.status(401).json({error:'Please sign in again.'});
-      const key=process.env.GOOGLE_PLACES_API_KEY;
-      if(!key)return res.status(200).json({configured:false});
-      if(reviewsCache.data&&Date.now()-reviewsCache.at<3600000)return res.status(200).json(reviewsCache.data);
-      const headers={'X-Goog-Api-Key':key,'Content-Type':'application/json'};
-      if(!reviewsCache.placeId){
-        const search=await (await fetchImpl('https://places.googleapis.com/v1/places:searchText',{method:'POST',headers:{...headers,'X-Goog-FieldMask':'places.id'},body:JSON.stringify({textQuery:process.env.GOOGLE_PLACE_QUERY||'Driving Force, 21 Montague Drive, Montague Gardens, Cape Town'})})).json();
-        reviewsCache.placeId=search.places?.[0]?.id||'';
-        if(!reviewsCache.placeId)return res.status(200).json({configured:true,error:search.error?.message||'The business could not be found on Google. Set GOOGLE_PLACE_ID.'});
-      }
-      const place=await (await fetchImpl('https://places.googleapis.com/v1/places/'+encodeURIComponent(reviewsCache.placeId),{headers:{...headers,'X-Goog-FieldMask':'displayName,rating,userRatingCount,googleMapsUri,reviews'}})).json();
-      if(place.error)return res.status(200).json({configured:true,error:place.error.message});
-      const data={configured:true,name:place.displayName?.text||'',rating:place.rating??null,count:place.userRatingCount??0,url:place.googleMapsUri||'',
-        reviews:(place.reviews||[]).slice(0,5).map(r=>({rating:r.rating,text:(r.text?.text||'').slice(0,400),author:r.authorAttribution?.displayName||'',when:r.relativePublishTimeDescription||''})),checked:new Date().toISOString()};
-      reviewsCache={...reviewsCache,at:Date.now(),data};
-      return res.status(200).json(data);
-    }catch(error){console.error(error);return res.status(200).json({configured:true,error:'Google could not be reached. Please try again later.'});}
-  };
-}
-module.exports={trackHandler,analyticsHandler,reviewsHandler,cleanSource,device,visitorHash};
+module.exports={trackHandler,analyticsHandler,cleanSource,device,visitorHash};
