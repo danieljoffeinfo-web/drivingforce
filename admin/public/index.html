@@ -12,13 +12,14 @@
 <body>
 <header class="bar">
   <div class="brand"><span class="mark" aria-hidden="true"></span>Driving Force <span class="tag">Stock admin</span></div>
-  <button id="sign-out" class="link" type="button" hidden>Sign out</button>
+  <div class="session" id="session" hidden><span id="who"></span><button id="account-open" class="link" type="button">Account</button><button id="sign-out" class="link" type="button">Sign out</button></div>
 </header>
 
 <main id="login-view" class="login" hidden>
   <form id="login-form" class="card narrow">
     <h1>Sign in</h1>
     <p class="muted">Manage the vehicles shown on the Driving Force website.</p>
+    <label>Email<input name="email" type="email" autocomplete="username" required></label>
     <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
     <p class="error" role="alert"></p>
     <button class="button" type="submit">Sign in</button>
@@ -74,6 +75,34 @@
     <p class="error" role="alert"></p>
     <div class="dialog-foot"><button value="cancel" class="button ghost">Keep it</button><button value="confirm" id="remove-confirm" class="button danger">Remove vehicle</button></div>
   </form>
+</dialog>
+<dialog id="account-dialog" aria-labelledby="account-title">
+  <div class="account">
+    <div class="dialog-head"><h2 id="account-title">Account</h2><button type="button" class="link" data-close>Close</button></div>
+    <form id="password-form" class="stack">
+      <h3>Change your password</h3>
+      <input type="email" name="username" autocomplete="username" hidden>
+      <label>Current password<input name="currentPassword" type="password" autocomplete="current-password" required></label>
+      <label>New password <small>(at least 10 characters)</small><input name="newPassword" type="password" autocomplete="new-password" minlength="10" required></label>
+      <p class="error" role="alert"></p>
+      <div><button class="button" type="submit">Update password</button></div>
+    </form>
+    <section id="team" class="stack" hidden>
+      <h3>Team</h3>
+      <ul id="team-list" class="team-list"></ul>
+      <form id="user-form" class="stack">
+        <h4>Add a person</h4>
+        <div class="grid">
+          <label>Email<input name="email" type="email" autocomplete="off" required></label>
+          <label>Name <small>(optional)</small><input name="name" maxlength="80" autocomplete="off"></label>
+          <label class="wide">Starting password <small>(at least 10 characters — share it with them privately)</small><input name="password" type="text" autocomplete="off" minlength="10" required></label>
+          <label class="check wide"><input name="owner" type="checkbox"> Owner — can add and remove people</label>
+        </div>
+        <p class="error" role="alert"></p>
+        <div><button class="button" type="submit">Add person</button></div>
+      </form>
+    </section>
+  </div>
 </dialog>
 </body>
 </html>
