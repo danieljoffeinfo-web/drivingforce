@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en-ZA">
+<html lang="en-ZA" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
 <meta name="robots" content="noindex, nofollow">
 <title>Stock admin | Driving Force</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -10,13 +11,9 @@
 <script src="admin.js" defer></script>
 </head>
 <body>
-<header class="bar">
-  <div class="brand"><span class="mark" aria-hidden="true"></span>Driving Force <span class="tag">Stock admin</span></div>
-  <div class="session" id="session" hidden><span id="who"></span><button id="account-open" class="link" type="button">Account</button><button id="sign-out" class="link" type="button">Sign out</button></div>
-</header>
-
 <main id="login-view" class="login" hidden>
   <form id="login-form" class="card narrow">
+    <img class="login-mark" src="favicon.svg" alt="" width="44" height="44">
     <h1>Sign in</h1>
     <p class="muted">Manage the vehicles shown on the Driving Force website.</p>
     <label>Email<input name="email" type="email" autocomplete="username" required></label>
@@ -42,42 +39,115 @@
   </form>
 </main>
 
-<main id="app-view" hidden>
-  <nav class="tabs" aria-label="Dashboard sections"><button type="button" class="tab active" data-tab="stock" aria-pressed="true">Stock</button><button type="button" class="tab" data-tab="analytics" aria-pressed="false">Analytics</button></nav>
-  <div id="stock-view">
-  <section class="toolbar">
-    <div>
-      <h1>Vehicles on the website</h1>
-      <p class="muted" id="summary">Loading…</p>
+<div id="app-view" class="shell" hidden>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><img src="favicon.svg" alt="" width="30" height="30"><div><strong>Driving Force</strong><span>Dealer admin</span></div></div>
+    <p class="nav-label">Workspace</p>
+    <nav class="nav" aria-label="Dashboard sections">
+      <button type="button" class="nav-item tab" data-tab="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
+      <button type="button" class="nav-item tab" data-tab="stock"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14M6.5 17l1.6-5.2A2 2 0 0 1 10 10.4h4a2 2 0 0 1 1.9 1.4L17.5 17"/><circle cx="8" cy="17.5" r="1.8"/><circle cx="16" cy="17.5" r="1.8"/><path d="M3 17h2m14 0h2"/></svg><span>Stock</span><span class="count" id="nav-stock-count"></span></button>
+      <button type="button" class="nav-item tab" data-tab="analytics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m6 10V4m6 16v-7m5 7H3"/></svg><span>Analytics</span></button>
+      <a class="nav-item" id="site-link" href="https://www.driving-force.co.za" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.6 5.7 3.6 9s-1.1 6.3-3.6 9c-2.5-2.7-3.6-5.7-3.6-9S9.5 5.7 12 3z"/></svg><span>View website</span></a>
+    </nav>
+    <div class="sidebar-foot">
+      <button type="button" class="nav-item" id="account-open"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/></svg><span>Account</span></button>
+      <label class="nav-item theme-switch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg><span>Dark mode</span><input type="checkbox" id="theme-toggle" role="switch" checked><span class="switch" aria-hidden="true"></span></label>
+      <div class="me"><span class="avatar" id="avatar" aria-hidden="true"></span><div><strong id="who"></strong><span id="who-role"></span></div><button type="button" class="icon-button" id="sign-out" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/></svg></button></div>
     </div>
-    <div class="actions">
-      <input id="search" type="search" placeholder="Search make, model or stock code" aria-label="Search vehicles">
-      <label class="size-toggle" title="Card size"><span class="sr-only">Card size</span><select id="card-size" aria-label="Card size"><option value="l">Large cards</option><option value="m">Medium cards</option><option value="s">Small cards</option></select></label>
-      <button id="add-open" class="button" type="button" title="Add vehicle (N)">+ Add vehicle</button>
-    </div>
-  </section>
-  <p class="notice" id="notice" role="status" hidden></p>
-  <div class="order-bar" id="order-bar" hidden><span>You’ve changed the order. It goes live when you save.</span><div><button class="button ghost small" type="button" id="order-undo">Undo</button><button class="button small" type="button" id="order-save">Save order</button></div></div>
-  <ul id="list" class="card-grid size-l" aria-live="polite"></ul>
-  </div>
-  <div id="analytics-view" hidden>
-    <section class="toolbar">
-      <div><h1>Website analytics</h1><p class="muted" id="analytics-summary">Anonymous visits to driving-force.co.za. No cookies, and no personal details are stored.</p></div>
-      <div class="actions"><select id="analytics-days" aria-label="Date range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option></select><button type="button" class="button ghost" id="analytics-refresh">Refresh</button></div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button type="button" class="icon-button menu-button" id="menu-open" aria-label="Open menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <h1 id="page-title">Home</h1>
+      <div class="pills"><span class="pill" id="site-pill"><i class="dot"></i><span>Website live</span></span><span class="pill" id="live-pill" title="People on the website in the last 5 minutes"><i class="dot"></i><strong id="live-count">0</strong> browsing</span></div>
+    </header>
+    <p class="notice" id="notice" role="status" hidden></p>
+
+    <section id="home-view" class="view">
+      <p class="error" id="home-error" role="alert"></p>
+      <div class="hero" id="hero"></div>
+      <section class="panel" id="forecast-panel">
+        <div class="panel-head"><span class="panel-icon violet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg></span><div><h2>Visitor forecast</h2><p class="muted">Projected from the same weekday over the last eight weeks</p></div></div>
+        <div class="forecast" id="forecast"></div>
+        <p class="panel-note" id="forecast-note">Each day is projected from the same weekday over the last eight weeks, recent weeks counting more. Today adds what usually comes in after this time of day.</p>
+      </section>
+      <div class="split">
+        <section class="panel">
+          <div class="panel-head"><span class="panel-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m6 10V4m6 16v-7m5 7H3"/></svg></span><div><h2>Visitor activity</h2><p class="muted">Daily visitors · last 7 days</p></div><button type="button" class="button ghost small push" data-goto="analytics">Full analytics →</button></div>
+          <div class="activity-head"><div><p class="big" id="activity-total">0</p><p class="muted" id="activity-sub"></p></div><div class="legend"><span><i class="key red"></i>Last 7 days</span><span><i class="key grey"></i>Previous 7 days</span></div></div>
+          <div id="home-chart" class="chart"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><span class="panel-icon teal"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><div><h2>Vehicle interest</h2><p class="muted">What visitors looked at · last 7 days</p></div><button type="button" class="button ghost small push" data-goto="analytics">Details →</button></div>
+          <div class="interest-head"><div><p class="big teal-text" id="interest-views">0</p><p class="muted">vehicle views · <span id="interest-browsers">0</span> visitors</p></div><div><p class="big" id="interest-enquiries">0</p><p class="muted">enquiries · <span id="interest-rate">0%</span> of visitors</p></div></div>
+          <div class="split-bar" id="interest-bar"><span class="a"></span><span class="b"></span></div>
+          <p class="list-label">Most viewed</p>
+          <ul class="bar-list" id="home-vehicles"></ul>
+        </section>
+      </div>
+      <div class="split">
+        <section class="panel">
+          <div class="panel-head"><span class="panel-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14M6.5 17l1.6-5.2A2 2 0 0 1 10 10.4h4a2 2 0 0 1 1.9 1.4L17.5 17"/><circle cx="8" cy="17.5" r="1.8"/><circle cx="16" cy="17.5" r="1.8"/><path d="M3 17h2m14 0h2"/></svg></span><div><h2>Stock health</h2><p class="muted">Everything live on the website right now</p></div><button type="button" class="button ghost small push" data-goto="stock">Manage stock →</button></div>
+          <div class="stat-grid" id="stock-stats"></div>
+          <p class="list-label">Price bands</p>
+          <ul class="bar-list" id="price-bands"></ul>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><span class="panel-icon red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span><div><h2>Needs attention</h2><p class="muted">Listings that could be working harder</p></div></div>
+          <div class="chips" id="attention-chips"></div>
+          <ul class="attention" id="attention"></ul>
+        </section>
+      </div>
     </section>
-    <p class="error" id="analytics-error" role="alert"></p>
-    <div class="kpis" id="kpis"></div>
-    <div class="analytics-grid">
-      <section class="panel span-3"><h2>Visitors per day</h2><div id="daily-chart" class="chart"></div></section>
-      <section class="panel span-3"><h2>Most popular vehicles</h2><p class="muted small">Views of the vehicle page, clicks on the vehicle in the showroom, and enquiry clicks about it.</p><div class="table-wrap"><table class="data-table" id="vehicle-table"></table></div></section>
-      <section class="panel"><h2>Where visitors come from</h2><ul class="bar-list" id="sources"></ul></section>
-      <section class="panel"><h2>Devices</h2><ul class="bar-list" id="devices"></ul></section>
-      <section class="panel"><h2>Countries</h2><ul class="bar-list" id="countries"></ul></section>
-      <section class="panel span-3"><h2>Enquiry clicks</h2><ul class="bar-list" id="enquiry-types"></ul></section>
-      <section class="panel span-3"><h2>Most viewed pages</h2><ul class="bar-list" id="pages"></ul></section>
-    </div>
+
+    <section id="stock-view" class="view" hidden>
+      <section class="toolbar">
+        <p class="muted" id="summary">Loading…</p>
+        <div class="actions">
+          <input id="search" type="search" placeholder="Search make, model or stock code" aria-label="Search vehicles">
+          <label class="size-toggle" title="Card size"><span class="sr-only">Card size</span><select id="card-size" aria-label="Card size"><option value="l">Large cards</option><option value="m">Medium cards</option><option value="s">Small cards</option></select></label>
+          <button id="add-open" class="button" type="button" title="Add vehicle (N)">+ Add vehicle</button>
+        </div>
+      </section>
+      <div class="order-bar" id="order-bar" hidden><span>You’ve changed the order. It goes live when you save.</span><div><button class="button ghost small" type="button" id="order-undo">Undo</button><button class="button small" type="button" id="order-save">Save order</button></div></div>
+      <ul id="list" class="card-grid size-l" aria-live="polite"></ul>
+    </section>
+
+    <section id="analytics-view" class="view" hidden>
+      <section class="toolbar">
+        <p class="muted" id="analytics-summary">Anonymous visits to driving-force.co.za. No cookies, and no personal details are stored.</p>
+        <div class="actions"><select id="analytics-days" aria-label="Date range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option></select><button type="button" class="button ghost" id="analytics-refresh">Refresh</button></div>
+      </section>
+      <p class="error" id="analytics-error" role="alert"></p>
+      <div class="kpis" id="kpis"></div>
+      <div class="analytics-grid">
+        <section class="panel span-2">
+          <div class="panel-head"><span class="panel-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m6 10V4m6 16v-7m5 7H3"/></svg></span><div><h2>Visitors per day</h2><p class="muted" id="daily-sub">Compared with the period before</p></div><div class="legend push"><span><i class="key red"></i>This period</span><span><i class="key grey"></i>Period before</span></div></div>
+          <div id="daily-chart" class="chart tall"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><span class="panel-icon violet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg></span><div><h2>Visitor journey</h2><p class="muted">From arriving to enquiring</p></div></div>
+          <ol class="funnel" id="funnel"></ol>
+        </section>
+        <section class="panel span-3">
+          <div class="panel-head"><span class="panel-icon teal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14M6.5 17l1.6-5.2A2 2 0 0 1 10 10.4h4a2 2 0 0 1 1.9 1.4L17.5 17"/><circle cx="8" cy="17.5" r="1.8"/><circle cx="16" cy="17.5" r="1.8"/><path d="M3 17h2m14 0h2"/></svg></span><div><h2>Most popular vehicles</h2><p class="muted">Page views, showroom clicks and enquiries per vehicle, with its current price</p></div></div>
+          <div class="table-wrap"><table class="data-table" id="vehicle-table"></table></div>
+        </section>
+        <section class="panel span-2">
+          <div class="panel-head"><span class="panel-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><h2>Busiest times</h2><p class="muted">When people visit, by hour and by weekday</p></div></div>
+          <div id="hours-chart" class="mini-bars"></div>
+          <div id="weekday-chart" class="mini-bars weekdays"></div>
+        </section>
+        <section class="panel"><div class="panel-head"><span class="panel-icon red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/></svg></span><div><h2>Enquiry clicks</h2><p class="muted">How people got in touch</p></div></div><ul class="bar-list" id="enquiry-types"></ul></section>
+        <section class="panel"><div class="panel-head"><span class="panel-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.6 5.7 3.6 9s-1.1 6.3-3.6 9c-2.5-2.7-3.6-5.7-3.6-9S9.5 5.7 12 3z"/></svg></span><div><h2>Where visitors come from</h2></div></div><ul class="bar-list" id="sources"></ul></section>
+        <section class="panel"><div class="panel-head"><span class="panel-icon teal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg></span><div><h2>Devices</h2></div></div><ul class="bar-list" id="devices"></ul></section>
+        <section class="panel"><div class="panel-head"><span class="panel-icon violet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><div><h2>Countries</h2></div></div><ul class="bar-list" id="countries"></ul></section>
+        <section class="panel span-3"><div class="panel-head"><span class="panel-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></svg></span><div><h2>Most viewed pages</h2></div></div><ul class="bar-list" id="pages"></ul></section>
+      </div>
+    </section>
   </div>
-</main>
+  <div class="scrim" id="scrim" hidden></div>
+</div>
 
 <dialog id="add-dialog" class="wide-dialog" aria-labelledby="add-title">
   <form id="add-form" class="add-form" novalidate>

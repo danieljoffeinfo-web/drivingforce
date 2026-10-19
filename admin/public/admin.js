@@ -14,8 +14,14 @@
     if (!response.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
     return data;
   }
-  function showLogin() { me = null; $('#app-view').hidden = true; $('#session').hidden = true; $('#login-view').hidden = false; $('#recover-form').hidden = true; $('#reset-form').hidden = true; $('#login-form').hidden = false; $('#login-form [name=email]').focus(); }
-  function showApp(user) { me = user; $('#who').textContent = user.name || user.email; $('#login-view').hidden = true; $('#app-view').hidden = false; $('#session').hidden = false; load(); }
+  function showLogin() { me = null; $('#app-view').hidden = true; $('#login-view').hidden = false; $('#recover-form').hidden = true; $('#reset-form').hidden = true; $('#login-form').hidden = false; $('#login-form [name=email]').focus(); }
+  function showApp(user) {
+    me = user; const name = user.name || user.email;
+    $('#who').textContent = name; $('#who-role').textContent = user.owner ? 'Owner' : 'Staff'; $('#avatar').textContent = name.trim()[0].toUpperCase();
+    $('#login-view').hidden = true; $('#app-view').hidden = false;
+    let saved = 'home'; try { saved = localStorage.getItem('df-view') || 'home'; } catch {}
+    load().then(() => go(saved));
+  }
   function notify(message) { const n = $('#notice'); n.textContent = message; n.hidden = !message; }
   const imageFor = url => /^https?:/.test(url) ? url : new URL(url, siteUrl).href;
 
@@ -29,7 +35,8 @@
           $(`#add-form [name=${name}]`).innerHTML = '<option value="">Choose…</option>' + list.map(o => `<option>${escapeHtml(o)}</option>`).join('');
       }
       fillSuggestions(); render();
-    } catch (error) { $('#summary').textContent = error.message; }
+      $('#site-pill').classList.add('on'); $('#site-link').href = siteUrl || $('#site-link').href;
+    } catch (error) { $('#summary').textContent = error.message; $('#site-pill').classList.remove('on'); }
   }
 
   // ---- Grid, prices and ordering ----
@@ -39,7 +46,8 @@
     const query = $('#search').value.trim().toLowerCase();
     const shown = vehicles.filter(car => `${car.make} ${car.model} ${car.variant} ${car.year} ${car.stock_code} ${car.displayName || ''} ${car.colour}`.toLowerCase().includes(query));
     $('#summary').textContent = `${vehicles.length} vehicle${vehicles.length === 1 ? '' : 's'} live on the website` + (query ? ` · ${shown.length} matching · clear the search to drag cards` : '');
-    $('#order-bar').hidden = !orderChanged();
+    $('#order-bar').hidden = !orderChanged(); $('#nav-stock-count').textContent = vehicles.length || '';
+    if (homeData) renderStockHealth();
     $('#list').innerHTML = shown.map(car => {
       const i = vehicles.indexOf(car), photos = photosOf(car), id = escapeHtml(car.id);
       return `<li class="vcard${query ? ' searching' : ''}" data-id="${id}"><img src="${escapeHtml(imageFor(photos[0]))}" alt="" loading="lazy" draggable="false"><label class="pos" title="Position on the website — type a number and press Enter"><span>#</span><input name="position" inputmode="numeric" value="${i + 1}" aria-label="Position of ${escapeHtml(title(car))}" autocomplete="off"></label>${car.descriptionSource === 'admin' ? '<span class="badge">New</span>' : ''}${photos.length > 1 ? `<span class="photo-count">${photos.length} photos</span>` : ''}<div class="card-body"><h3 title="${escapeHtml(car.year + ' ' + title(car))}">${car.year} ${escapeHtml(title(car))}</h3><p class="meta" title="${escapeHtml(car.variant)}">${escapeHtml(car.variant)}</p><p class="meta">${km(car.mile)} · ${escapeHtml(car.stock_code)}</p><form class="price-form" data-price="${id}"><span class="currency">R</span><input name="price" inputmode="numeric" value="${car.value}" aria-label="Price of ${escapeHtml(title(car))} in rand" autocomplete="off"><button class="button small" type="submit" hidden>Save</button></form><span class="saved" role="status"></span></div><div class="card-actions"><button type="button" class="edit" data-edit="${id}">Edit</button><button type="button" class="remove" data-remove="${id}" aria-label="Remove ${escapeHtml(title(car))}">Remove</button></div></li>`;
@@ -377,74 +385,228 @@
     finally { button.disabled = false; }
   });
 
-  // ---- Analytics ----
+  // ---- Layout: sidebar sections, theme and mobile menu ----
+  const titles = {home: 'Home', stock: 'Stock', analytics: 'Analytics'};
+  let view = 'home', analyticsLoaded = false, homeLoaded = false, homeData = null;
+  function go(name) {
+    view = titles[name] ? name : 'home';
+    document.querySelectorAll('.tab').forEach(t => { const on = t.dataset.tab === view; t.classList.toggle('active', on); if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
+    for (const key of Object.keys(titles)) $(`#${key}-view`).hidden = key !== view;
+    $('#page-title').textContent = titles[view]; closeMenu();
+    try { localStorage.setItem('df-view', view); } catch {}
+    if (view === 'analytics' && !analyticsLoaded) loadAnalytics();
+    if (view === 'home') { if (!homeLoaded) loadHome(); else renderHome(); }
+    if (view === 'analytics' && lastAnalytics) requestAnimationFrame(() => renderCharts(lastAnalytics));
+  }
+  document.querySelectorAll('.tab, [data-goto]').forEach(b => b.addEventListener('click', () => go(b.dataset.tab || b.dataset.goto)));
+  const closeMenu = () => { $('#sidebar').classList.remove('open'); $('#scrim').hidden = true; };
+  $('#menu-open').addEventListener('click', () => { $('#sidebar').classList.add('open'); $('#scrim').hidden = false; });
+  $('#scrim').addEventListener('click', closeMenu);
+  const themeToggle = $('#theme-toggle');
+  const applyTheme = dark => { document.documentElement.dataset.theme = dark ? 'dark' : 'light'; themeToggle.checked = dark; };
+  try { applyTheme(localStorage.getItem('df-theme') !== 'light'); } catch { applyTheme(true); }
+  themeToggle.addEventListener('change', () => {
+    applyTheme(themeToggle.checked); try { localStorage.setItem('df-theme', themeToggle.checked ? 'dark' : 'light'); } catch {}
+    redrawCharts();
+  });
+
+  // ---- Shared helpers for the overview and analytics ----
   const fmt = n => Number(n || 0).toLocaleString('en-ZA').replace(/,/g, ' ');
+  const short = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.0', '') + 'm' : n >= 1e4 ? Math.round(n / 1e3) + 'k' : n >= 1e3 ? (n / 1e3).toFixed(1).replace('.0', '') + 'k' : fmt(n);
+  const pctOf = (a, b) => b ? Math.round(a / b * 100) : 0;
+  const dayOf = value => new Date(String(value).slice(0, 10) + 'T12:00:00');
+  const dateLabel = (value, opts) => dayOf(value).toLocaleDateString('en-ZA', opts);
   const countryName = code => { try { return code && code !== '??' ? new Intl.DisplayNames(['en'], {type: 'region'}).of(code) : 'Unknown'; } catch { return code; } };
-  const sourceName = s => ({direct: 'Direct / typed in', google: 'Google', facebook: 'Facebook', instagram: 'Instagram', bing: 'Bing'}[s] || s);
-  let analyticsLoaded = false, lastDays = null, resizeTimer = null;
-  addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (lastDays && !$('#analytics-view').hidden) dailyChart(lastDays); }, 150); });
-  document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => { const on = t === tab; t.classList.toggle('active', on); t.setAttribute('aria-pressed', String(on)); });
-    $('#stock-view').hidden = tab.dataset.tab !== 'stock'; $('#analytics-view').hidden = tab.dataset.tab !== 'analytics';
-    if (tab.dataset.tab === 'analytics' && !analyticsLoaded) loadAnalytics();
-  }));
+  const sourceName = s => ({direct: 'Direct / typed in', google: 'Google', facebook: 'Facebook', instagram: 'Instagram', bing: 'Bing', 'chatgpt.com': 'ChatGPT'}[s] || s);
+  const pageName = p => ({'/': 'Home / showroom', '/index.html': 'Home / showroom', '/vehicle.html': 'Vehicle pages', '/finance.html': 'Finance application', '/visit.html': 'Visit us', '/contact.html': 'Contact', '/privacy.html': 'Privacy policy', '/terms.html': 'Terms of use'}[p] || p);
+  const carById = id => vehicles.find(car => String(car.id) === String(id));
+  const carName = (id, fallback) => { const car = carById(id); return car ? `${car.year} ${title(car)}` : (fallback || `Vehicle ${id}`).replace(/ · [^·]*$/, '') + ' (sold / removed)'; };
+  // Widths are set from script because the dashboard's security policy blocks inline style attributes.
+  const applyWidths = root => root.querySelectorAll('[data-width]').forEach(el => { el.style.width = el.dataset.width + '%'; });
+  function trend(now, before, suffix = '') {
+    if (!before) return now ? `<span class="trend up">▲ new</span>${suffix}` : `<span class="trend">–</span>${suffix}`;
+    const pct = Math.round((now - before) / before * 100);
+    return `<span class="trend ${pct > 0 ? 'up' : pct < 0 ? 'down' : ''}">${pct > 0 ? '▲' : pct < 0 ? '▼' : ''} ${Math.abs(pct)}%</span>${suffix}`;
+  }
+  function barList(el, rows, label, value, tone = '') {
+    const max = Math.max(1, ...rows.map(value));
+    el.innerHTML = rows.length ? rows.map(r => `<li><span class="name" title="${escapeHtml(label(r))}">${escapeHtml(label(r))}</span><span class="track"><span class="fill ${tone}" data-width="${Math.max(3, value(r) / max * 100)}"></span></span><span class="num">${fmt(value(r))}</span></li>`).join('') : '<li class="empty-note">No data yet.</li>';
+    applyWidths(el);
+  }
+  function tooltip(el, svg, w, h) {
+    const tip = el.querySelector('.chart-tip'), cursor = svg.querySelector('.cursor');
+    svg.addEventListener('pointermove', event => {
+      const hit = event.target.closest('.hit'); if (!hit) { tip.hidden = true; cursor?.classList.remove('on'); return; }
+      const sx = svg.clientWidth / w, sy = svg.clientHeight / h;
+      tip.innerHTML = hit.dataset.tip; tip.hidden = false;
+      tip.style.left = Math.min(Math.max(hit.dataset.x * sx, 70), svg.clientWidth - 70) + 'px'; tip.style.top = hit.dataset.y * sy + 'px';
+      if (cursor) { cursor.setAttribute('x1', hit.dataset.x); cursor.setAttribute('x2', hit.dataset.x); cursor.classList.add('on'); }
+    });
+    svg.addEventListener('pointerleave', () => { tip.hidden = true; cursor?.classList.remove('on'); });
+  }
+  const niceTop = max => { const step = Math.pow(10, Math.floor(Math.log10(Math.max(1, max)))); return Math.max(4, Math.ceil(max / step) * step); };
+
+  // Line chart of this period against the one before, drawn at the panel's real width so text is never stretched.
+  function lineChart(el, rows) {
+    const w = Math.max(280, el.clientWidth || 640), h = el.clientHeight || 240, pad = {l: 34, r: 12, t: 14, b: 26};
+    if (!rows.length || rows.every(d => !d.visitors && !d.prev_visitors)) { el.innerHTML = '<p class="empty-note">No visits recorded yet. Figures appear here as people use the website.</p>'; return; }
+    const top = niceTop(Math.max(...rows.map(d => Math.max(d.visitors, d.prev_visitors || 0))));
+    const n = rows.length, x = i => pad.l + (n === 1 ? (w - pad.l - pad.r) / 2 : i * (w - pad.l - pad.r) / (n - 1)), y = v => pad.t + (h - pad.t - pad.b) * (1 - v / top);
+    const line = key => rows.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(d[key] || 0).toFixed(1)}`).join(' ');
+    const ticks = [0, top / 2, top].map(v => `<line class="gridline" x1="${pad.l}" x2="${w - pad.r}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pad.l - 8}" y="${y(v) + 4}" text-anchor="end">${short(v)}</text>`).join('');
+    const every = Math.ceil(n / Math.max(2, Math.floor(w / 80)));
+    const labels = rows.map((d, i) => (i % every === 0 || i === n - 1) && !(i !== n - 1 && n - 1 - i < every / 2) ? `<text class="axis" x="${x(i)}" y="${h - 6}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}">${escapeHtml(n <= 8 ? dateLabel(d.day, {weekday: 'short'}) : dateLabel(d.day, {day: 'numeric', month: 'short'}))}</text>` : '').join('');
+    const slot = (w - pad.l - pad.r) / Math.max(1, n - 1);
+    const hits = rows.map((d, i) => `<rect class="hit" x="${x(i) - slot / 2}" y="${pad.t}" width="${slot}" height="${h - pad.t - pad.b}" data-x="${x(i)}" data-y="${y(d.visitors)}" data-tip="<strong>${escapeHtml(dateLabel(d.day, {weekday: 'short', day: 'numeric', month: 'short'}))}</strong><br>${fmt(d.visitors)} visitor${d.visitors === 1 ? '' : 's'} · ${fmt(d.pageviews)} page views${d.enquiries ? ' · ' + fmt(d.enquiries) + ' enquiries' : ''}<br><span>Period before: ${fmt(d.prev_visitors)}</span>"/>`).join('');
+    const dots = rows.map((d, i) => d.visitors ? `<circle class="dot" cx="${x(i)}" cy="${y(d.visitors)}" r="${n > 40 ? 0 : 3}"/>` : '').join('');
+    const gid = 'g' + el.id;
+    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Visitors per day"><defs><linearGradient id="${gid}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" class="stop-a"/><stop offset="1" class="stop-b"/></linearGradient></defs>${ticks}<path class="area" fill="url(#${gid})" d="${line('visitors')} L${x(n - 1)},${y(0)} L${x(0)},${y(0)} Z"/><path class="prev" d="${line('prev_visitors')}"/><path class="line" d="${line('visitors')}"/>${dots}<line class="cursor" x1="0" x2="0" y1="${pad.t}" y2="${h - pad.b}"/>${labels}${hits}</svg><div class="chart-tip" hidden></div>`;
+    tooltip(el, el.querySelector('svg'), w, h);
+  }
+  // Small column chart: hourly visitors for the hero tile, busiest hours and weekdays.
+  function miniBars(el, values, labels, tips, every = 1) {
+    const max = Math.max(1, ...values);
+    el.innerHTML = `<div class="cols">${values.map((v, i) => `<span class="col${v === max && v ? ' peak' : ''}" title="${escapeHtml(tips[i])}"><span class="colbar" data-height="${Math.max(v ? 6 : 2, v / max * 100)}"></span>${labels ? `<small>${i % every === 0 ? escapeHtml(labels[i]) : ''}</small>` : ''}</span>`).join('')}</div>`;
+    el.querySelectorAll('[data-height]').forEach(b => { b.style.height = b.dataset.height + '%'; });
+  }
+
+  // ---- Home overview ----
+  async function loadHome() {
+    homeLoaded = true; $('#home-error').textContent = '';
+    try {
+      const [month, week] = await Promise.all([api('/api/analytics?days=35'), api('/api/analytics?days=7')]);
+      homeData = {...month, vehiclesWeek: week.vehicles || []}; setLive(homeData.live); renderHome();
+    }
+    catch (e) { homeLoaded = false; $('#home-error').textContent = e.message; }
+  }
+  function setLive(n) { $('#live-count').textContent = fmt(n); $('#live-pill').classList.toggle('on', n > 0); }
+  function renderHome() {
+    if (!homeData || view !== 'home') return;
+    const a = homeData, t = a.today || {}, now = new Date(String(a.now).slice(0, 19));
+    const daily = a.daily || [], last7 = daily.slice(-7), prev7 = daily.slice(-14, -7);
+    const sum = (rows, key) => rows.reduce((s, d) => s + (d[key] || 0), 0);
+    const live = vehicles.length, stockValue = vehicles.reduce((s, c) => s + (Number(c.value) || 0), 0);
+    const hour = now.getHours();
+    const tile = (cls, icon, label, value, sub, extra = '') => `<div class="hero-cell"><div class="hero-label"><span class="panel-icon ${cls}">${icon}</span><span>${label}</span></div><div class="hero-row"><p class="hero-value ${cls}-text">${value}</p><p class="hero-sub">${sub}</p>${extra}</div></div>`;
+    const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+    $('#hero').innerHTML = `<div class="hero-today"><strong>Today</strong><span>${escapeHtml(now.toLocaleDateString('en-ZA', {weekday: 'short', day: 'numeric', month: 'short'}))}</span></div>`
+      + tile('red', svg('<path d="M4 20V10m6 10V4m6 16v-7"/>'), 'Visitors today', fmt(t.visitors), `${trend(t.visitors, t.y_visitors, ' vs this time yesterday')} · ${fmt(t.pageviews)} page views`, '<div class="spark" id="hero-spark"></div>')
+      + tile('amber', svg('<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'), 'Vehicle views today', fmt(t.vehicle_views), trend(t.vehicle_views, t.y_vehicle_views, ' vs this time yesterday'))
+      + tile('blue', svg('<path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/>'), 'Enquiries today', fmt(t.enquiries), 'WhatsApp, email, calls and finance')
+      + tile('teal', svg('<path d="M5 17h14M6.5 17l1.6-5.2A2 2 0 0 1 10 10.4h4a2 2 0 0 1 1.9 1.4L17.5 17"/><circle cx="8" cy="17.5" r="1.8"/><circle cx="16" cy="17.5" r="1.8"/>'), 'Live vehicles', fmt(live), `${money(stockValue)} in stock`)
+      + tile('violet', svg('<circle cx="12" cy="12" r="3"/><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/>'), 'Browsing now', fmt(a.live), 'on the website in the last 5 minutes');
+    miniBars($('#hero-spark'), (t.hourly || []).slice(0, hour + 1), null, (t.hourly || []).slice(0, hour + 1).map((v, i) => `${String(i).padStart(2, '0')}:00 · ${v} visitor${v === 1 ? '' : 's'}`));
+
+    // Forecast: each weekday's usual visitors; today adds the share of the day that is usually still to come.
+    const fc = a.forecast || [], usual = new Map(fc.map(f => [dayOf(f.day).getDay(), f.visitors]));
+    const hours = a.hours || [], dayShare = hours.reduce((s, v) => s + v, 0) ? hours.slice(0, hour + 1).reduce((s, v) => s + v, 0) / hours.reduce((s, v) => s + v, 0) : Math.min(1, (hour + 1) / 24);
+    const todayForecast = Math.max(t.visitors, Math.round(t.visitors + (usual.get(now.getDay()) || 0) * (1 - dayShare)));
+    const forecastFor = date => dayOf(date).toDateString() === now.toDateString() ? todayForecast : (usual.get(dayOf(date).getDay()) || 0);
+    const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const actual = new Map(daily.map(d => [String(d.day).slice(0, 10), d.visitors]));
+    const range = (from, to) => { const out = []; for (const d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) out.push(iso(d)); return out; };
+    const weekStart = new Date(now); weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1), monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const todayIso = iso(now);
+    const period = days => { let taken = 0, expected = 0; for (const d of days) { const got = actual.get(d) || 0; if (d < todayIso) { taken += got; expected += got; } else if (d === todayIso) { taken += got; expected += todayForecast; } else expected += forecastFor(d); } return {taken, expected}; };
+    const cells = [
+      ['Today', `usually ${Math.round(dayShare * 100)}% in by now`, period([todayIso])],
+      ['This week', `${Math.round((weekEnd - now) / 864e5)} days left`, period(range(weekStart, weekEnd))],
+      [now.toLocaleDateString('en-ZA', {month: 'long'}), `${monthEnd.getDate() - now.getDate()} days left`, period(range(monthStart, monthEnd))]];
+    const next = fc.map(f => ({day: f.day, forecast: forecastFor(f.day), taken: f.actual ?? null}));
+    const top = Math.max(1, ...next.map(r => Math.max(r.forecast, r.taken || 0)));
+    $('#forecast').innerHTML = cells.map(([label, hint, p]) => `<div class="fc-cell"><p class="fc-label"><strong>${escapeHtml(label)}</strong> ${escapeHtml(hint)}</p><p class="fc-value">${fmt(p.expected)}</p><span class="progress"><span data-width="${Math.min(100, pctOf(p.taken, p.expected))}"></span></span><p class="fc-sub"><strong>${fmt(p.taken)}</strong> so far · ${pctOf(p.taken, p.expected)}% of forecast</p><p class="fc-hint">expected visitors</p></div>`).join('')
+      + `<div class="fc-week"><div class="fc-week-head"><span>Next 7 days</span><span class="legend"><span><i class="key red"></i>So far</span><span><i class="key dim"></i>Forecast</span></span></div><div class="fc-bars">${next.map((r, i) => `<div class="fc-day${i === 0 ? ' today' : ''}"><small>${short(r.forecast)}</small><span class="fc-track"><span class="fc-bar" data-height="${r.forecast / top * 100}"></span>${r.taken !== null ? `<span class="fc-taken" data-height="${r.taken / top * 100}"></span>` : ''}</span><strong>${i === 0 ? 'Today' : escapeHtml(dateLabel(r.day, {weekday: 'short'}))}</strong><span>${dayOf(r.day).getDate()}</span></div>`).join('')}</div></div>`;
+    applyWidths($('#forecast')); $('#forecast').querySelectorAll('[data-height]').forEach(b => { b.style.height = Math.max(2, b.dataset.height) + '%'; });
+    $('#forecast-note').textContent = (a.weeks_of_data || 0) < 3
+      ? `The forecast learns from your traffic. It has ${a.weeks_of_data || 0} week${a.weeks_of_data === 1 ? '' : 's'} of history so far and gets sharper over the next few weeks. Each day is projected from the same weekday over the last eight weeks.`
+      : 'Each day is projected from the same weekday over the last eight weeks, recent weeks counting more. Today adds what usually comes in after this time of day.';
+
+    // Activity: last 7 days against the 7 before.
+    const rows = last7.map((d, i) => ({...d, prev_visitors: prev7[i]?.visitors || 0}));
+    $('#activity-total').textContent = fmt(sum(last7, 'visitors'));
+    $('#activity-sub').innerHTML = `visitors in the last 7 days · ${trend(sum(last7, 'visitors'), sum(prev7, 'visitors'), ' vs the 7 days before')}`;
+    lineChart($('#home-chart'), rows);
+
+    // Vehicle interest, matched to the current stock list.
+    const views = sum(last7, 'vehicle_views'), enquiries = sum(last7, 'enquiries');
+    const week = homeData.vehiclesWeek || [];
+    $('#interest-views').textContent = fmt(views); $('#interest-enquiries').textContent = fmt(enquiries);
+    $('#interest-browsers').textContent = fmt(sum(last7, 'visitors')); $('#interest-rate').textContent = pctOf(enquiries, sum(last7, 'visitors')) + '%';
+    const bar = $('#interest-bar'), share = views + enquiries ? views / (views + enquiries) * 100 : 100;
+    bar.querySelector('.a').style.width = share + '%'; bar.querySelector('.b').style.width = (100 - share) + '%';
+    barList($('#home-vehicles'), week.slice(0, 6), r => carName(r.id, r.label), r => r.views + r.clicks, 'teal');
+    renderStockHealth();
+  }
+  function renderStockHealth() {
+    if (!$('#stock-stats') || view !== 'home') return;
+    const values = vehicles.map(c => Number(c.value) || 0).filter(Boolean), miles = vehicles.map(c => Number(c.mile) || 0);
+    const nowSec = Date.now() / 1000, ages = vehicles.map(c => c.dateString ? (nowSec - c.dateString) / 86400 : null).filter(v => v !== null && v >= 0);
+    const avg = list => list.length ? list.reduce((s, v) => s + v, 0) / list.length : 0;
+    const stat = (label, value) => `<div class="stat"><p>${label}</p><strong>${value}</strong></div>`;
+    $('#stock-stats').innerHTML = stat('Vehicles live', fmt(vehicles.length)) + stat('Stock value', money(values.reduce((s, v) => s + v, 0))) + stat('Average price', values.length ? money(avg(values)) : '–')
+      + stat('Average mileage', miles.length ? km(Math.round(avg(miles) / 100) * 100) : '–') + stat('Average days listed', ages.length ? fmt(Math.round(avg(ages))) : '–') + stat('Photos per vehicle', vehicles.length ? avg(vehicles.map(c => photosOf(c).length)).toFixed(1) : '–');
+    const bands = [[0, 200000, 'Under R200k'], [200000, 400000, 'R200k – R400k'], [400000, 700000, 'R400k – R700k'], [700000, 1000000, 'R700k – R1m'], [1000000, Infinity, 'Over R1m']]
+      .map(([lo, hi, name]) => ({name, n: values.filter(v => v >= lo && v < hi).length})).filter(b => b.n);
+    barList($('#price-bands'), bands, r => r.name, r => r.n, 'amber');
+    // Listings with little interest, few photos or a long time on the site.
+    const seen = new Map((homeData?.vehiclesWeek || []).map(r => [String(r.id), r]));
+    const items = [], counts = {views: 0, photos: 0, old: 0, noEnquiry: 0};
+    for (const car of vehicles) {
+      const r = seen.get(String(car.id)), photos = photosOf(car).length, days = car.dateString ? Math.floor((nowSec - car.dateString) / 86400) : null;
+      if (homeData && !r) { counts.views++; items.push({car, level: 3, text: 'No views in the last 7 days. Try a better cover photo or check the price.'}); }
+      if (r && r.views >= 5 && !r.enquiries) { counts.noEnquiry++; items.push({car, level: 2, text: `${r.views} views but no enquiries. The price or details may be holding people back.`}); }
+      if (days !== null && days > 90) { counts.old++; items.push({car, level: 2, text: `Listed ${days} days ago. Worth a price review.`}); }
+      if (photos < 3) { counts.photos++; items.push({car, level: 1, text: `Only ${photos} photo${photos === 1 ? '' : 's'}. Listings with 6+ photos get more enquiries.`}); }
+    }
+    items.sort((a, b) => b.level - a.level);
+    $('#attention-chips').innerHTML = [[counts.views, 'with no views this week', 2], [counts.noEnquiry, 'viewed but no enquiries', 1], [counts.old, 'listed over 90 days', 1], [counts.photos, 'with fewer than 3 photos', 1]]
+      .filter(([n]) => n).map(([n, label, level]) => `<span class="chip lvl${level}"><strong>${n}</strong>${label}</span>`).join('');
+    $('#attention').innerHTML = items.length ? items.slice(0, 6).map(i => `<li class="lvl${Math.min(2, i.level)}"><img src="${escapeHtml(imageFor(photosOf(i.car)[0] || ''))}" alt="" loading="lazy"><div><strong>${escapeHtml(i.car.year + ' ' + title(i.car))}</strong><span>${escapeHtml(i.text)}</span></div><button type="button" class="button ghost small" data-edit-car="${escapeHtml(i.car.id)}">Edit</button></li>`).join('') + (items.length > 6 ? `<li class="more">and ${items.length - 6} more suggestions</li>` : '')
+      : '<li class="all-good">Everything looks healthy. Every vehicle has photos and is getting views.</li>';
+  }
+  $('#attention').addEventListener('click', event => { const b = event.target.closest('[data-edit-car]'); if (b) openForm('edit', carById(b.dataset.editCar)); });
+
+  // ---- Full analytics ----
+  let lastAnalytics = null, resizeTimer = null;
+  const redrawCharts = () => { if (view === 'analytics' && lastAnalytics) renderCharts(lastAnalytics); if (view === 'home' && homeData) renderHome(); };
+  addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(redrawCharts, 150); });
   $('#analytics-days').addEventListener('change', loadAnalytics);
   $('#analytics-refresh').addEventListener('click', loadAnalytics);
-  function change(now, before) {
-    if (!before) return now ? 'New this period' : 'No change';
-    const pct = Math.round((now - before) / before * 100);
-    return `${pct > 0 ? '▲ ' : pct < 0 ? '▼ ' : ''}${Math.abs(pct)}% vs previous ${$('#analytics-days').selectedOptions[0].textContent.toLowerCase().replace('last ', '')}`;
-  }
-  function barList(el, rows, label, value) {
-    const max = Math.max(1, ...rows.map(value));
-    el.innerHTML = rows.length ? rows.map(r => `<li><span class="name" title="${escapeHtml(label(r))}">${escapeHtml(label(r))}</span><span class="num">${fmt(value(r))}</span><span class="track"><span class="fill" data-width="${Math.max(2, value(r) / max * 100)}"></span></span></li>`).join('') : '<li class="empty-note">No data yet.</li>';
-    // Widths are set from script because the dashboard's security policy blocks inline style attributes.
-    el.querySelectorAll('.fill').forEach(fill => { fill.style.width = fill.dataset.width + '%'; });
-  }
-  function dailyChart(days) {
-    // Drawn at the panel's real width so the axis text is never stretched.
-    lastDays = days;
-    const el = $('#daily-chart'), w = Math.max(300, el.clientWidth || 720), h = 220, pad = {l: 34, r: 6, t: 10, b: 24};
-    if (!days.length || days.every(d => !d.visitors)) { el.innerHTML = '<p class="empty-note">No visits recorded yet. Figures appear here as people use the website.</p>'; return; }
-    const max = Math.max(1, ...days.map(d => d.visitors)), step = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / step) * step;
-    const slot = (w - pad.l - pad.r) / days.length, bw = Math.min(24, Math.max(2, slot - 2)), y = v => pad.t + (h - pad.t - pad.b) * (1 - v / top);
-    const ticks = [0, top / 2, top].map(v => `<g class="grid"><line x1="${pad.l}" x2="${w - pad.r}" y1="${y(v)}" y2="${y(v)}"/></g><g class="axis"><text x="${pad.l - 6}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text></g>`).join('');
-    const every = Math.ceil(days.length / Math.max(3, Math.floor(w / 90)));
-    const bars = days.map((d, i) => {
-      const x = pad.l + i * slot + (slot - bw) / 2, bh = Math.max(0, y(0) - y(d.visitors)), r = Math.min(4, bw / 2, bh);
-      const date = new Date(String(d.day).slice(0, 10) + 'T12:00:00');
-      const label = date.toLocaleDateString('en-ZA', {day: 'numeric', month: 'short'});
-      const path = bh ? `M${x},${y(0)} V${y(0) - bh + r} Q${x},${y(0) - bh} ${x + r},${y(0) - bh} H${x + bw - r} Q${x + bw},${y(0) - bh} ${x + bw},${y(0) - bh + r} V${y(0)} Z` : '';
-      return `<rect class="hit" x="${pad.l + i * slot}" y="${pad.t}" width="${slot}" height="${h - pad.t - pad.b}" data-tip="${escapeHtml(date.toLocaleDateString('en-ZA', {weekday: 'short', day: 'numeric', month: 'short'}))}: ${fmt(d.visitors)} visitor${d.visitors === 1 ? '' : 's'}, ${fmt(d.pageviews)} page views${d.enquiries ? ', ' + fmt(d.enquiries) + ' enquiry clicks' : ''}" data-x="${x + bw / 2}" data-y="${y(d.visitors)}"></rect>${path ? `<path class="bar" d="${path}"/>` : ''}${i % every === 0 ? `<g class="axis"><text x="${x + bw / 2}" y="${h - 6}" text-anchor="middle">${escapeHtml(label)}</text></g>` : ''}`;
-    }).join('');
-    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Visitors per day">${ticks}${bars}</svg><div class="chart-tip" hidden></div>`;
-    const tip = el.querySelector('.chart-tip'), svg = el.querySelector('svg');
-    svg.addEventListener('mousemove', event => {
-      const hit = event.target.closest('.hit'); if (!hit) { tip.hidden = true; return; }
-      const sx = svg.clientWidth / w, sy = svg.clientHeight / h;
-      tip.textContent = hit.dataset.tip; tip.hidden = false; tip.style.left = hit.dataset.x * sx + 'px'; tip.style.top = hit.dataset.y * sy + 'px';
-    });
-    svg.addEventListener('mouseleave', () => { tip.hidden = true; });
+  function renderCharts(a) {
+    lineChart($('#daily-chart'), a.daily || []);
+    const hours = a.hours || [], days = a.weekdays || [], names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    miniBars($('#hours-chart'), hours, hours.map((_, i) => String(i).padStart(2, '0')), hours.map((v, i) => `${String(i).padStart(2, '0')}:00–${String(i + 1).padStart(2, '0')}:00 · ${v} visits`), innerWidth < 600 ? 6 : 3);
+    miniBars($('#weekday-chart'), days, names, days.map((v, i) => `${names[i]} · ${v} visits`));
   }
   async function loadAnalytics() {
     analyticsLoaded = true; $('#analytics-error').textContent = '';
-    const days = $('#analytics-days').value;
+    const days = $('#analytics-days').value, range = $('#analytics-days').selectedOptions[0].textContent.toLowerCase().replace('last ', '');
     try {
-      const a = await api('/api/analytics?days=' + days);
-      const t = a.totals, p = a.previous;
-      $('#kpis').innerHTML = [['Visitors', t.visitors, p.visitors], ['Page views', t.pageviews, p.pageviews], ['Vehicle page views', t.vehicle_views, p.vehicle_views], ['Enquiry clicks', t.enquiries, p.enquiries]]
-        .map(([label, now, before]) => `<div class="kpi"><p class="label">${label}</p><p class="value">${fmt(now)}</p><p class="change">${change(now, before)}</p></div>`).join('');
-      dailyChart(a.daily || []);
+      const a = await api('/api/analytics?days=' + days); lastAnalytics = a; setLive(a.live);
+      const t = a.totals, p = a.previous, spark = key => (a.daily || []).map(d => d[key] || 0);
+      $('#kpis').innerHTML = [['red', 'Visitors', t.visitors, p.visitors, 'visitors'], ['blue', 'Page views', t.pageviews, p.pageviews, 'pageviews'], ['amber', 'Vehicle page views', t.vehicle_views, p.vehicle_views, 'vehicle_views'], ['teal', 'Enquiry clicks', t.enquiries, p.enquiries, 'enquiries']]
+        .map(([tone, label, now, before, key]) => `<div class="kpi ${tone}"><p class="label">${label}</p><p class="value">${fmt(now)}</p><p class="change">${trend(now, before, ` vs previous ${escapeHtml(range)}`)}</p><div class="spark kpi-spark" data-key="${key}"></div></div>`).join('');
+      $('#kpis').querySelectorAll('.kpi-spark').forEach(el => { const v = spark(el.dataset.key); miniBars(el, v, null, (a.daily || []).map((d, i) => `${dateLabel(d.day, {day: 'numeric', month: 'short'})} · ${fmt(v[i])}`)); });
+      $('#daily-sub').textContent = `Daily visitors · ${$('#analytics-days').selectedOptions[0].textContent.toLowerCase()} against the ${range} before`;
+      renderCharts(a);
+      const f = a.funnel || {visitors: t.visitors, browsed: 0, enquired: 0};
+      $('#funnel').innerHTML = [['Visited the website', f.visitors, 'red'], ['Looked at a vehicle', f.browsed, 'amber'], ['Made an enquiry', f.enquired, 'teal']]
+        .map(([label, n, tone], i, all) => `<li><div class="funnel-row"><span>${label}</span><strong>${fmt(n)}</strong></div><span class="track"><span class="fill ${tone}" data-width="${Math.max(2, pctOf(n, f.visitors))}"></span></span><small>${i ? `${pctOf(n, all[i - 1][1])}% of the step before · ${pctOf(n, f.visitors)}% of visitors` : 'Unique visitors, counted once per day'}</small></li>`).join('');
+      applyWidths($('#funnel'));
       const v = a.vehicles || [];
-      $('#vehicle-table').innerHTML = v.length ? `<thead><tr><th>#</th><th>Vehicle</th><th>Page views</th><th>Showroom clicks</th><th>WhatsApp</th><th>Email</th><th>Finance</th><th>Visitors</th></tr></thead><tbody>${v.slice(0, 25).map((r, i) => `<tr><td>${i + 1}</td><td>${escapeHtml(r.label || 'Vehicle ' + r.id + ' (no longer listed)')}</td><td>${fmt(r.views)}</td><td>${fmt(r.clicks)}</td><td>${fmt(r.whatsapp)}</td><td>${fmt(r.email)}</td><td>${fmt(r.finance)}</td><td>${fmt(r.visitors)}</td></tr>`).join('')}</tbody>` : '<tbody><tr><td class="empty-note">No vehicle views yet.</td></tr></tbody>';
-      barList($('#sources'), a.sources || [], r => sourceName(r.name), r => r.visitors);
-      barList($('#devices'), a.devices || [], r => r.name[0].toUpperCase() + r.name.slice(1), r => r.visitors);
-      barList($('#countries'), a.countries || [], r => countryName(r.name), r => r.visitors);
-      barList($('#pages'), a.pages || [], r => ({'/': 'Home / showroom', '/index.html': 'Home / showroom', '/vehicle.html': 'Vehicle pages', '/finance.html': 'Finance application', '/visit.html': 'Visit us', '/contact.html': 'Contact', '/privacy.html': 'Privacy policy', '/terms.html': 'Terms of use'}[r.name] || r.name), r => r.views);
-      barList($('#enquiry-types'), [['WhatsApp', t.whatsapp], ['Email', t.email], ['Phone calls', t.phone], ['Finance application', t.finance]].map(([name, n]) => ({name, n})).filter(r => r.n), r => r.name, r => r.n);
+      $('#vehicle-table').innerHTML = v.length ? `<thead><tr><th>#</th><th>Vehicle</th><th>Price</th><th>Page views</th><th>Showroom clicks</th><th>WhatsApp</th><th>Email</th><th>Finance</th><th>Visitors</th><th>Enquiry rate</th></tr></thead><tbody>${v.slice(0, 25).map((r, i) => { const car = carById(r.id); return `<tr${car ? '' : ' class="gone"'}><td>${i + 1}</td><td><span class="veh">${car ? `<img src="${escapeHtml(imageFor(photosOf(car)[0] || ''))}" alt="" loading="lazy">` : '<span class="ph"></span>'}${escapeHtml(carName(r.id, r.label))}</span></td><td>${car ? money(car.value) : '–'}</td><td>${fmt(r.views)}</td><td>${fmt(r.clicks)}</td><td>${fmt(r.whatsapp)}</td><td>${fmt(r.email)}</td><td>${fmt(r.finance)}</td><td>${fmt(r.visitors)}</td><td>${r.visitors ? pctOf(r.enquiries, r.visitors) + '%' : '–'}</td></tr>`; }).join('')}</tbody>` : '<tbody><tr><td class="empty-note">No vehicle views yet.</td></tr></tbody>';
+      barList($('#sources'), a.sources || [], r => sourceName(r.name), r => r.visitors, 'blue');
+      barList($('#devices'), a.devices || [], r => r.name[0].toUpperCase() + r.name.slice(1), r => r.visitors, 'teal');
+      barList($('#countries'), a.countries || [], r => countryName(r.name), r => r.visitors, 'violet');
+      barList($('#pages'), a.pages || [], r => pageName(r.name), r => r.views, 'amber');
+      barList($('#enquiry-types'), [['WhatsApp', t.whatsapp], ['Email', t.email], ['Phone calls', t.phone], ['Finance application', t.finance], ['Directions', t.directions]].map(([name, n]) => ({name, n})).filter(r => r.n), r => r.name, r => r.n);
       $('#analytics-summary').textContent = `Anonymous visits to driving-force.co.za since ${new Date(a.since).toLocaleDateString('en-ZA', {day: 'numeric', month: 'long', year: 'numeric'})}. No cookies, and no personal details are stored.`;
     } catch (e) { $('#analytics-error').textContent = e.message; }
   }
+  // Keep the "browsing" pill and the overview fresh while the dashboard is open.
+  setInterval(() => { if (!me || document.hidden) return; if (view === 'home') loadHome(); else api('/api/analytics?days=1').then(a => setLive(a.live)).catch(() => {}); }, 60000);
 
   if (resetToken) { $('#login-view').hidden = false; showForm('#reset-form'); }
   else api('/api/session').then(data => data.authenticated ? showApp(data.user) : showLogin()).catch(showLogin);
