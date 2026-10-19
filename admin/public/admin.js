@@ -412,7 +412,7 @@
     const every = Math.ceil(days.length / Math.max(3, Math.floor(w / 90)));
     const bars = days.map((d, i) => {
       const x = pad.l + i * slot + (slot - bw) / 2, bh = Math.max(0, y(0) - y(d.visitors)), r = Math.min(4, bw / 2, bh);
-      const date = new Date(d.day + 'T12:00:00');
+      const date = new Date(String(d.day).slice(0, 10) + 'T12:00:00');
       const label = date.toLocaleDateString('en-ZA', {day: 'numeric', month: 'short'});
       const path = bh ? `M${x},${y(0)} V${y(0) - bh + r} Q${x},${y(0) - bh} ${x + r},${y(0) - bh} H${x + bw - r} Q${x + bw},${y(0) - bh} ${x + bw},${y(0) - bh + r} V${y(0)} Z` : '';
       return `<rect class="hit" x="${pad.l + i * slot}" y="${pad.t}" width="${slot}" height="${h - pad.t - pad.b}" data-tip="${escapeHtml(date.toLocaleDateString('en-ZA', {weekday: 'short', day: 'numeric', month: 'short'}))}: ${fmt(d.visitors)} visitor${d.visitors === 1 ? '' : 's'}, ${fmt(d.pageviews)} page views${d.enquiries ? ', ' + fmt(d.enquiries) + ' enquiry clicks' : ''}" data-x="${x + bw / 2}" data-y="${y(d.visitors)}"></rect>${path ? `<path class="bar" d="${path}"/>` : ''}${i % every === 0 ? `<g class="axis"><text x="${x + bw / 2}" y="${h - 6}" text-anchor="middle">${escapeHtml(label)}</text></g>` : ''}`;
