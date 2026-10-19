@@ -1,15 +1,29 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-process.env.ADMIN_PASSWORD='correct horse battery';
-process.env.OWNER_EMAIL='Owner@Example.com';
-process.env.SESSION_SECRET='x'.repeat(48);
-process.env.DATA_KEY='k'.repeat(48);
+const {AuthError}=require('../lib/supabase.cjs');
 const auth=require('../lib/auth.cjs');
 const {buildVehicle}=require('../lib/vehicles.cjs');
 const {createStore}=require('../lib/store.cjs');
-const {createUserStore}=require('../lib/users.cjs');
-const {sessionHandler,usersHandler,vehiclesHandler,photosHandler}=require('../lib/handlers.cjs');
+const {sessionHandler,accountHandler,vehiclesHandler,photosHandler}=require('../lib/handlers.cjs');
 const seed=require('../lib/seed-vehicles.json');
+
+// In-memory stand-in for Supabase Auth plus the dashboard_users list.
+function fakeSupabase(){
+  const accounts=new Map([['owner@example.com',{id:'u1',password:'owner-password-1',confirmed:true}],['sales@example.com',{id:'u2',password:'sales-password-1',confirmed:true}],['stranger@example.com',{id:'u3',password:'stranger-pass-1',confirmed:true}]]);
+  const roles=new Map([['owner@example.com','owner'],['sales@example.com','staff']]);
+  const tokens=new Map();let n=0;const log=[];
+  const issue=email=>{const a='at'+(++n),r='rt'+n;tokens.set(a,{email,kind:'access'});tokens.set(r,{email,kind:'refresh'});return {accessToken:a,refreshToken:r,user:{id:accounts.get(email).id,email,user_metadata:{}}};};
+  const who=token=>{const t=tokens.get(token);if(!t||t.kind!=='access'||t.expired)throw new AuthError('invalid JWT',401);return t.email;};
+  return {accounts,roles,tokens,log,
+    async signIn(email,password){const a=accounts.get(email);if(!a||a.password!==password)throw new AuthError('Invalid login credentials',400);return issue(email);},
+    async refresh(rt){const t=tokens.get(rt);if(!t||t.kind!=='refresh')throw new AuthError('Invalid Refresh Token',400);tokens.delete(rt);return issue(t.email);},
+    async getUser(token){const email=who(token);return {id:accounts.get(email).id,email,user_metadata:{}};},
+    async role(token){const email=who(token);return roles.get(email)??null;},
+    async updatePassword(token,password){const email=who(token);accounts.get(email).password=password;return {};},
+    async signOut(token){tokens.delete(token);},
+    async recover(email,redirect){log.push(['recover',email,redirect]);return {};}
+  };
+}
 
 function fakeBlob(){
   const files=new Map();let clock=0;
@@ -26,64 +40,55 @@ const input={make:'Toyota',model:'Hilux',variant:'2.8 GD-6 Legend',year:'2023',p
 const jpeg='data:image/jpeg;base64,'+Buffer.from([255,216,255,224,1,2,3]).toString('base64');
 
 function setup(){
-  const blob=fakeBlob(),fetchImpl=fakeFetch(blob);
-  const users=createUserStore(blob,fetchImpl),store=createStore(blob,fetchImpl);
-  return {blob,users,login:sessionHandler({users}),accounts:usersHandler({users}),vehicles:vehiclesHandler({store,users}),photos:photosHandler({store,users})};
+  const blob=fakeBlob(),fetchImpl=fakeFetch(blob),supabase=fakeSupabase();
+  const store=createStore(blob,fetchImpl);
+  return {blob,supabase,login:sessionHandler({supabase}),account:accountHandler({supabase}),vehicles:vehiclesHandler({store,supabase}),photos:photosHandler({store,supabase})};
 }
+const cookiesFrom=res=>[].concat(res.headers['Set-Cookie']||[]).map(c=>c.split(';')[0]).join('; ');
 async function signIn(login,email,password){
   const res=response();await login(request('POST',{email,password}),res);
-  return {res,cookie:res.headers['Set-Cookie']?.split(';')[0]};
+  return {res,cookie:cookiesFrom(res)};
 }
 
-test('passwords are hashed and accounts are stored encrypted',async()=>{
-  const {blob,users}=setup();
-  const [owner]=await users.load();
-  assert.equal(owner.email,'owner@example.com');assert.equal(owner.owner,true);
-  assert.ok(!('password' in owner));
-  assert.equal(auth.verifyPassword(owner,'correct horse battery'),true);
-  assert.equal(auth.verifyPassword(owner,'wrong'),false);
-  assert.equal(auth.verifyPassword(undefined,'correct horse battery'),false);
-  const stored=[...blob.files.values()].find(f=>f.pathname.startsWith('users/'));
-  assert.ok(stored,'first owner is saved');
-  assert.ok(!stored.body.includes('owner@example.com'),'account file is encrypted');
-  assert.equal((await users.load())[0].salt,owner.salt,'owner account is stable across loads');
+test('Supabase sign-in is limited to the dashboard_users list',async()=>{
+  const {supabase,login,vehicles}=setup();
+  let res=response();await vehicles(request('GET'),res);assert.equal(res.statusCode,401);
+  assert.equal((await signIn(login,'owner@example.com','wrong')).res.statusCode,401);
+  const stranger=await signIn(login,'stranger@example.com','stranger-pass-1');
+  assert.equal(stranger.res.statusCode,403,'a Supabase login that is not on the list is refused');assert.match(stranger.res.data.error,/dashboard_users/);
+  assert.equal(stranger.cookie,'');
+  const owner=await signIn(login,' OWNER@example.com ','owner-password-1');
+  assert.equal(owner.res.statusCode,200);assert.deepEqual(owner.res.data.user,{email:'owner@example.com',name:'',owner:true});
+  assert.match([].concat(owner.res.headers['Set-Cookie']).join(),/HttpOnly; Secure; SameSite=Strict/);
+  res=response();await vehicles(request('GET',null,{cookie:owner.cookie}),res);assert.equal(res.statusCode,200);
+  const staff=await signIn(login,'sales@example.com','sales-password-1');assert.equal(staff.res.data.user.owner,false);
+  supabase.roles.delete('sales@example.com');
+  res=response();await vehicles(request('GET',null,{cookie:staff.cookie}),res);assert.equal(res.statusCode,401,'removing someone from the list ends their access');
+  res=response();await vehicles(request('GET',null,{cookie:'df_at=forged; df_rt=forged'}),res);assert.equal(res.statusCode,401);
 });
 
-test('email and password sign-in, sessions and team management',async()=>{
-  const {login,accounts,vehicles}=setup();
-  let res=response();await vehicles(request('GET'),res);assert.equal(res.statusCode,401);
-  assert.equal((await signIn(login,'owner@example.com','wrong password')).res.statusCode,401);
-  assert.equal((await signIn(login,'nobody@example.com','correct horse battery')).res.statusCode,401);
-  const owner=await signIn(login,' OWNER@example.com ','correct horse battery');
-  assert.equal(owner.res.statusCode,200);assert.deepEqual(owner.res.data.user,{email:'owner@example.com',name:'',owner:true});
-  assert.match(owner.res.headers['Set-Cookie'],/HttpOnly; Secure; SameSite=Strict/);
-  res=response();await login(request('GET',null,{cookie:owner.cookie}),res);assert.equal(res.data.user.email,'owner@example.com');
+test('expired sessions refresh, sign out, password change and reset',async()=>{
+  const {supabase,login,account,vehicles}=setup();
+  const owner=await signIn(login,'owner@example.com','owner-password-1');
+  const access=owner.cookie.match(/df_at=([^;]+)/)[1];
+  supabase.tokens.get(access).expired=true;
+  let res=response();await vehicles(request('GET',null,{cookie:owner.cookie}),res);
+  assert.equal(res.statusCode,200,'an expired access token is refreshed');assert.match(cookiesFrom(res),/df_at=at\d+; df_rt=rt\d+/);
+  const refreshed=cookiesFrom(res);
+  res=response();await account(request('PATCH',{currentPassword:'nope',newPassword:'brand-new-pass-1'},{cookie:refreshed}),res);assert.equal(res.statusCode,400);
+  res=response();await account(request('PATCH',{currentPassword:'owner-password-1',newPassword:'short'},{cookie:refreshed}),res);assert.equal(res.statusCode,400);
+  res=response();await account(request('PATCH',{currentPassword:'owner-password-1',newPassword:'brand-new-pass-1'},{cookie:refreshed}),res);assert.equal(res.statusCode,200);
+  assert.equal(supabase.accounts.get('owner@example.com').password,'brand-new-pass-1');
+  res=response();await login(request('DELETE',null,{cookie:refreshed}),res);assert.match(cookiesFrom(res),/df_at=; df_rt=/);
+  res=response();await vehicles(request('GET',null,{cookie:refreshed.replace(/df_rt=[^;]+/,'df_rt=gone')}),res);assert.equal(res.statusCode,401,'signed-out tokens stop working');
 
-  res=response();await accounts(request('POST',{email:'sales@example.com',name:'Sam',password:'short'},{cookie:owner.cookie}),res);assert.equal(res.statusCode,400);
-  res=response();await accounts(request('POST',{email:'sales@example.com',name:'Sam',password:'sales-start-123'},{cookie:owner.cookie}),res);assert.equal(res.statusCode,201);
-  res=response();await accounts(request('POST',{email:'SALES@example.com',password:'sales-start-123'},{cookie:owner.cookie}),res);assert.equal(res.statusCode,409);
-  const staff=await signIn(login,'sales@example.com','sales-start-123');assert.equal(staff.res.statusCode,200);assert.equal(staff.res.data.user.owner,false);
-  res=response();await vehicles(request('GET',null,{cookie:staff.cookie}),res);assert.equal(res.statusCode,200);
-  res=response();await accounts(request('GET',null,{cookie:staff.cookie}),res);assert.equal(res.statusCode,403,'staff cannot manage accounts');
-  res=response();await accounts(request('PATCH',{email:'owner@example.com',newPassword:'taken-over-123'},{cookie:staff.cookie}),res);assert.equal(res.statusCode,403);
-
-  res=response();await accounts(request('PATCH',{currentPassword:'wrong',newPassword:'sales-new-pass-1'},{cookie:staff.cookie}),res);assert.equal(res.statusCode,401);
-  res=response();await accounts(request('PATCH',{currentPassword:'sales-start-123',newPassword:'sales-new-pass-1'},{cookie:staff.cookie}),res);assert.equal(res.statusCode,200);
-  const refreshed=res.headers['Set-Cookie'].split(';')[0];
-  res=response();await vehicles(request('GET',null,{cookie:staff.cookie}),res);assert.equal(res.statusCode,401,'old sessions end after a password change');
-  res=response();await vehicles(request('GET',null,{cookie:refreshed}),res);assert.equal(res.statusCode,200,'this device stays signed in');
-  assert.equal((await signIn(login,'sales@example.com','sales-start-123')).res.statusCode,401);
-  assert.equal((await signIn(login,'sales@example.com','sales-new-pass-1')).res.statusCode,200);
-
-  res=response();await accounts(request('PATCH',{email:'sales@example.com',newPassword:'owner-reset-123'},{cookie:owner.cookie}),res);assert.equal(res.statusCode,200);
-  res=response();await vehicles(request('GET',null,{cookie:refreshed}),res);assert.equal(res.statusCode,401,'a reset signs the person out');
-  res=response();await accounts(request('DELETE',null,{cookie:owner.cookie,query:{email:'owner@example.com'}}),res);assert.equal(res.statusCode,400,'owners cannot remove themselves');
-  const again=await signIn(login,'sales@example.com','owner-reset-123');
-  res=response();await accounts(request('DELETE',null,{cookie:owner.cookie,query:{email:'sales@example.com'}}),res);assert.equal(res.statusCode,200);
-  res=response();await vehicles(request('GET',null,{cookie:again.cookie}),res);assert.equal(res.statusCode,401,'removed people lose access immediately');
-  assert.equal((await signIn(login,'sales@example.com','owner-reset-123')).res.statusCode,401);
-  const forged=owner.cookie.replace(/.$/,c=>c==='A'?'B':'A');
-  res=response();await vehicles(request('GET',null,{cookie:forged}),res);assert.equal(res.statusCode,401);
+  res=response();await login({...request('POST',{action:'recover',email:'owner@example.com'}),headers:{host:'admin.example',origin:'https://admin.example'}},res);
+  assert.equal(res.statusCode,200);assert.deepEqual(supabase.log.at(-1),['recover','owner@example.com','https://admin.example/']);
+  res=response();await login(request('POST',{action:'recover',email:'nobody@example.com'}),res);assert.equal(res.statusCode,200,'unknown emails get the same answer');
+  const {accessToken}=await supabase.signIn('owner@example.com','brand-new-pass-1');
+  res=response();await login(request('POST',{action:'reset',accessToken:'bad',password:'reset-pass-123'}),res);assert.equal(res.statusCode,400);
+  res=response();await login(request('POST',{action:'reset',accessToken,password:'reset-pass-123'}),res);assert.equal(res.statusCode,200);
+  assert.equal((await signIn(login,'owner@example.com','reset-pass-123')).res.statusCode,200);
 });
 
 test('new vehicles match the showroom inventory shape',()=>{
@@ -104,7 +109,7 @@ test('new vehicles match the showroom inventory shape',()=>{
 
 test('photos, prices, order and removal end to end',async()=>{
   const {blob,login,vehicles,photos}=setup();
-  const {cookie}=await signIn(login,'owner@example.com','correct horse battery');
+  const {cookie}=await signIn(login,'owner@example.com','owner-password-1');
   const call=async(handler,method,body,query={})=>{const res=response();await handler(request(method,body,{cookie,query}),res);return res;};
   const photoFiles=()=>[...blob.files.keys()].filter(k=>k.startsWith('vehicles/'));
   let res=await call(vehicles,'GET');assert.equal(res.data.vehicles.length,49);

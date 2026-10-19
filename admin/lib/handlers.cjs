@@ -1,9 +1,10 @@
 const auth=require('./auth.cjs');
 const {buildVehicle,VehicleError,bodyTypes,transmissions,fuelTypes,photosOf,parsePrice,setPrice,setPhotos}=require('./vehicles.cjs');
 const {createStore}=require('./store.cjs');
-const {createUserStore}=require('./users.cjs');
+const {createSupabaseAuth}=require('./supabase.cjs');
 const maxPhotoBytes=3*1024*1024;
 const minPassword=10;
+const publicUser=user=>({email:user.email,name:user.name||'',owner:Boolean(user.owner)});
 function parseBody(req){
   if(typeof req.body==='string'){try{return JSON.parse(req.body);}catch{throw new VehicleError('The request could not be read.');}}
   return req.body||{};
@@ -30,17 +31,9 @@ function readPhoto(dataUrl){
   if(!(photo[0]===255&&photo[1]===216&&photo[2]===255))throw new VehicleError('The photo could not be read. Please choose a JPG or PNG.');
   return photo;
 }
-const publicUser=user=>({email:user.email,name:user.name||'',owner:Boolean(user.owner)});
 const queryValue=(req,key)=>String(req.query?.[key]??new URL(req.url,'http://admin').searchParams.get(key)??'');
-// Accounts are re-read on every request so a removed user or reset password takes effect immediately.
-async function currentUser(req,users){
-  const session=auth.readSession(req);
-  if(!session)return null;
-  const user=(await users.load()).find(u=>u.email===session.email);
-  return user&&user.salt.slice(0,8)===session.saltPrefix?user:null;
-}
-async function requireUser(req,users){
-  const user=await currentUser(req,users);
+async function requireUser(req,res,supabase){
+  const user=await auth.resolveUser(req,res,supabase);
   if(!user)throw new VehicleError('Please sign in again.',401);
   return user;
 }
@@ -49,75 +42,68 @@ function checkPassword(password){
   if(password.length>200)throw new VehicleError('That password is too long.');
   return password;
 }
-function sessionHandler({users=createUserStore()}={}){
+const notOnList='This email can sign in to Supabase but has not been given access to the stock admin. Ask an owner to add it to the dashboard_users list.';
+function sessionHandler({supabase=createSupabaseAuth()}={}){
   return async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
     try{
       guard(req);
-      if(req.method==='GET'){const user=await currentUser(req,users);return res.status(200).json({authenticated:Boolean(user),user:user?publicUser(user):null});}
-      if(req.method==='DELETE'){res.setHeader('Set-Cookie',auth.clearedCookie);return res.status(200).json({authenticated:false});}
+      if(req.method==='GET'){const user=await auth.resolveUser(req,res,supabase);return res.status(200).json({authenticated:Boolean(user),user:user?publicUser(user):null});}
+      if(req.method==='DELETE'){
+        const token=auth.readCookie(req,auth.accessCookie);auth.forget(req);
+        if(token)await supabase.signOut(token);
+        res.setHeader('Set-Cookie',auth.clearedCookies);return res.status(200).json({authenticated:false});
+      }
       if(req.method!=='POST'){res.setHeader('Allow','GET, POST, DELETE');return res.status(405).json({error:'Method not allowed.'});}
       const body=parseBody(req),email=auth.normaliseEmail(body.email);
       const keys=['ip:'+String(req.headers['x-forwarded-for']||req.socket?.remoteAddress||'unknown').split(',')[0].trim(),'email:'+email];
       if(auth.throttled(keys))throw new VehicleError('Too many attempts. Please wait 15 minutes and try again.',429);
-      const user=(await users.load()).find(u=>u.email===email);
-      if(!auth.verifyPassword(user,body.password)){auth.recordFailure(keys);throw new VehicleError('That email and password do not match.',401);}
-      res.setHeader('Set-Cookie',auth.sessionCookie(auth.createSession(user)));
-      return res.status(200).json({authenticated:true,user:publicUser(user)});
-    }catch(error){return respondError(res,error);}
-  };
-}
-function usersHandler({users=createUserStore()}={}){
-  return async(req,res)=>{
-    res.setHeader('Cache-Control','no-store');
-    try{
-      guard(req);
-      const me=await requireUser(req,users);
-      const all=await users.load();
-      if(req.method==='PATCH'){
-        const body=parseBody(req);
-        const targetEmail=body.email?auth.normaliseEmail(body.email):me.email;
-        const target=all.find(u=>u.email===targetEmail);
-        if(!target)throw new VehicleError('That account no longer exists.',404);
-        if(target.email===me.email){
-          if(!auth.verifyPassword(me,body.currentPassword))throw new VehicleError('Your current password is not correct.',401);
-        }else if(!me.owner)throw new VehicleError('Only owners can reset other people’s passwords.',403);
-        Object.assign(target,auth.hashPassword(checkPassword(body.newPassword)));
-        await users.save(all);
-        // Keep the person who changed their own password signed in on this device.
-        if(target.email===me.email)res.setHeader('Set-Cookie',auth.sessionCookie(auth.createSession(target)));
-        return res.status(200).json({updated:target.email});
-      }
-      if(!me.owner)throw new VehicleError('Only owners can manage accounts.',403);
-      if(req.method==='GET')return res.status(200).json({users:all.map(publicUser)});
-      if(req.method==='POST'){
-        const body=parseBody(req),email=auth.normaliseEmail(body.email);
+      if(body.action==='recover'){
+        // Always answers the same way so the form does not reveal which emails have accounts.
         if(!auth.validEmail(email))throw new VehicleError('Please enter a valid email address.');
-        if(all.some(u=>u.email===email))throw new VehicleError('That email already has an account.',409);
-        const name=typeof body.name==='string'?body.name.trim().slice(0,80):'';
-        const user={email,name,owner:body.owner===true,...auth.hashPassword(checkPassword(body.password)),created:new Date().toISOString()};
-        await users.save([...all,user]);
-        return res.status(201).json({user:publicUser(user)});
+        auth.recordFailure(keys);
+        await supabase.recover(email,'https://'+req.headers.host+'/').catch(error=>console.error(error));
+        return res.status(200).json({sent:true});
       }
-      if(req.method==='DELETE'){
-        const email=auth.normaliseEmail(queryValue(req,'email'));
-        if(email===me.email)throw new VehicleError('You cannot remove your own account.');
-        const target=all.find(u=>u.email===email);
-        if(!target)throw new VehicleError('That account has already been removed.',404);
-        await users.save(all.filter(u=>u!==target));
-        return res.status(200).json({removed:email});
+      if(body.action==='reset'){
+        // Sets a new password with the one-time token from a Supabase password-reset link.
+        const password=checkPassword(body.password);
+        if(typeof body.accessToken!=='string'||!body.accessToken)throw new VehicleError('This reset link is not valid. Please request a new one.');
+        try{await supabase.updatePassword(body.accessToken,password);}catch(error){if(error.status>=400&&error.status<500)throw new VehicleError(error.status===422?error.message:'This reset link has expired. Please request a new one.',400);throw error;}
+        return res.status(200).json({updated:true});
       }
-      res.setHeader('Allow','GET, POST, PATCH, DELETE');
-      return res.status(405).json({error:'Method not allowed.'});
+      let session;
+      try{session=await supabase.signIn(email,typeof body.password==='string'?body.password:'');}
+      catch(error){if(error.status>=400&&error.status<500){auth.recordFailure(keys);throw new VehicleError(/confirm/i.test(error.message)?'Please confirm this email address in Supabase first.':'That email and password do not match.',401);}throw error;}
+      const role=await supabase.role(session.accessToken);
+      if(role!=='owner'&&role!=='staff'){await supabase.signOut(session.accessToken);throw new VehicleError(notOnList,403);}
+      res.setHeader('Set-Cookie',auth.sessionCookies(session));
+      return res.status(200).json({authenticated:true,user:publicUser({email:auth.normaliseEmail(session.user?.email||email),name:session.user?.user_metadata?.name||'',owner:role==='owner'})});
     }catch(error){return respondError(res,error);}
   };
 }
-function vehiclesHandler({store=createStore(),users=createUserStore()}={}){
+function accountHandler({supabase=createSupabaseAuth()}={}){
   return async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
     try{
       guard(req);
-      await requireUser(req,users);
+      const me=await requireUser(req,res,supabase);
+      if(req.method!=='PATCH'){res.setHeader('Allow','PATCH');return res.status(405).json({error:'Method not allowed.'});}
+      const body=parseBody(req),password=checkPassword(body.newPassword);
+      try{await supabase.signIn(me.email,typeof body.currentPassword==='string'?body.currentPassword:'');}
+      catch(error){if(error.status>=400&&error.status<500)throw new VehicleError('Your current password is not correct.',400);throw error;}
+      try{await supabase.updatePassword(me.token,password);}
+      catch(error){if(error.status===422)throw new VehicleError(error.message);throw error;}
+      return res.status(200).json({updated:true});
+    }catch(error){return respondError(res,error);}
+  };
+}
+function vehiclesHandler({store=createStore(),supabase=createSupabaseAuth()}={}){
+  return async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    try{
+      guard(req);
+      await requireUser(req,res,supabase);
       if(req.method==='GET'){
         const data=await store.load();
         return res.status(200).json({vehicles:data.vehicles,updated:data.updated||null,options:{bodyTypes,transmissions,fuelTypes},siteUrl:process.env.SITE_URL||'https://www.driving-force.co.za/'});
@@ -175,12 +161,12 @@ function vehiclesHandler({store=createStore(),users=createUserStore()}={}){
   };
 }
 // Photos upload one per request to stay well inside the platform's request size limit.
-function photosHandler({store=createStore(),users=createUserStore()}={}){
+function photosHandler({store=createStore(),supabase=createSupabaseAuth()}={}){
   return async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
     try{
       guard(req);
-      await requireUser(req,users);
+      await requireUser(req,res,supabase);
       if(req.method==='POST'){
         const url=await store.uploadPhoto(readPhoto(parseBody(req).photo));
         return res.status(201).json({url});
@@ -199,4 +185,4 @@ function photosHandler({store=createStore(),users=createUserStore()}={}){
     }catch(error){return respondError(res,error);}
   };
 }
-module.exports={sessionHandler,usersHandler,vehiclesHandler,photosHandler};
+module.exports={sessionHandler,accountHandler,vehiclesHandler,photosHandler};

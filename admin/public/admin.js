@@ -10,11 +10,11 @@
   async function api(path, init = {}) {
     const response = await fetch(path, {...init, headers: {'Content-Type': 'application/json', ...(init.headers || {})}});
     const data = await response.json().catch(() => ({}));
-    if (response.status === 401 && path !== '/api/session' && !(path === '/api/users' && init.method === 'PATCH')) showLogin();
+    if (response.status === 401 && path !== '/api/session') showLogin();
     if (!response.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
     return data;
   }
-  function showLogin() { me = null; $('#app-view').hidden = true; $('#session').hidden = true; $('#login-view').hidden = false; $('#login-form [name=email]').focus(); }
+  function showLogin() { me = null; $('#app-view').hidden = true; $('#session').hidden = true; $('#login-view').hidden = false; $('#recover-form').hidden = true; $('#reset-form').hidden = true; $('#login-form').hidden = false; $('#login-form [name=email]').focus(); }
   function showApp(user) { me = user; $('#who').textContent = user.name || user.email; $('#login-view').hidden = true; $('#app-view').hidden = false; $('#session').hidden = false; load(); }
   function notify(message) { const n = $('#notice'); n.textContent = message; n.hidden = !message; }
   const imageFor = url => /^https?:/.test(url) ? url : new URL(url, siteUrl).href;
@@ -279,54 +279,47 @@
     finally { button.disabled = false; }
   });
 
-  const accountDialog = $('#account-dialog'), passwordForm = $('#password-form'), userForm = $('#user-form');
+  const accountDialog = $('#account-dialog'), passwordForm = $('#password-form');
   accountDialog.querySelector('[data-close]').addEventListener('click', () => accountDialog.close());
-  async function loadTeam() {
-    const {users} = await api('/api/users');
-    $('#team-list').innerHTML = users.map(u => `<li><div><strong>${escapeHtml(u.name || u.email)}</strong>${u.owner ? '<span class="badge">Owner</span>' : ''}${u.name ? `<div class="meta">${escapeHtml(u.email)}</div>` : ''}</div>${u.email === me.email ? '<span class="meta">You</span>' : `<div class="row-actions"><button class="button ghost small" type="button" data-reset="${escapeHtml(u.email)}">Reset password</button><button class="button ghost small" type="button" data-remove-user="${escapeHtml(u.email)}">Remove</button></div>`}</li>`).join('');
-  }
   $('#account-open').addEventListener('click', () => {
-    passwordForm.reset(); userForm.reset(); accountDialog.querySelectorAll('.error').forEach(e => e.textContent = '');
-    passwordForm.username.value = me.email;
-    $('#team').hidden = !me.owner;
-    if (me.owner) loadTeam().catch(e => { userForm.querySelector('.error').textContent = e.message; });
+    passwordForm.reset(); passwordForm.querySelector('.error').textContent = '';
+    passwordForm.username.value = me.email; $('#team').hidden = !me.owner;
     accountDialog.showModal();
   });
   passwordForm.addEventListener('submit', async event => {
     event.preventDefault();
     const button = passwordForm.querySelector('button'), error = passwordForm.querySelector('.error');
     button.disabled = true; error.textContent = '';
-    try { await api('/api/users', {method: 'PATCH', body: JSON.stringify({currentPassword: passwordForm.currentPassword.value, newPassword: passwordForm.newPassword.value})}); passwordForm.reset(); accountDialog.close(); notify('Your password has been updated.'); }
+    try { await api('/api/account', {method: 'PATCH', body: JSON.stringify({currentPassword: passwordForm.currentPassword.value, newPassword: passwordForm.newPassword.value})}); passwordForm.reset(); accountDialog.close(); notify('Your password has been updated.'); }
     catch (e) { error.textContent = e.message; }
     finally { button.disabled = false; }
   });
-  userForm.addEventListener('submit', async event => {
+
+  // ---- Forgotten passwords, handled by Supabase reset emails ----
+  function showForm(id) { ['#login-form', '#recover-form', '#reset-form'].forEach(f => { $(f).hidden = f !== id; }); $(id).querySelector('input:not([hidden])').focus(); }
+  $('#forgot-open').addEventListener('click', () => { $('#recover-form').email.value = $('#login-form').email.value; showForm('#recover-form'); });
+  $('#recover-form [data-back]').addEventListener('click', () => showForm('#login-form'));
+  $('#recover-form').addEventListener('submit', async event => {
     event.preventDefault();
-    const button = userForm.querySelector('button'), error = userForm.querySelector('.error');
+    const form = event.target, button = form.querySelector('[type=submit]'), error = form.querySelector('.error');
     button.disabled = true; error.textContent = '';
-    try {
-      const {user} = await api('/api/users', {method: 'POST', body: JSON.stringify({email: userForm.email.value, name: userForm.name.value, password: userForm.password.value, owner: userForm.owner.checked})});
-      userForm.reset(); await loadTeam(); error.textContent = ''; notify(`${user.email} can now sign in with the starting password you set.`);
-    } catch (e) { error.textContent = e.message; }
+    try { await api('/api/session', {method: 'POST', body: JSON.stringify({action: 'recover', email: form.email.value})}); error.textContent = ''; form.querySelector('.muted').textContent = 'If that email has a login, a reset link is on its way. Check your inbox (and spam folder).'; }
+    catch (e) { error.textContent = e.message; }
     finally { button.disabled = false; }
   });
-  $('#team-list').addEventListener('click', async event => {
-    const error = userForm.querySelector('.error'); error.textContent = '';
-    const reset = event.target.closest('[data-reset]'), remove = event.target.closest('[data-remove-user]');
-    try {
-      if (reset) {
-        const password = prompt(`New password for ${reset.dataset.reset} (at least 10 characters). Share it with them privately.`);
-        if (!password) return;
-        await api('/api/users', {method: 'PATCH', body: JSON.stringify({email: reset.dataset.reset, newPassword: password})});
-        notify(`Password reset for ${reset.dataset.reset}. Their other sessions have been signed out.`);
-      }
-      if (remove) {
-        if (!confirm(`Remove ${remove.dataset.removeUser}? They will be signed out and can no longer sign in.`)) return;
-        await api('/api/users?email=' + encodeURIComponent(remove.dataset.removeUser), {method: 'DELETE'});
-        await loadTeam(); notify(`${remove.dataset.removeUser} has been removed.`);
-      }
-    } catch (e) { error.textContent = e.message; }
+  // Supabase reset links return here with the one-time token in the address fragment.
+  const recovery = new URLSearchParams(location.hash.slice(1));
+  const resetToken = recovery.get('type') === 'recovery' ? recovery.get('access_token') : null;
+  if (location.hash) history.replaceState(null, '', location.pathname);
+  $('#reset-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.target, button = form.querySelector('button'), error = form.querySelector('.error');
+    button.disabled = true; error.textContent = '';
+    try { await api('/api/session', {method: 'POST', body: JSON.stringify({action: 'reset', accessToken: resetToken, password: form.password.value})}); form.reset(); showForm('#login-form'); $('#login-form .error').textContent = ''; $('#login-form .muted').textContent = 'Your password has been changed. Sign in with the new password.'; }
+    catch (e) { error.textContent = e.message; }
+    finally { button.disabled = false; }
   });
 
-  api('/api/session').then(data => data.authenticated ? showApp(data.user) : showLogin()).catch(showLogin);
+  if (resetToken) { $('#login-view').hidden = false; showForm('#reset-form'); }
+  else api('/api/session').then(data => data.authenticated ? showApp(data.user) : showLogin()).catch(showLogin);
 })();

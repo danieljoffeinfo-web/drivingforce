@@ -23,6 +23,22 @@
     <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
     <p class="error" role="alert"></p>
     <button class="button" type="submit">Sign in</button>
+    <button class="link forgot" type="button" id="forgot-open">Forgot password?</button>
+  </form>
+  <form id="recover-form" class="card narrow" hidden>
+    <h1>Reset password</h1>
+    <p class="muted">Enter your email and we’ll send you a link to choose a new password.</p>
+    <label>Email<input name="email" type="email" autocomplete="username" required></label>
+    <p class="error" role="alert"></p>
+    <button class="button" type="submit">Send reset link</button>
+    <button class="link forgot" type="button" data-back>Back to sign in</button>
+  </form>
+  <form id="reset-form" class="card narrow" hidden>
+    <h1>Choose a new password</h1>
+    <input type="email" name="username" autocomplete="username" hidden>
+    <label>New password <small>(at least 10 characters)</small><input name="password" type="password" autocomplete="new-password" minlength="10" required></label>
+    <p class="error" role="alert"></p>
+    <button class="button" type="submit">Save new password</button>
   </form>
 </main>
 
@@ -98,19 +114,12 @@
       <div><button class="button" type="submit">Update password</button></div>
     </form>
     <section id="team" class="stack" hidden>
-      <h3>Team</h3>
-      <ul id="team-list" class="team-list"></ul>
-      <form id="user-form" class="stack">
-        <h4>Add a person</h4>
-        <div class="grid">
-          <label>Email<input name="email" type="email" autocomplete="off" required></label>
-          <label>Name <small>(optional)</small><input name="name" maxlength="80" autocomplete="off"></label>
-          <label class="wide">Starting password <small>(at least 10 characters — share it with them privately)</small><input name="password" type="text" autocomplete="off" minlength="10" required></label>
-          <label class="check wide"><input name="owner" type="checkbox"> Owner — can add and remove people</label>
-        </div>
-        <p class="error" role="alert"></p>
-        <div><button class="button" type="submit">Add person</button></div>
-      </form>
+      <h3>Team access</h3>
+      <p class="muted">Logins are managed in Supabase (project “drivingforce”):</p>
+      <ol class="steps">
+        <li><strong>Authentication → Users → Add user</strong>: enter their email and a password, and tick “Auto Confirm User”. Reset or delete logins there too.</li>
+        <li><strong>Table Editor → dashboard_users</strong>: add their email with role <code>staff</code> (or <code>owner</code>). Delete the row to remove their access to this dashboard.</li>
+      </ol>
     </section>
   </div>
 </dialog>

@@ -2,10 +2,9 @@
 
 A separate Vercel project (`driving-force-admin`) for adding vehicles to, and removing them from, the showroom website.
 
-- Everyone signs in with their own email and password. Owners add and remove people, and reset passwords, under **Account**; everyone can change their own password there. Passwords need at least 10 characters and are stored as scrypt hashes.
-- The first owner is `OWNER_EMAIL`, who signs in with `ADMIN_PASSWORD` the first time. After that, accounts live in an encrypted file in the Blob store (`users/`, encrypted with `DATA_KEY`), and `ADMIN_PASSWORD` is no longer used. Changing `DATA_KEY` makes the existing accounts unreadable.
-- `SESSION_SECRET` signs the 12-hour sign-in cookie. Changing or resetting a password, or removing a person, signs out their other sessions straight away.
-- There is no emailed "forgot password" link: an owner resets the password and shares it privately.
+- Sign-in uses Supabase Auth in the `drivingforce` Supabase project (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`). Create logins and set or reset passwords under **Authentication → Users** ("Add user", tick "Auto Confirm User").
+- Only emails listed in the `public.dashboard_users` table (role `owner` or `staff`) get into the dashboard; deleting a row removes access within a minute. The table has row-level security with no policies, so it is not readable through the public API; the server checks it with the `dashboard_role()` function.
+- Sessions are the Supabase access and refresh tokens in HttpOnly cookies; expired access tokens are refreshed automatically. Everyone can change their own password under **Account**, and "Forgot password?" sends a Supabase reset email that returns to the dashboard.
 - Inventory and new photos are stored in the `driving-force-inventory` Vercel Blob store (`BLOB_READ_WRITE_TOKEN`).
 - Every change publishes `inventory.json` to the store. The showroom (`dist/inventory.js`) reads that file and falls back to the bundled `dist/vehicles.json` until the first change, or if the store cannot be reached. Changes appear on the website within about a minute.
 - Vehicles can have up to 20 photos; the first is the main photo. Photos upload one at a time through `/api/photos` and are scaled to 1600px in the browser first.
