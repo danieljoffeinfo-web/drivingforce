@@ -43,6 +43,8 @@
 </main>
 
 <main id="app-view" hidden>
+  <nav class="tabs" aria-label="Dashboard sections"><button type="button" class="tab active" data-tab="stock" aria-pressed="true">Stock</button><button type="button" class="tab" data-tab="analytics" aria-pressed="false">Analytics</button></nav>
+  <div id="stock-view">
   <section class="toolbar">
     <div>
       <h1>Vehicles on the website</h1>
@@ -57,6 +59,25 @@
   <p class="notice" id="notice" role="status" hidden></p>
   <div class="order-bar" id="order-bar" hidden><span>You’ve changed the order. It goes live when you save.</span><div><button class="button ghost small" type="button" id="order-undo">Undo</button><button class="button small" type="button" id="order-save">Save order</button></div></div>
   <ul id="list" class="card-grid size-l" aria-live="polite"></ul>
+  </div>
+  <div id="analytics-view" hidden>
+    <section class="toolbar">
+      <div><h1>Website analytics</h1><p class="muted" id="analytics-summary">Anonymous visits to driving-force.co.za. No cookies, and no personal details are stored.</p></div>
+      <div class="actions"><select id="analytics-days" aria-label="Date range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option></select><button type="button" class="button ghost" id="analytics-refresh">Refresh</button></div>
+    </section>
+    <p class="error" id="analytics-error" role="alert"></p>
+    <div class="kpis" id="kpis"></div>
+    <div class="analytics-grid">
+      <section class="panel span-2"><h2>Visitors per day</h2><div id="daily-chart" class="chart"></div></section>
+      <section class="panel" id="reviews-panel"><h2>Google reviews</h2><div id="reviews"></div></section>
+      <section class="panel span-3"><h2>Most popular vehicles</h2><p class="muted small">Views of the vehicle page, clicks on the vehicle in the showroom, and enquiry clicks about it.</p><div class="table-wrap"><table class="data-table" id="vehicle-table"></table></div></section>
+      <section class="panel"><h2>Where visitors come from</h2><ul class="bar-list" id="sources"></ul></section>
+      <section class="panel"><h2>Devices</h2><ul class="bar-list" id="devices"></ul></section>
+      <section class="panel"><h2>Countries</h2><ul class="bar-list" id="countries"></ul></section>
+      <section class="panel span-3"><h2>Enquiry clicks</h2><ul class="bar-list" id="enquiry-types"></ul></section>
+      <section class="panel span-3"><h2>Most viewed pages</h2><ul class="bar-list" id="pages"></ul></section>
+    </div>
+  </div>
 </main>
 
 <dialog id="add-dialog" class="wide-dialog" aria-labelledby="add-title">

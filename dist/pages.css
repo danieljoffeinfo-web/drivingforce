@@ -10,3 +10,7 @@
 .vehicle-visit-actions>.button{margin:0;flex-shrink:0}
 .vehicle-visit-actions>.phone-link{display:inline-flex;align-items:center;min-height:54px;margin:0;white-space:nowrap}
 @media(max-width:700px){.vehicle-visit-actions{flex-direction:column;align-items:stretch;gap:12px}.vehicle-visit-actions>.phone-link{justify-content:center;min-height:44px}}
+/* Privacy policy and terms of use. */
+.policy-content .policy-updated{color:#646464;font-size:13px}
+.policy-content ul{padding-left:20px;margin:0 0 18px}
+.policy-content li{margin-bottom:8px;line-height:1.65}

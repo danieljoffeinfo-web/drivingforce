@@ -17,6 +17,8 @@ function createSupabaseAuth({url=process.env.SUPABASE_URL,key=process.env.SUPABA
     role:token=>call('/rest/v1/rpc/dashboard_role',{method:'POST',token,body:{}}),
     updatePassword:(token,password)=>call('/auth/v1/user',{method:'PUT',token,body:{password}}),
     signOut:token=>call('/auth/v1/logout',{method:'POST',token}).catch(()=>null),
+    // Calls a database function; with a token it runs as that signed-in person.
+    rpc:(name,body,token)=>call('/rest/v1/rpc/'+name,{method:'POST',token,body}),
     recover:(email,redirectTo)=>call('/auth/v1/recover'+(redirectTo?'?redirect_to='+encodeURIComponent(redirectTo):''),{method:'POST',body:{email}})
   };
 }

@@ -174,3 +174,42 @@ test('editing details keeps the id, photos and position',async()=>{
   assert.equal(saved.localImage,car.localImage);assert.equal(saved.displayName,undefined);assert.deepEqual(saved.description,car.description);assert.equal(saved.descriptionSource,car.descriptionSource);
   res=await call('GET');assert.equal(String(res.data.vehicles[2].id),String(car.id),'position is unchanged');
 });
+
+test('website visits are recorded anonymously and only from the showroom',async()=>{
+  process.env.ANALYTICS_SECRET='s'.repeat(40);
+  const {trackHandler,cleanSource,device}=require('../lib/analytics.cjs');
+  const calls=[];const supabase={rpc:async(name,body)=>{calls.push([name,body]);return null;}};
+  const inventory={vehicles:[{id:2746,year:2020,make:'PORSCHE',model:'911',displayName:'Porsche 911 Carrera S',stock_code:'TP12828'}]};
+  const handler=trackHandler({supabase,fetchImpl:async()=>({json:async()=>inventory})});
+  const send=async(body,headers={})=>{const res=response();res.end=()=>res;await handler({method:'POST',body:JSON.stringify(body),headers:{origin:'https://www.driving-force.co.za','user-agent':'Mozilla/5.0 (iPhone) Mobile','x-forwarded-for':'203.0.113.9','x-vercel-ip-country':'ZA',...headers},socket:{}},res);return res;};
+  let res=await send({kind:'vehicle_view',path:'/vehicle.html?id=2746',vehicleId:'2746',source:'https://www.google.co.za/'});
+  assert.equal(res.statusCode,204);assert.equal(calls.length,1);
+  const [name,args]=calls[0];
+  assert.equal(name,'track_event');assert.equal(args.p_secret,process.env.ANALYTICS_SECRET);
+  assert.equal(args.p_path,'/vehicle.html','query strings are dropped');assert.equal(args.p_vehicle_label,'2020 Porsche 911 Carrera S · TP12828');
+  assert.equal(args.p_source,'google');assert.equal(args.p_device,'mobile');assert.equal(args.p_country,'ZA');
+  assert.ok(!JSON.stringify(args).includes('203.0.113.9'),'the IP address is never stored');assert.equal(args.p_visitor.length,22);
+  await send({kind:'pageview',path:'/'});assert.equal(calls[1][1].p_visitor,args.p_visitor,'same visitor on the same day');
+  await send({kind:'pageview'},{origin:'https://evil.example'});
+  await send({kind:'pageview'},{'user-agent':'Googlebot/2.1'});
+  await send({kind:'hack'});
+  assert.equal(calls.length,2,'other sites, bots and unknown events are ignored');
+  assert.equal(cleanSource('https://l.facebook.com/x'),'facebook');assert.equal(cleanSource(''),'direct');assert.equal(device('Mozilla/5.0 (iPad; CPU OS)'),'tablet');
+});
+
+test('analytics and reviews need a dashboard sign-in',async()=>{
+  const {analyticsHandler,reviewsHandler}=require('../lib/analytics.cjs');
+  const {supabase,login}=setup();
+  supabase.rpc=async(name,body,token)=>({name,body,token});
+  const {cookie}=await signIn(login,'owner@example.com','owner-password-1');
+  let res=response();await analyticsHandler({supabase})({method:'GET',url:'/api/analytics?days=7',headers:{}},res);assert.equal(res.statusCode,401);
+  res=response();await analyticsHandler({supabase})({method:'GET',url:'/api/analytics?days=7',headers:{cookie}},res);
+  assert.equal(res.statusCode,200);assert.equal(res.data.name,'dashboard_analytics');assert.deepEqual(res.data.body,{p_days:7});assert.ok(res.data.token,'runs as the signed-in person');
+  delete process.env.GOOGLE_PLACES_API_KEY;
+  res=response();await reviewsHandler({supabase})({method:'GET',headers:{cookie}},res);assert.deepEqual(res.data,{configured:false});
+  process.env.GOOGLE_PLACES_API_KEY='k';
+  const fetchImpl=async url=>({json:async()=>url.includes('searchText')?{places:[{id:'abc'}]}:{displayName:{text:'Driving Force'},rating:4.8,userRatingCount:212,googleMapsUri:'https://maps.google.com/?cid=1',reviews:[{rating:5,text:{text:'Great service'},authorAttribution:{displayName:'Thabo'},relativePublishTimeDescription:'a week ago'}]}});
+  res=response();await reviewsHandler({supabase,fetchImpl})({method:'GET',headers:{cookie}},res);
+  assert.equal(res.data.rating,4.8);assert.equal(res.data.count,212);assert.equal(res.data.reviews[0].author,'Thabo');
+  delete process.env.GOOGLE_PLACES_API_KEY;
+});
