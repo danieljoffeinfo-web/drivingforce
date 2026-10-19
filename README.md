@@ -41,13 +41,15 @@ Every vehicle card has two enquiry buttons:
 - **WhatsApp us** opens a chat with sales on 082 425 4253 (`wa.me/27824254253`), prefilled with the vehicle, stock code and price.
 - **Email us** opens a short form (name, email, optional phone, message) prefilled with the vehicle. It posts to `api/enquiry.js` (`lib/enquiry.cjs`), which sends the enquiry through [Resend](https://resend.com) with the customer's address as reply-to.
 
-Enquiries are in-house alerts, so no sending domain is verified in Resend. Email delivery needs these Vercel environment variables:
+Every enquiry goes to danny@drivingforce.biz, danieljoffeinfo@gmail.com and tyron@drivingforce.biz, as a separate email to each so one refused address cannot block the others. Email delivery uses these Vercel environment variables:
 
 | Variable | Value |
 | --- | --- |
 | `RESEND_API_KEY` | Resend API key (sensitive) |
-| `ENQUIRY_TO` | The email address that owns the Resend account. Defaults to `info@drivingforce.biz` |
+| `ENQUIRY_TO` | Optional. Comma-separated recipients, replacing the three above |
 | `ENQUIRY_FROM` | Optional. Defaults to `Driving Force Website <onboarding@resend.dev>` |
+
+Until a sending domain is verified in Resend, its onboarding sender only delivers to the Resend account owner's own address. To reach all three recipients, verify `drivingforce.biz` in Resend (Domains → Add domain, then add the DNS records it lists) and set `ENQUIRY_FROM` to an address on that domain, for example `Driving Force Website <website@drivingforce.biz>`.
 
 Without a verified domain, Resend only delivers mail sent from `onboarding@resend.dev` to the Resend account owner's address, so `ENQUIRY_TO` must be that address (or the Resend account must be registered to `info@drivingforce.biz`). Verifying a domain later only requires setting `ENQUIRY_FROM`.
 

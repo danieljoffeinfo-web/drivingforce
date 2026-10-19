@@ -16,13 +16,28 @@ test('enquiry email escapes values and names the vehicle',()=>{
   assert.match(subject,/2020 Porsche 911 Carrera S \(TP12828\)/);
   assert.match(html,/&lt;b&gt;hi&lt;\/b&gt;<br>there/);assert.match(html,/R\s2\s395\s995/);
 });
-test('enquiry is sent through Resend to the fixed recipient with the customer as reply-to',async()=>{
-  let sent;const handler=createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env,fetchImpl:async(url,options)=>{sent={url,options};return new Response('{"id":"1"}',{status:200});}});
+test('enquiry is sent through Resend to each fixed recipient with the customer as reply-to',async()=>{
+  const sent=[];const handler=createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env,fetchImpl:async(url,options)=>{sent.push({url,options});return new Response('{"id":"1"}',{status:200});}});
   const res=response();await handler(request({...payload(),to:'attacker@example.com'}),res);
-  assert.equal(res.statusCode,200);assert.equal(sent.url,'https://api.resend.com/emails');
-  const body=JSON.parse(sent.options.body);
-  assert.deepEqual(body.to,['info@drivingforce.biz']);assert.equal(body.reply_to,'customer@example.com');assert.equal(body.from,env.ENQUIRY_FROM);
-  assert.equal(sent.options.headers.Authorization,'Bearer re_test');
+  assert.equal(res.statusCode,200);
+  assert.deepEqual(sent.map(s=>JSON.parse(s.options.body).to),[['danny@drivingforce.biz'],['danieljoffeinfo@gmail.com'],['tyron@drivingforce.biz']]);
+  for(const {url,options} of sent){
+    const body=JSON.parse(options.body);
+    assert.equal(url,'https://api.resend.com/emails');assert.equal(body.reply_to,'customer@example.com');assert.equal(body.from,env.ENQUIRY_FROM);
+    assert.equal(options.headers.Authorization,'Bearer re_test');
+  }
+});
+test('one refused recipient does not stop the others, and ENQUIRY_TO overrides the list',async()=>{
+  const delivered=[];
+  const fetchImpl=async(url,options)=>{const [to]=JSON.parse(options.body).to;if(to!=='danieljoffeinfo@gmail.com')return new Response('{"message":"You can only send testing emails to your own email address"}',{status:403});delivered.push(to);return new Response('{"id":"1"}',{status:200});};
+  const errors=console.error;console.error=()=>{};
+  try{
+    let res=response();await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env,fetchImpl})(request(payload()),res);
+    assert.equal(res.statusCode,200);assert.deepEqual(delivered,['danieljoffeinfo@gmail.com']);
+    const to=[];res=response();
+    await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env:{...env,ENQUIRY_TO:'a@example.test, b@example.test'},fetchImpl:async(url,options)=>{to.push(...JSON.parse(options.body).to);return new Response('{}',{status:200});}})(request(payload()),res);
+    assert.deepEqual(to,['a@example.test','b@example.test']);
+  }finally{console.error=errors;}
 });
 test('enquiry uses the Resend onboarding sender when no domain sender is configured',async()=>{
   let body;const handler=createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env:{RESEND_API_KEY:'re_test'},fetchImpl:async(url,options)=>{body=JSON.parse(options.body);return new Response('{"id":"1"}',{status:200});}});
@@ -32,7 +47,9 @@ test('enquiry uses the Resend onboarding sender when no domain sender is configu
 test('enquiry reports missing configuration, provider failures and cross-site requests',async()=>{
   let res=response();await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env:{},fetchImpl:()=>assert.fail('should not send')})(request(payload()),res);
   assert.equal(res.statusCode,503);assert.match(res.data.error,/082 425 4253/);
+  const errors=console.error;console.error=()=>{};
   res=response();await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env,fetchImpl:async()=>new Response('{}',{status:422})})(request(payload()),res);
+  console.error=errors;
   assert.equal(res.statusCode,502);
   res=response();const req=request(payload());req.headers.origin='https://other.test';
   await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env,fetchImpl:()=>assert.fail('should not send')})(req,res);assert.equal(res.statusCode,403);
