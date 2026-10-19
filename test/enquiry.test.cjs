@@ -24,6 +24,11 @@ test('enquiry is sent through Resend to the fixed recipient with the customer as
   assert.deepEqual(body.to,['info@drivingforce.biz']);assert.equal(body.reply_to,'customer@example.com');assert.equal(body.from,env.ENQUIRY_FROM);
   assert.equal(sent.options.headers.Authorization,'Bearer re_test');
 });
+test('enquiry uses the Resend onboarding sender when no domain sender is configured',async()=>{
+  let body;const handler=createHandler({env:{RESEND_API_KEY:'re_test'},fetchImpl:async(url,options)=>{body=JSON.parse(options.body);return new Response('{"id":"1"}',{status:200});}});
+  const res=response();await handler(request(payload()),res);
+  assert.equal(res.statusCode,200);assert.equal(body.from,'Driving Force Website <onboarding@resend.dev>');
+});
 test('enquiry reports missing configuration, provider failures and cross-site requests',async()=>{
   let res=response();await createHandler({env:{},fetchImpl:()=>assert.fail('should not send')})(request(payload()),res);
   assert.equal(res.statusCode,503);assert.match(res.data.error,/082 425 4253/);
