@@ -234,56 +234,13 @@
   $('#sign-out').addEventListener('click', async () => { await api('/api/session', {method: 'DELETE'}).catch(() => {}); vehicles = []; $('#list').innerHTML = ''; showLogin(); });
   $('#search').addEventListener('input', render);
 
-  // ---- Suggestions, paste-to-fill and copy ----
+  // ---- Suggestions for make, model and colour ----
   const knownMakes = ['ALFA ROMEO','ASTON MARTIN','AUDI','BENTLEY','BMW','CHERY','CHEVROLET','CITROEN','FERRARI','FIAT','FORD','GWM','HAVAL','HONDA','HYUNDAI','ISUZU','JAGUAR','JEEP','KIA','LAMBORGHINI','LAND ROVER','LEXUS','MAHINDRA','MASERATI','MAZDA','MCLAREN','MERCEDES-BENZ','MINI','MITSUBISHI','NISSAN','OPEL','PEUGEOT','PORSCHE','RENAULT','ROLLS-ROYCE','SUBARU','SUZUKI','TOYOTA','VOLKSWAGEN','VOLVO'];
-  const makeAliases = {'MERCEDES': 'MERCEDES-BENZ', 'MERC': 'MERCEDES-BENZ', 'VW': 'VOLKSWAGEN', 'LANDROVER': 'LAND ROVER', 'RANGE ROVER': 'LAND ROVER'};
-  const colours = ['white','black','silver','grey','gray','blue','red','green','yellow','orange','brown','beige','gold','bronze','maroon','burgundy','purple','champagne','charcoal','navy'];
   function fillSuggestions() {
     const uniq = list => [...new Set(list.filter(Boolean))].sort();
     $('#make-options').innerHTML = uniq([...knownMakes, ...vehicles.map(c => c.make)]).map(v => `<option value="${escapeHtml(v)}">`).join('');
     $('#model-options').innerHTML = uniq(vehicles.map(c => c.model)).map(v => `<option value="${escapeHtml(v)}">`).join('');
     $('#colour-options').innerHTML = uniq(vehicles.map(c => c.colour)).map(v => `<option value="${escapeHtml(v)}">`).join('');
-  }
-  const digits = value => String(value).replace(/[^\d]/g, '');
-  // Reads vehicle details from pasted text: "Key: value" lines first, then patterns in free text.
-  function parseDetails(text) {
-    const out = {}, t = text.replace(/ /g, ' ');
-    const keys = {make: /^make$/, model: /^model$/, variant: /^(variant|derivative|version|spec)$/, year: /^(year|model year|reg(istration)? year|first registered)$/, price: /^(price|asking price|selling price|retail price)$/, mileage: /^(mileage|odometer|kilomet(re|er)s|km)$/, colour: /^(colou?r|exterior colou?r)$/, stockCode: /^(stock|stock (code|no\.?|number|#|ref(erence)?)|ref(erence)?|ref no\.?)$/, bodyType: /^(body|body ?type|body ?style|type)$/, transmission: /^(transmission|gearbox|gear ?box)$/, fuelType: /^(fuel|fuel ?type)$/, displayName: /^(display name|title|name)$/, description: /^description$/, features: /^(equipment|features|extras)$/};
-    for (const line of t.split(/\n/)) {
-      const m = line.match(/^\s*([A-Za-z#. ]{2,30}?)\s*[:=\t]\s*(.+?)\s*$/); if (!m) continue;
-      const key = Object.keys(keys).find(k => keys[k].test(m[1].trim().toLowerCase()));
-      if (key && !out[key]) out[key] = m[2];
-    }
-    const flat = t.replace(/\n/g, ' · ');
-    if (!out.price) { const m = flat.match(/\bR\s?(\d{1,3}(?:[ ,.]\d{3})+|\d{4,})/i); if (m) out.price = m[1]; }
-    if (!out.mileage) { const m = flat.match(/(\d{1,3}(?:[ ,.]\d{3})+|\d{1,7})\s?(?:km|kms|kilomet)/i); if (m) out.mileage = m[1]; }
-    if (!out.year) { const m = flat.match(/(?<![\d ,.])((?:19[5-9]|20[0-4])\d)(?![\d,.]| ?km| \d{3}\b)/); if (m) out.year = m[1]; }
-    if (!out.stockCode) { const m = flat.match(/\bstock(?: ?(?:code|no\.?|number|ref))?\s*[:#]?\s*([A-Z0-9][A-Z0-9-]{2,})/i) || flat.match(/\b(TP\d{4,})\b/i); if (m) out.stockCode = m[1]; }
-    if (!out.transmission) { if (/\bmanual\b|\bm\/t\b|\b\d-?speed manual/i.test(flat)) out.transmission = 'Manual'; else if (/\b(auto(matic)?|a\/t|dct|dsg|pdk|cvt|tiptronic|steptronic|s ?tronic|edc)\b/i.test(flat)) out.transmission = 'Automatic'; }
-    if (!out.fuelType) { const m = flat.match(/\b(diesel|petrol|hybrid|electric)\b/i); if (m) out.fuelType = m[1]; }
-    if (!out.bodyType) {
-      const bodies = [[/double ?cab|d\/cab|dc\b/i, 'Double Cab'], [/single ?cab|s\/cab/i, 'Single Cab'], [/station ?wagon|estate|touring|avant/i, 'Station Wagon'], [/convertible|cabrio(let)?|roadster|spider|spyder/i, 'Convertible'], [/coup[eé]/i, 'Coupe'], [/hatch(back)?/i, 'Hatchback'], [/sedan|saloon/i, 'Sedan'], [/\bsuv\b/i, 'SUV'], [/bakkie|pick-? ?up/i, 'Bakkie'], [/\bmpv\b|minivan|people carrier/i, 'MPV'], [/panel ?van/i, 'Panel Van']];
-      const hit = bodies.find(([re]) => re.test(flat)); if (hit) out.bodyType = hit[1];
-    }
-    if (!out.colour) { const m = flat.match(new RegExp('\\b(' + colours.join('|') + ')\\b', 'i')); if (m) out.colour = m[1][0].toUpperCase() + m[1].slice(1).toLowerCase(); }
-    if (!out.make) {
-      const makes = [...new Set([...Object.keys(makeAliases), ...knownMakes, ...vehicles.map(c => c.make)])].sort((a, b) => b.length - a.length);
-      for (const segment of [t.split(/\n/).find(l => l.trim()) || '', ...flat.split(/\s*[·|•,\n]\s*/)]) {
-        const upper = segment.toUpperCase(), make = makes.find(mk => new RegExp('(^|[^A-Z])' + mk.replace(/[-]/g, '[- ]?') + '($|[^A-Z])').test(upper));
-        if (!make) continue;
-        out.make = makeAliases[make] || make;
-        // Words after the make: the first is the model, the rest of the title is the variant.
-        const after = segment.slice(upper.search(new RegExp(make.replace(/[-]/g, '[- ]?'))) + make.length).replace(/^[\s-]+/, '');
-        const words = after.split(/\s+(?:·|\||-|–|,)\s+|\s+R\s?\d/)[0].trim().split(/\s+/).filter(Boolean);
-        if (make === 'RANGE ROVER') words.unshift('RANGE ROVER');
-        if (!out.model && words.length) out.model = make === 'RANGE ROVER' ? 'RANGE ROVER' : words.shift();
-        else if (make === 'RANGE ROVER') words.shift();
-        if (!out.variant && words.length) out.variant = words.join(' ').replace(/\b(19|20)\d\d\b/, '').trim();
-        break;
-      }
-    }
-    for (const k of ['price', 'mileage', 'year']) if (out[k]) out[k] = digits(out[k]);
-    return out;
   }
   // ---- Add and edit a vehicle (one form) ----
   const addDialog = $('#add-dialog'), addForm = $('#add-form'), addPhotos = photoPicker($('#add-photos'));
@@ -302,7 +259,7 @@
   function openForm(nextMode, car) {
     mode = nextMode; editTarget = nextMode === 'edit' ? car : null; added = false;
     addForm.reset(); addForm.querySelectorAll('.filled').forEach(f => f.classList.remove('filled'));
-    addForm.querySelector('.error').textContent = ''; addForm.querySelector('.paste-result').textContent = ''; $('#paste-text').value = '';
+    addForm.querySelector('.error').textContent = '';
     addPhotos.set([]);
     if (car) {
       const values = valuesOf(car);
@@ -310,21 +267,15 @@
       addPhotos.set(photosOf(car));
     }
     $('#add-title').textContent = nextMode === 'edit' ? `Edit ${car.year} ${title(car)}` : 'Add a vehicle';
-    addForm.querySelector('.paste-box').hidden = nextMode === 'edit';
     $('#add-again').hidden = nextMode === 'edit';
     $('#add-submit').textContent = nextMode === 'edit' ? 'Save changes' : 'Publish to website';
     addDialog.showModal();
-    (nextMode === 'edit' ? addForm.price : $('#paste-text')).focus();
+    (nextMode === 'edit' ? addForm.price : addForm.make).focus();
   }
   $('#add-open').addEventListener('click', () => openForm('add'));
   addDialog.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => addDialog.close()));
   addDialog.addEventListener('close', () => { if (!added) addPhotos.cleanupAll(); });
   addForm.addEventListener('input', event => event.target.classList?.remove('filled'));
-  $('#paste-text').addEventListener('input', () => {
-    const found = parseDetails($('#paste-text').value);
-    const filled = Object.entries(found).filter(([name, value]) => setField(name, value, true)).map(([name]) => addForm.elements[name].closest('label').firstChild.textContent.trim());
-    addForm.querySelector('.paste-result').textContent = filled.length ? `Filled ${filled.length}: ${filled.join(', ')}. Check the highlighted fields.` : '';
-  });
   addForm.addEventListener('keydown', event => { if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); $('#add-submit').click(); } });
   addForm.addEventListener('submit', async event => {
     event.preventDefault();

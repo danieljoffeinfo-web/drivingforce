@@ -143,11 +143,6 @@ kbd{font:600 11px/1 inherit;font-family:inherit;border:1px solid #cfcfcf;border-
 .card-grid .empty{grid-column:1/-1;background:#fff;padding:32px;text-align:center;color:var(--muted)}
 /* ---- Quick add ---- */
 .wide-dialog{max-width:min(1060px,calc(100vw - 24px))}
-.paste-box{background:var(--soft);border:1px solid var(--line);padding:12px;margin-bottom:16px}
-.paste-box label{font-weight:400;font-size:13px}
-.paste-box textarea{margin-top:8px;font-size:13px}
-.paste-result{margin:8px 0 0;font-size:13px;color:#1a7f37;font-weight:600;min-height:1em}
-.paste-result:empty{display:none}
 .form-columns{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:20px;align-items:start}
 .form-columns .photo-grid{grid-template-columns:repeat(2,1fr)}
 .filled{background:#fff8d6 !important;border-color:#e0b400 !important}
