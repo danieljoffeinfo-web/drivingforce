@@ -32,7 +32,7 @@ main#app-view{max-width:1100px;margin:0 auto;padding:32px 16px 64px}
 .actions input{margin:0;max-width:320px;flex:1 1 200px}
 .notice{background:#fff;border-left:4px solid var(--red);padding:12px 16px;margin:0 0 16px}
 .list{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
-.item{display:grid;grid-template-columns:120px 1fr auto;gap:16px;align-items:center;padding:12px 16px;background:#fff}
+.item{display:grid;grid-template-columns:auto 120px 1fr auto;gap:16px;align-items:center;padding:12px 16px;background:#fff}
 .item img{width:120px;height:80px;object-fit:cover;background:var(--soft);display:block}
 .item h3{margin:0;font-size:16px}
 .item .meta{color:var(--muted);font-size:13px;margin:2px 0 0}
@@ -47,16 +47,44 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .wide{grid-column:1/-1}
 .photo-field{margin-bottom:16px}
-.photo-drop{position:relative;display:grid;place-items:center;height:200px;border:1px dashed #b5b5b5;background:var(--soft);cursor:pointer;text-align:center;overflow:hidden;font-weight:600}
-.photo-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;height:100%}
-.photo-drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.photo-grid li{position:relative;background:var(--soft);border:1px solid var(--line)}
+.photo-grid img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover}
+.photo-grid .uploading img{opacity:.45}
+.photo-grid .tag{position:absolute;top:6px;left:6px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:1px 6px;text-transform:uppercase}
+.photo-grid .tag.cover{background:var(--red)}
+.photo-tools{display:flex;justify-content:space-between;padding:4px}
+.icon{border:1px solid #cfcfcf;background:#fff;color:var(--ink);width:32px;height:32px;font:inherit;font-size:15px;line-height:1;cursor:pointer;display:inline-grid;place-items:center;padding:0}
+.icon:hover:not(:disabled){border-color:var(--ink)}
+.icon:disabled{opacity:.35;cursor:default}
+.photo-add{display:grid;place-items:center;text-align:center;min-height:120px;border:1px dashed #b5b5b5 !important;cursor:pointer;font-weight:600;font-size:13px;position:relative}
+.photo-add input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;width:100%;height:100%}
+.photo-status{font-size:13px;color:var(--muted);margin:8px 0 0;min-height:1.2em}
+.order-bar{position:sticky;top:8px;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--ink);color:#fff;padding:12px 16px;margin:0 0 12px}
+.order-bar div{display:flex;gap:8px}
+.order-bar .button{border-color:#fff}
+.order-bar .button.ghost{background:transparent;color:#fff}
+.order-hint{margin:0 0 12px;font-size:13px}
+.item.dragging{opacity:.4}
+.item.drop-target{box-shadow:inset 0 3px 0 var(--red)}
+.move{display:flex;flex-direction:column;align-items:center;gap:4px}
+.handle{cursor:grab;font-size:22px;color:var(--muted);user-select:none;line-height:1;padding:4px 6px;touch-action:none}
+.item.dragging .handle{cursor:grabbing}
+.position{font-size:12px;color:var(--muted);font-weight:600}
+.row-actions{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.price-form{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+.price-form .currency{font-weight:700}
+.price-form input{width:130px;margin:0;padding:6px 8px;font-weight:700}
+.price-form input.changed{border-color:var(--red);outline:1px solid var(--red)}
+.price-form .saved{color:#1a7f37;font-size:13px;font-weight:600}
 @media (max-width:600px){
   .bar{padding:12px 16px}
   h1{font-size:28px}
   .actions{justify-content:stretch}.actions input{max-width:none}
-  .item{grid-template-columns:88px 1fr;gap:12px}
+  .item{grid-template-columns:auto 88px 1fr;gap:10px;padding:12px}
   .item img{width:88px;height:60px}
-  .item .button{grid-column:1/-1}
+  .row-actions{grid-column:1/-1;flex-direction:row}
+  .row-actions .button{flex:1}
   .grid{grid-template-columns:1fr}
 }
 .session{display:flex;align-items:center;gap:14px;font-size:14px}

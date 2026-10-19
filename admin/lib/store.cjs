@@ -20,8 +20,8 @@ function createStore(blob=require('@vercel/blob'),fetchImpl=fetch){
     if(stale.length)await blob.del(stale);
     return result.url;
   }
-  async function uploadPhoto(stockCode,buffer){
-    const result=await blob.put('vehicles/'+stockCode.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.jpg',buffer,{access:'public',contentType:'image/jpeg',addRandomSuffix:true});
+  async function uploadPhoto(buffer){
+    const result=await blob.put('vehicles/photo.jpg',buffer,{access:'public',contentType:'image/jpeg',addRandomSuffix:true});
     return result.url;
   }
   async function removePhoto(url){

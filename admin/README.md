@@ -8,6 +8,8 @@ A separate Vercel project (`driving-force-admin`) for adding vehicles to, and re
 - There is no emailed "forgot password" link: an owner resets the password and shares it privately.
 - Inventory and new photos are stored in the `driving-force-inventory` Vercel Blob store (`BLOB_READ_WRITE_TOKEN`).
 - Every change publishes `inventory.json` to the store. The showroom (`dist/inventory.js`) reads that file and falls back to the bundled `dist/vehicles.json` until the first change, or if the store cannot be reached. Changes appear on the website within about a minute.
+- Vehicles can have up to 20 photos; the first is the main photo. Photos upload one at a time through `/api/photos` and are scaled to 1600px in the browser first.
+- Prices are edited inline on each row. The vehicle order in the admin is the order on the website's default (featured) view.
 - The last 30 saves are kept under `inventory/history/` in the store for recovery.
 - Until the first change, the admin starts from `lib/seed-vehicles.json`, a copy of the showroom snapshot.
 - `npm test` runs the admin tests against an in-memory store.

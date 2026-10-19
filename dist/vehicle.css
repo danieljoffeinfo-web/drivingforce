@@ -10,6 +10,15 @@
 .photo-expand{position:absolute;bottom:18px;right:18px;display:flex;align-items:center;gap:23px;min-height:44px;padding:0 16px;background:#fff;color:var(--ink);font-size:12px;font-weight:500}
 .photo-expand>span{font-size:22px}
 .photo-open:hover .photo-expand{background:var(--ink);color:#fff}
+.photo-thumbs{display:flex;gap:8px;overflow-x:auto;padding-top:10px;scrollbar-width:thin}
+.photo-thumb{flex:0 0 88px;padding:0;border:2px solid transparent;background:var(--soft);cursor:pointer}
+.photo-thumb img{display:block;width:100%;aspect-ratio:1.5;object-fit:cover;height:auto}
+.photo-thumb[aria-pressed="true"]{border-color:var(--red)}
+.photo-thumb:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.dialog-photo{position:relative}
+.photo-step{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:64px;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:34px;line-height:1;cursor:pointer}
+.photo-step:hover{background:rgba(0,0,0,.8)}
+.photo-prev{left:0}.photo-next{right:0}
 .photo-caption{display:flex;justify-content:space-between;gap:16px;padding-top:15px;font-size:11px;color:#626262;line-height:1.5}
 .detail-eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--font);font-size:10px;line-height:1.6;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;margin:0 0 18px;color:#626262}
 .vehicle-summary h1{font-family:var(--font);font-size:clamp(30px,3vw,46px);font-weight:600;letter-spacing:-1.5px;line-height:1.08;text-align:left;white-space:normal;margin:0 0 16px;overflow-wrap:anywhere;text-wrap:balance}

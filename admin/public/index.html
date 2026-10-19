@@ -38,15 +38,15 @@
     </div>
   </section>
   <p class="notice" id="notice" role="status" hidden></p>
+  <div class="order-bar" id="order-bar" hidden><span>You’ve changed the order of the vehicles.</span><div><button class="button ghost small" type="button" id="order-undo">Undo</button><button class="button small" type="button" id="order-save">Save order</button></div></div>
+  <p class="muted order-hint" id="order-hint">Drag <span aria-hidden="true">⠿</span> or use the arrows to change the order vehicles appear on the website. Type a new price and press Enter to update it.</p>
   <ul id="list" class="list" aria-live="polite"></ul>
 </main>
 
 <dialog id="add-dialog" aria-labelledby="add-title">
   <form id="add-form" class="add-form" novalidate>
     <div class="dialog-head"><h2 id="add-title">Add a vehicle</h2><button type="button" class="link" data-close>Cancel</button></div>
-    <div class="photo-field">
-      <label class="photo-drop"><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required><img alt="" hidden><span>Choose a photo<br><small>JPG, PNG or WebP</small></span></label>
-    </div>
+    <div class="photo-field" id="add-photos"></div>
     <div class="grid">
       <label>Make<input name="make" required placeholder="e.g. BMW" maxlength="40"></label>
       <label>Model<input name="model" required placeholder="e.g. X5" maxlength="60"></label>
@@ -76,6 +76,16 @@
     <div class="dialog-foot"><button value="cancel" class="button ghost">Keep it</button><button value="confirm" id="remove-confirm" class="button danger">Remove vehicle</button></div>
   </form>
 </dialog>
+<dialog id="photos-dialog" aria-labelledby="photos-title">
+  <div class="add-form">
+    <div class="dialog-head"><h2 id="photos-title">Photos</h2><button type="button" class="link" data-close>Cancel</button></div>
+    <p class="muted" id="photos-name"></p>
+    <div class="photo-field" id="edit-photos"></div>
+    <p class="error" role="alert"></p>
+    <div class="dialog-foot"><button type="button" class="button ghost" data-close>Cancel</button><button class="button" type="button" id="photos-save">Save photos</button></div>
+  </div>
+</dialog>
+
 <dialog id="account-dialog" aria-labelledby="account-title">
   <div class="account">
     <div class="dialog-head"><h2 id="account-title">Account</h2><button type="button" class="link" data-close>Close</button></div>

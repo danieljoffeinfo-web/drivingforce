@@ -1,5 +1,5 @@
 const auth=require('./auth.cjs');
-const {buildVehicle,VehicleError,bodyTypes,transmissions,fuelTypes}=require('./vehicles.cjs');
+const {buildVehicle,VehicleError,bodyTypes,transmissions,fuelTypes,photosOf,parsePrice,setPrice,setPhotos}=require('./vehicles.cjs');
 const {createStore}=require('./store.cjs');
 const {createUserStore}=require('./users.cjs');
 const maxPhotoBytes=3*1024*1024;
@@ -15,6 +15,20 @@ function respondError(res,error){
   const known=error instanceof VehicleError;
   if(!known)console.error(error);
   return res.status(known?error.status:500).json({error:known?error.message:'Something went wrong. Please try again.'});
+}
+// Only photos this admin uploaded to the store may be attached to a vehicle.
+const uploadedPhoto=url=>typeof url==='string'&&/^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/vehicles\/[\w.-]+\.jpg$/.test(url);
+function photoList(value){
+  if(!Array.isArray(value)||value.some(url=>typeof url!=='string'||url.length>500))throw new VehicleError('The photos could not be read. Please add them again.');
+  return [...new Set(value)];
+}
+function readPhoto(dataUrl){
+  const prefix='data:image/jpeg;base64,';
+  if(typeof dataUrl!=='string'||!dataUrl.startsWith(prefix))throw new VehicleError('Please choose a JPG, PNG or WebP photo.');
+  const photo=Buffer.from(dataUrl.slice(prefix.length),'base64');
+  if(photo.length>maxPhotoBytes)throw new VehicleError('The photo is too large.',413);
+  if(!(photo[0]===255&&photo[1]===216&&photo[2]===255))throw new VehicleError('The photo could not be read. Please choose a JPG or PNG.');
+  return photo;
 }
 const publicUser=user=>({email:user.email,name:user.name||'',owner:Boolean(user.owner)});
 const queryValue=(req,key)=>String(req.query?.[key]??new URL(req.url,'http://admin').searchParams.get(key)??'');
@@ -110,18 +124,41 @@ function vehiclesHandler({store=createStore(),users=createUserStore()}={}){
       }
       if(req.method==='POST'){
         const body=parseBody(req);
-        const prefix='data:image/jpeg;base64,';
-        if(typeof body.photo!=='string'||!body.photo.startsWith(prefix))throw new VehicleError('Please add a photo of the vehicle.');
-        const photo=Buffer.from(body.photo.slice(prefix.length),'base64');
-        if(photo.length>maxPhotoBytes)throw new VehicleError('The photo is too large.',413);
-        if(!(photo[0]===255&&photo[1]===216&&photo[2]===255))throw new VehicleError('The photo could not be read. Please choose a JPG or PNG.');
+        const photos=photoList(body.photos);
+        if(photos.some(url=>!uploadedPhoto(url)))throw new VehicleError('The photos could not be read. Please add them again.');
         const data=await store.load();
-        // Validate before uploading so a rejected form never leaves an orphaned photo behind.
-        buildVehicle(body.vehicle,data.vehicles,{imageUrl:'pending'});
-        const imageUrl=await store.uploadPhoto(String(body.vehicle.stockCode).trim(),photo);
-        const vehicle=buildVehicle(body.vehicle,data.vehicles,{imageUrl});
+        const vehicle=buildVehicle(body.vehicle,data.vehicles,{photos});
         await store.save([vehicle,...data.vehicles]);
         return res.status(201).json({vehicle});
+      }
+      if(req.method==='PATCH'){
+        const body=parseBody(req);
+        const data=await store.load();
+        if(body.action==='order'){
+          // The new order must contain exactly the current vehicles, so a car added or removed meanwhile is never lost.
+          const ids=Array.isArray(body.ids)?body.ids.map(String):[];
+          const byId=new Map(data.vehicles.map(car=>[String(car.id),car]));
+          if(ids.length!==byId.size||new Set(ids).size!==ids.length||ids.some(id=>!byId.has(id)))throw new VehicleError('The list changed while you were arranging it. Please refresh and try again.',409);
+          await store.save(ids.map(id=>byId.get(id)));
+          return res.status(200).json({ids});
+        }
+        const car=data.vehicles.find(c=>String(c.id)===String(body.id));
+        if(!car)throw new VehicleError('That vehicle is no longer listed. Please refresh.',404);
+        if(body.action==='price'){
+          setPrice(car,parsePrice(body.price));
+          await store.save(data.vehicles);
+          return res.status(200).json({vehicle:car});
+        }
+        if(body.action==='photos'){
+          const before=photosOf(car),photos=photoList(body.photos);
+          // Existing photos (including the original site images) may be kept or reordered; new ones must be uploads.
+          if(photos.some(url=>!before.includes(url)&&!uploadedPhoto(url)))throw new VehicleError('The photos could not be read. Please add them again.');
+          setPhotos(car,photos);
+          await store.save(data.vehicles);
+          for(const url of before.filter(url=>!photos.includes(url)))try{await store.removePhoto(url);}catch(error){console.error(error);}
+          return res.status(200).json({vehicle:car});
+        }
+        throw new VehicleError('Unknown change.');
       }
       if(req.method==='DELETE'){
         const id=queryValue(req,'id');
@@ -129,12 +166,37 @@ function vehiclesHandler({store=createStore(),users=createUserStore()}={}){
         const vehicle=data.vehicles.find(car=>String(car.id)===id);
         if(!vehicle)throw new VehicleError('That vehicle has already been removed.',404);
         await store.save(data.vehicles.filter(car=>car!==vehicle));
-        try{await store.removePhoto(vehicle.localImage);}catch(error){console.error(error);}
+        for(const url of photosOf(vehicle))try{await store.removePhoto(url);}catch(error){console.error(error);}
         return res.status(200).json({removed:vehicle.id});
       }
-      res.setHeader('Allow','GET, POST, DELETE');
+      res.setHeader('Allow','GET, POST, PATCH, DELETE');
       return res.status(405).json({error:'Method not allowed.'});
     }catch(error){return respondError(res,error);}
   };
 }
-module.exports={sessionHandler,usersHandler,vehiclesHandler};
+// Photos upload one per request to stay well inside the platform's request size limit.
+function photosHandler({store=createStore(),users=createUserStore()}={}){
+  return async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    try{
+      guard(req);
+      await requireUser(req,users);
+      if(req.method==='POST'){
+        const url=await store.uploadPhoto(readPhoto(parseBody(req).photo));
+        return res.status(201).json({url});
+      }
+      if(req.method==='DELETE'){
+        // Discards an upload that was never attached, e.g. when a form is cancelled.
+        const url=queryValue(req,'url');
+        if(!uploadedPhoto(url))throw new VehicleError('Unknown photo.');
+        const data=await store.load();
+        if(data.vehicles.some(car=>photosOf(car).includes(url)))throw new VehicleError('That photo is in use.',409);
+        await store.removePhoto(url);
+        return res.status(200).json({removed:url});
+      }
+      res.setHeader('Allow','POST, DELETE');
+      return res.status(405).json({error:'Method not allowed.'});
+    }catch(error){return respondError(res,error);}
+  };
+}
+module.exports={sessionHandler,usersHandler,vehiclesHandler,photosHandler};
