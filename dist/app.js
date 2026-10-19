@@ -112,6 +112,16 @@
     if(category==='performance')return ['Coupe','Convertible'].includes(c.body_type)||/\b(AMG|RS[345]|M135i)\b/i.test(c.variant);
     return ['Hatchback','Sedan','Station Wagon'].includes(c.body_type);
   }
+  // Card photos slide sideways (swipe, or the arrows on hover); cars with one photo show it as before.
+  // The photo strip is a separate link so the arrow buttons are not nested inside a link.
+  function cardPhotos(c){
+    const photos=(Array.isArray(c.photos)&&c.photos.length?c.photos:[c.localImage]).filter(Boolean);
+    const alt=escapeHtml(c.year+' '+title(c)+' — '+c.colour);
+    const strip=`<a class="vehicle-image vehicle-track" href="vehicle.html?id=${c.id}" tabindex="-1" aria-hidden="true">${photos.map((src,i)=>`<img src="${escapeHtml(src)}" alt="${i?'':alt}" loading="lazy" width="800" height="533" draggable="false">`).join('')}</a>`;
+    if(photos.length<2)return `<div class="vehicle-media">${strip}</div>`;
+    const name=escapeHtml(c.year+' '+title(c));
+    return `<div class="vehicle-media" data-count="${photos.length}">${strip}<button type="button" class="carousel-btn carousel-prev" data-step="-1" aria-label="Previous photo of the ${name}">‹</button><button type="button" class="carousel-btn carousel-next" data-step="1" aria-label="Next photo of the ${name}">›</button><span class="carousel-count" aria-hidden="true">1 / ${photos.length}</span><span class="carousel-dots" aria-hidden="true">${photos.map((_,i)=>`<i${i?'':' class="on"'}></i>`).join('')}</span></div>`;
+  }
   function renderInventory(){
     const query=$('#vehicle-search').value.trim().toLowerCase();
     let results=inventory.filter(c=>inCategory(c)&&`${c.make} ${c.model} ${c.variant} ${c.year}`.toLowerCase().includes(query));
@@ -120,7 +130,7 @@
     if(sort==='price-desc')results.sort((a,b)=>b.value-a.value);
     if(sort==='year-desc')results.sort((a,b)=>b.year-a.year);
     $('#result-count').textContent=`${results.length} vehicle${results.length===1?'':'s'} on display`;
-    $('#vehicle-grid').innerHTML=results.map(c=>`<article class="vehicle-card"><a class="vehicle-card-link" href="vehicle.html?id=${c.id}" aria-label="View ${escapeHtml(c.year+' '+title(c))}, ${money(c.value)}"><div class="vehicle-image"><img src="${escapeHtml(c.localImage)}" alt="${escapeHtml(c.year+' '+title(c)+' — '+c.colour)}" loading="lazy" width="800" height="533"></div><div class="vehicle-info"><p class="vehicle-meta"><span>${c.year}</span><span>${escapeHtml(c.body_type)}</span></p><h3>${escapeHtml(title(c))}</h3><p class="vehicle-variant">${escapeHtml(c.variant)}</p><div class="vehicle-specs"><span>${Number(c.mile).toLocaleString('en-ZA').replace(/,/g,' ')} km</span><span>${escapeHtml(c.transmission)}</span><span>${escapeHtml(c.fuelType)}</span></div><div class="vehicle-card-bottom"><span class="vehicle-price">${money(c.value)}</span><span class="vehicle-view">View vehicle <span aria-hidden="true">↗</span></span></div></div></a><div class="vehicle-contact"><a class="vehicle-whatsapp" href="${escapeHtml(whatsappLink(c))}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp us about the ${escapeHtml(c.year+' '+title(c))} (opens WhatsApp)">${whatsappIcon}<span>WhatsApp us</span></a><button type="button" class="vehicle-email" data-vehicle="${c.id}" aria-haspopup="dialog" aria-label="Email us about the ${escapeHtml(c.year+' '+title(c))}">${emailIcon}<span>Email us</span></button></div></article>`).join('') || '<div class="empty-state"><h3>No matches. More possibilities.</h3><p>Try another make or model, or clear your filters to see the full collection.</p><button id="clear-filters" class="button button-black">Clear filters <span>↗</span></button></div>';
+    $('#vehicle-grid').innerHTML=results.map(c=>`<article class="vehicle-card">${cardPhotos(c)}<a class="vehicle-card-link" href="vehicle.html?id=${c.id}" aria-label="View ${escapeHtml(c.year+' '+title(c))}, ${money(c.value)}"><div class="vehicle-info"><p class="vehicle-meta"><span>${c.year}</span><span>${escapeHtml(c.body_type)}</span></p><h3>${escapeHtml(title(c))}</h3><p class="vehicle-variant">${escapeHtml(c.variant)}</p><div class="vehicle-specs"><span>${Number(c.mile).toLocaleString('en-ZA').replace(/,/g,' ')} km</span><span>${escapeHtml(c.transmission)}</span><span>${escapeHtml(c.fuelType)}</span></div><div class="vehicle-card-bottom"><span class="vehicle-price">${money(c.value)}</span><span class="vehicle-view">View vehicle <span aria-hidden="true">↗</span></span></div></div></a><div class="vehicle-contact"><a class="vehicle-whatsapp" href="${escapeHtml(whatsappLink(c))}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp us about the ${escapeHtml(c.year+' '+title(c))} (opens WhatsApp)">${whatsappIcon}<span>WhatsApp us</span></a><button type="button" class="vehicle-email" data-vehicle="${c.id}" aria-haspopup="dialog" aria-label="Email us about the ${escapeHtml(c.year+' '+title(c))}">${emailIcon}<span>Email us</span></button></div></article>`).join('') || '<div class="empty-state"><h3>No matches. More possibilities.</h3><p>Try another make or model, or clear your filters to see the full collection.</p><button id="clear-filters" class="button button-black">Clear filters <span>↗</span></button></div>';
     if($('#clear-filters'))$('#clear-filters').addEventListener('click',()=>{category='all';$('#vehicle-search').value='';$('#vehicle-sort').value='featured';updateTabs();renderInventory();$('#vehicle-search').focus();});
   }
   // Email enquiries post to /api/enquiry, which delivers them through Resend.
@@ -160,6 +170,21 @@
   function updateTabs(){$$('.filter').forEach(b=>{const active=b.dataset.category===category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});}
   $$('.filter').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.category;updateTabs();renderInventory();}));
   $('#vehicle-search').addEventListener('input',()=>{renderInventory();});
+  const grid=$('#vehicle-grid');
+  grid.addEventListener('click',event=>{
+    const button=event.target.closest('.carousel-btn');if(!button)return;
+    const track=button.parentElement.querySelector('.vehicle-track'),count=track.children.length;
+    const index=Math.round(track.scrollLeft/track.clientWidth),next=(index+Number(button.dataset.step)+count)%count;
+    track.scrollTo({left:next*track.clientWidth,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  });
+  // Keep the dots and counter in step with swiping as well as the arrows.
+  grid.addEventListener('scroll',event=>{
+    const track=event.target;if(!track.classList?.contains('vehicle-track'))return;
+    const media=track.parentElement,index=Math.round(track.scrollLeft/track.clientWidth);
+    const count=media.querySelector('.carousel-count');if(!count)return;
+    count.textContent=(index+1)+' / '+track.children.length;
+    media.querySelectorAll('.carousel-dots i').forEach((dot,i)=>dot.classList.toggle('on',i===index));
+  },true);
   $('#vehicle-sort').addEventListener('change',()=>{renderInventory();});
   DFInventory.load().then(data=>{inventory=data.vehicles;$('#all-count').textContent=inventory.length;renderInventory();}).catch(()=>{$('#result-count').textContent='The collection could not be loaded.';$('#vehicle-grid').innerHTML='<div class="empty-state"><h3>Your next drive is waiting.</h3><p>Visit the full Driving Force showroom to browse current stock.</p><a class="button button-black" href="visit.html" >Visit the showroom <span>↗</span></a></div>';});
   function calculate(){
