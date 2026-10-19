@@ -157,3 +157,10 @@ kbd{font:600 11px/1 inherit;font-family:inherit;border:1px solid #cfcfcf;border-
 @media (max-width:760px){.form-columns{grid-template-columns:1fr}.kbd-tip,.hint-keys{display:none}}
 @media (max-width:600px){.card-grid.size-s{--card:150px}.card-grid{gap:8px}.vcard .photo-count{display:none}.size-toggle{display:none}}
 .form-columns.no-photos{grid-template-columns:1fr}
+.card-actions{gap:8px;padding:10px;border-top:1px solid var(--line)}
+.card-actions button{flex:1;border:1px solid var(--ink);padding:12px 6px;font-size:14px;font-weight:700}
+.card-actions button:first-child{border-left:1px solid var(--ink)}
+.card-actions .edit{background:#fff;color:var(--ink)}
+.card-actions .edit:hover{background:var(--soft)}
+.card-actions .remove{background:var(--red);border-color:var(--red);color:#fff}
+.card-actions .remove:hover{background:#a51923;border-color:#a51923}

@@ -42,7 +42,7 @@
     $('#order-bar').hidden = !orderChanged();
     $('#list').innerHTML = shown.map(car => {
       const i = vehicles.indexOf(car), photos = photosOf(car), id = escapeHtml(car.id);
-      return `<li class="vcard${query ? ' searching' : ''}" data-id="${id}"><img src="${escapeHtml(imageFor(photos[0]))}" alt="" loading="lazy" draggable="false"><label class="pos" title="Position on the website — type a number and press Enter"><span>#</span><input name="position" inputmode="numeric" value="${i + 1}" aria-label="Position of ${escapeHtml(title(car))}" autocomplete="off"></label>${car.descriptionSource === 'admin' ? '<span class="badge">New</span>' : ''}${photos.length > 1 ? `<span class="photo-count">${photos.length} photos</span>` : ''}<div class="card-body"><h3 title="${escapeHtml(car.year + ' ' + title(car))}">${car.year} ${escapeHtml(title(car))}</h3><p class="meta" title="${escapeHtml(car.variant)}">${escapeHtml(car.variant)}</p><p class="meta">${km(car.mile)} · ${escapeHtml(car.stock_code)}</p><form class="price-form" data-price="${id}"><span class="currency">R</span><input name="price" inputmode="numeric" value="${car.value}" aria-label="Price of ${escapeHtml(title(car))} in rand" autocomplete="off"><button class="button small" type="submit" hidden>Save</button></form><span class="saved" role="status"></span></div><div class="card-actions"><button type="button" data-edit="${id}" title="Edit details">Edit</button><button type="button" data-photos="${id}" title="Manage photos">Photos</button><button type="button" data-duplicate="${id}" title="Add a similar vehicle using these details">Copy+</button><button type="button" data-copy="${id}" title="Copy the details as text">Copy</button><button type="button" class="danger" data-remove="${id}" title="Take off the website" aria-label="Remove ${escapeHtml(title(car))}">✕</button></div></li>`;
+      return `<li class="vcard${query ? ' searching' : ''}" data-id="${id}"><img src="${escapeHtml(imageFor(photos[0]))}" alt="" loading="lazy" draggable="false"><label class="pos" title="Position on the website — type a number and press Enter"><span>#</span><input name="position" inputmode="numeric" value="${i + 1}" aria-label="Position of ${escapeHtml(title(car))}" autocomplete="off"></label>${car.descriptionSource === 'admin' ? '<span class="badge">New</span>' : ''}${photos.length > 1 ? `<span class="photo-count">${photos.length} photos</span>` : ''}<div class="card-body"><h3 title="${escapeHtml(car.year + ' ' + title(car))}">${car.year} ${escapeHtml(title(car))}</h3><p class="meta" title="${escapeHtml(car.variant)}">${escapeHtml(car.variant)}</p><p class="meta">${km(car.mile)} · ${escapeHtml(car.stock_code)}</p><form class="price-form" data-price="${id}"><span class="currency">R</span><input name="price" inputmode="numeric" value="${car.value}" aria-label="Price of ${escapeHtml(title(car))} in rand" autocomplete="off"><button class="button small" type="submit" hidden>Save</button></form><span class="saved" role="status"></span></div><div class="card-actions"><button type="button" class="edit" data-edit="${id}">Edit</button><button type="button" class="remove" data-remove="${id}" aria-label="Remove ${escapeHtml(title(car))}">Remove</button></div></li>`;
     }).join('') || `<li class="empty">${vehicles.length ? 'No vehicles match your search.' : 'No vehicles are listed yet. Add your first one.'}</li>`;
   }
   function move(id, to) {
@@ -112,9 +112,10 @@
 
   // Card size, remembered on this device.
   const sizeSelect = $('#card-size');
-  try { sizeSelect.value = localStorage.getItem('df-card-size') || 's'; } catch {}
+  sizeSelect.value = 'l';
+  try { sizeSelect.value = localStorage.getItem('df-card-size-v2') || 'l'; } catch {}
   const applySize = () => { $('#list').className = 'card-grid size-' + sizeSelect.value; };
-  sizeSelect.addEventListener('change', () => { applySize(); try { localStorage.setItem('df-card-size', sizeSelect.value); } catch {} });
+  sizeSelect.addEventListener('change', () => { applySize(); try { localStorage.setItem('df-card-size-v2', sizeSelect.value); } catch {} });
   applySize();
   $('#order-undo').addEventListener('click', () => {
     const byId = new Map(vehicles.map(car => [String(car.id), car]));
@@ -284,16 +285,7 @@
     for (const k of ['price', 'mileage', 'year']) if (out[k]) out[k] = digits(out[k]);
     return out;
   }
-  // Text for the clipboard, in the same "Key: value" form the paste box reads back.
-  function detailsText(car) {
-    return [`${car.year} ${title(car)}`, `Make: ${car.make}`, `Model: ${car.model}`, `Variant: ${car.variant}`, `Year: ${car.year}`, `Price: ${money(car.value)}`, `Mileage: ${km(car.mile)}`, `Colour: ${car.colour}`, `Body type: ${car.body_type}`, `Transmission: ${car.transmission}`, `Fuel type: ${car.fuelType}`, `Stock code: ${car.stock_code}`, car.displayName ? `Display name: ${car.displayName}` : '', car.features?.length ? `Equipment: ${car.features.join('; ')}` : ''].filter(Boolean).join('\n');
-  }
-  async function copyText(text) {
-    try { await navigator.clipboard.writeText(text); return true; }
-    catch { const area = document.createElement('textarea'); area.value = text; document.body.append(area); area.select(); const ok = document.execCommand('copy'); area.remove(); return ok; }
-  }
-
-  // ---- Add, duplicate and edit a vehicle (one form) ----
+  // ---- Add and edit a vehicle (one form) ----
   const addDialog = $('#add-dialog'), addForm = $('#add-form'), addPhotos = photoPicker($('#add-photos'));
   const fieldNames = ['make', 'model', 'variant', 'year', 'price', 'mileage', 'colour', 'stockCode', 'bodyType', 'transmission', 'fuelType', 'displayName', 'description', 'features'];
   let added = false, mode = 'add', editTarget = null;
@@ -314,16 +306,15 @@
     addPhotos.set([]);
     if (car) {
       const values = valuesOf(car);
-      // A duplicate keeps the specification but needs its own stock code, price check, photos and description.
-      if (nextMode === 'duplicate') { values.stockCode = ''; values.description = ''; }
-      for (const name of fieldNames) setField(name, values[name], nextMode === 'duplicate' && ['price', 'mileage', 'colour', 'year'].includes(name));
+      for (const name of fieldNames) setField(name, values[name], false);
+      addPhotos.set(photosOf(car));
     }
-    $('#add-title').textContent = nextMode === 'edit' ? `Edit ${car.year} ${title(car)}` : nextMode === 'duplicate' ? `Add a vehicle like the ${car.year} ${title(car)}` : 'Add a vehicle';
-    $('#add-photos').hidden = nextMode === 'edit'; addForm.querySelector('.form-columns').classList.toggle('no-photos', nextMode === 'edit');
+    $('#add-title').textContent = nextMode === 'edit' ? `Edit ${car.year} ${title(car)}` : 'Add a vehicle';
+    addForm.querySelector('.paste-box').hidden = nextMode === 'edit';
     $('#add-again').hidden = nextMode === 'edit';
     $('#add-submit').textContent = nextMode === 'edit' ? 'Save changes' : 'Publish to website';
     addDialog.showModal();
-    (nextMode === 'duplicate' ? addForm.stockCode : $('#paste-text')).focus();
+    (nextMode === 'edit' ? addForm.price : $('#paste-text')).focus();
   }
   $('#add-open').addEventListener('click', () => openForm('add'));
   addDialog.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => addDialog.close()));
@@ -340,18 +331,18 @@
     const again = event.submitter?.value === 'again';
     const button = event.submitter || $('#add-submit'), label = button.textContent, error = addForm.querySelector('.error');
     error.textContent = '';
-    if (mode !== 'edit') {
-      if (addPhotos.busy()) { error.textContent = 'Please wait for the photos to finish uploading.'; return; }
-      if (!addPhotos.urls().length) { error.textContent = 'Please add at least one photo of the vehicle (drag them onto the photo area).'; return; }
-    }
+    if (addPhotos.busy()) { error.textContent = 'Please wait for the photos to finish uploading.'; return; }
+    if (!addPhotos.urls().length) { error.textContent = 'Please add at least one photo of the vehicle (drag them onto the photo area).'; return; }
     const missing = [...addForm.querySelectorAll('[required]')].find(field => !field.value.trim());
     if (missing) { error.textContent = `Please fill in ${missing.closest('label').firstChild.textContent.trim().toLowerCase()}.`; missing.focus(); return; }
     const vehicle = Object.fromEntries(fieldNames.map(name => [name, addForm.elements[name].value]));
     button.disabled = true; button.textContent = mode === 'edit' ? 'Saving…' : 'Publishing…';
     try {
       if (mode === 'edit') {
-        const {vehicle: car} = await api('/api/vehicles', {method: 'PATCH', body: JSON.stringify({action: 'details', id: editTarget.id, vehicle})});
-        Object.assign(editTarget, car); added = true; fillSuggestions(); render(); addDialog.close();
+        let {vehicle: car} = await api('/api/vehicles', {method: 'PATCH', body: JSON.stringify({action: 'details', id: editTarget.id, vehicle})});
+        const photos = addPhotos.urls();
+        if (JSON.stringify(photos) !== JSON.stringify(photosOf(car))) ({vehicle: car} = await api('/api/vehicles', {method: 'PATCH', body: JSON.stringify({action: 'photos', id: editTarget.id, photos})}));
+        Object.assign(editTarget, car); added = true; addPhotos.discard(); fillSuggestions(); render(); addDialog.close();
         notify(`Saved changes to ${car.year} ${title(car)}. The website updates within about a minute.`);
         return;
       }
@@ -363,45 +354,15 @@
     } catch (e) { error.textContent = e.message; }
     finally { button.disabled = false; button.textContent = label; }
   });
-  $('#list').addEventListener('click', async event => {
-    const edit = event.target.closest('[data-edit]'), dup = event.target.closest('[data-duplicate]'), copy = event.target.closest('[data-copy]');
-    const find = el => vehicles.find(car => String(car.id) === el.dataset[el.dataset.edit ? 'edit' : el.dataset.duplicate ? 'duplicate' : 'copy']);
-    if (edit) openForm('edit', find(edit));
-    if (dup) openForm('duplicate', find(dup));
-    if (copy) { const car = find(copy); const ok = await copyText(detailsText(car)); copy.textContent = ok ? 'Copied ✓' : 'Failed'; setTimeout(() => { copy.textContent = 'Copy'; }, 1500); }
+  $('#list').addEventListener('click', event => {
+    const edit = event.target.closest('[data-edit]');
+    if (edit) openForm('edit', vehicles.find(car => String(car.id) === edit.dataset.edit));
   });
   // Keyboard shortcuts: N adds a vehicle, / jumps to search.
   addEventListener('keydown', event => {
     if (!me || document.querySelector('dialog[open]') || event.ctrlKey || event.metaKey || event.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) return;
     if (event.key === 'n' || event.key === 'N') { event.preventDefault(); openForm('add'); }
     if (event.key === '/') { event.preventDefault(); $('#search').focus(); }
-  });
-
-  // ---- Manage photos of a listed vehicle ----
-  const photosDialog = $('#photos-dialog'), editPhotos = photoPicker($('#edit-photos'));
-  let editing = null, photosSaved = false;
-  $('#list').addEventListener('click', event => {
-    const button = event.target.closest('[data-photos]'); if (!button) return;
-    editing = vehicles.find(car => String(car.id) === button.dataset.photos);
-    photosSaved = false; photosDialog.querySelector('.error').textContent = '';
-    $('#photos-name').textContent = `${editing.year} ${title(editing)} — stock ${editing.stock_code}. The main photo is shown first on the website.`;
-    editPhotos.set(photosOf(editing)); photosDialog.showModal();
-  });
-  photosDialog.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => photosDialog.close()));
-  photosDialog.addEventListener('close', () => { if (!photosSaved) editPhotos.cleanupAll(); });
-  $('#photos-save').addEventListener('click', async event => {
-    const button = event.currentTarget, error = photosDialog.querySelector('.error');
-    error.textContent = '';
-    if (editPhotos.busy()) { error.textContent = 'Please wait for the photos to finish uploading.'; return; }
-    if (!editPhotos.urls().length) { error.textContent = 'A vehicle needs at least one photo.'; return; }
-    button.disabled = true; button.textContent = 'Saving…';
-    try {
-      const {vehicle} = await api('/api/vehicles', {method: 'PATCH', body: JSON.stringify({action: 'photos', id: editing.id, photos: editPhotos.urls()})});
-      photosSaved = true; editPhotos.discard();
-      Object.assign(editing, vehicle); render(); photosDialog.close();
-      notify(`Photos updated for ${editing.year} ${title(editing)}.`);
-    } catch (e) { error.textContent = e.message; }
-    finally { button.disabled = false; button.textContent = 'Save photos'; }
   });
 
   // ---- Remove a vehicle ----

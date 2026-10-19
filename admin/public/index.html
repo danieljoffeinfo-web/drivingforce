@@ -49,22 +49,21 @@
       <p class="muted" id="summary">Loading…</p>
     </div>
     <div class="actions">
-      <input id="search" type="search" placeholder="Search make, model or stock code  ( / )" aria-label="Search vehicles">
-      <label class="size-toggle" title="Card size"><span class="sr-only">Card size</span><select id="card-size" aria-label="Card size"><option value="s">Small cards</option><option value="m">Medium cards</option><option value="l">Large cards</option></select></label>
+      <input id="search" type="search" placeholder="Search make, model or stock code" aria-label="Search vehicles">
+      <label class="size-toggle" title="Card size"><span class="sr-only">Card size</span><select id="card-size" aria-label="Card size"><option value="l">Large cards</option><option value="m">Medium cards</option><option value="s">Small cards</option></select></label>
       <button id="add-open" class="button" type="button" title="Add vehicle (N)">+ Add vehicle</button>
     </div>
   </section>
   <p class="notice" id="notice" role="status" hidden></p>
   <div class="order-bar" id="order-bar" hidden><span>You’ve changed the order. It goes live when you save.</span><div><button class="button ghost small" type="button" id="order-undo">Undo</button><button class="button small" type="button" id="order-save">Save order</button></div></div>
-  <p class="muted order-hint" id="order-hint"><strong>Drag any card</strong> to move it, or type a new position in its <strong>#</strong> box. Type a price and press <strong>Enter</strong> to update it. <span class="hint-keys">Press <kbd>N</kbd> to add a vehicle, <kbd>/</kbd> to search.</span></p>
-  <ul id="list" class="card-grid size-s" aria-live="polite"></ul>
+  <ul id="list" class="card-grid size-l" aria-live="polite"></ul>
 </main>
 
 <dialog id="add-dialog" class="wide-dialog" aria-labelledby="add-title">
   <form id="add-form" class="add-form" novalidate>
     <div class="dialog-head"><h2 id="add-title">Add a vehicle</h2><button type="button" class="link" data-close>Cancel</button></div>
     <div class="paste-box">
-      <label for="paste-text"><strong>Paste details to fill the form</strong> <small>— paste a listing, a copied card, or lines like “Price: R 459 995”. Check the highlighted fields.</small></label>
+      <label for="paste-text"><strong>Paste details to fill the form</strong> <small>— paste a listing’s text and the fields fill in. Check the highlighted fields.</small></label>
       <textarea id="paste-text" rows="3" placeholder="e.g. 2021 BMW X5 xDrive30d M Sport · R 899 995 · 45 000 km · Automatic · Diesel · Black · Stock TP13001"></textarea>
       <p class="paste-result" role="status"></p>
     </div>
@@ -101,16 +100,6 @@
     <div class="dialog-foot"><button value="cancel" class="button ghost">Keep it</button><button value="confirm" id="remove-confirm" class="button danger">Remove vehicle</button></div>
   </form>
 </dialog>
-<dialog id="photos-dialog" aria-labelledby="photos-title">
-  <div class="add-form">
-    <div class="dialog-head"><h2 id="photos-title">Photos</h2><button type="button" class="link" data-close>Cancel</button></div>
-    <p class="muted" id="photos-name"></p>
-    <div class="photo-field" id="edit-photos"></div>
-    <p class="error" role="alert"></p>
-    <div class="dialog-foot"><button type="button" class="button ghost" data-close>Cancel</button><button class="button" type="button" id="photos-save">Save photos</button></div>
-  </div>
-</dialog>
-
 <dialog id="account-dialog" aria-labelledby="account-title">
   <div class="account">
     <div class="dialog-head"><h2 id="account-title">Account</h2><button type="button" class="link" data-close>Close</button></div>
