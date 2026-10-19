@@ -418,7 +418,7 @@
   const dateLabel = (value, opts) => dayOf(value).toLocaleDateString('en-ZA', opts);
   const countryName = code => { try { return code && code !== '??' ? new Intl.DisplayNames(['en'], {type: 'region'}).of(code) : 'Unknown'; } catch { return code; } };
   const sourceName = s => ({direct: 'Direct / typed in', google: 'Google', facebook: 'Facebook', instagram: 'Instagram', bing: 'Bing', 'chatgpt.com': 'ChatGPT'}[s] || s);
-  const pageName = p => ({'/': 'Home / showroom', '/index.html': 'Home / showroom', '/vehicle.html': 'Vehicle pages', '/finance.html': 'Finance application', '/visit.html': 'Visit us', '/contact.html': 'Contact', '/privacy.html': 'Privacy policy', '/terms.html': 'Terms of use'}[p] || p);
+  const pageName = p => ({'/': 'Home / showroom', '/index.html': 'Home / showroom', '/vehicles/': 'Vehicle pages', '/vehicle.html': 'Vehicle pages', '/vehicle': 'Vehicle pages', '/used-cars': 'Used cars by make', '/finance': 'Finance application', '/finance.html': 'Finance application', '/visit': 'Visit us', '/visit.html': 'Visit us', '/contact': 'Contact', '/contact.html': 'Contact', '/privacy': 'Privacy policy', '/privacy.html': 'Privacy policy', '/terms': 'Terms of use', '/terms.html': 'Terms of use'}[p] || (p.startsWith('/used-cars/') ? 'Used ' + p.slice(11).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + ' page' : p));
   const carById = id => vehicles.find(car => String(car.id) === String(id));
   const carName = (id, fallback) => { const car = carById(id); return car ? `${car.year} ${title(car)}` : (fallback || `Vehicle ${id}`).replace(/ · [^·]*$/, '') + ' (sold / removed)'; };
   // Widths are set from script because the dashboard's security policy blocks inline style attributes.

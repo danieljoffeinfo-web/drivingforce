@@ -14,3 +14,27 @@
 .policy-content .policy-updated{color:#646464;font-size:13px}
 .policy-content ul{padding-left:20px;margin:0 0 18px}
 .policy-content li{margin-bottom:8px;line-height:1.65}
+
+/* Breadcrumbs, make pages and listings */
+.crumbs{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;font-size:13px;color:#646464;min-height:44px;align-items:center}
+.crumbs li+li::before{content:"/";margin-right:6px;color:#b5b5b5}
+.crumbs a:hover{text-decoration:underline;text-underline-offset:5px}
+.crumbs [aria-current]{color:var(--ink)}
+.listing-page .page-main{max-width:1480px}
+.listing-page .eyebrow{font-size:10px;letter-spacing:1.6px;font-weight:600;display:flex;gap:10px;align-items:center;margin:14px 0 18px}
+.listing-page .red-line{display:inline-block;width:28px;height:2px;background:var(--red)}
+.listing-page .page-lead a{text-decoration:underline;text-underline-offset:4px}
+.listing-page .make-links{margin:0 0 34px}
+.listing-count{font-size:12px;color:#737373;letter-spacing:.4px;margin:0 0 18px;padding-top:18px;border-top:1px solid var(--line)}
+.listing-page .vehicle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:40px 28px}
+.listing-foot{margin-top:46px;padding-top:22px;border-top:1px solid var(--line);font-size:14px;color:#626262;line-height:1.8}
+.listing-foot a{text-decoration:underline;text-underline-offset:4px}
+.make-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.make-grid a{display:block;border:1px solid var(--line);padding:22px 22px 20px;transition:border-color .15s,transform .15s}
+.make-grid a:hover{border-color:var(--ink);transform:translateY(-2px)}
+.make-grid strong{display:block;font-family:var(--display);font-size:28px;line-height:1;margin-bottom:8px;text-transform:uppercase}
+.make-grid span{font-size:13px;color:#646464}
+.vehicle-whatsapp-cta{margin-top:10px}
+.listing-page .vehicle-card{display:flex;flex-direction:column}
+.listing-page .page-heading{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:700px){.listing-page .page-heading br{display:none}}

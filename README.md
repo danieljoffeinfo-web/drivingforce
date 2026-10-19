@@ -14,14 +14,25 @@ The local API uses the real delivery service for valid submissions. Tests mock t
 
 ## Main files
 
-- `dist/index.html`, `style.css`, `app.js`: homepage, hero transition, all inventory, filtering and sorting.
-- `dist/vehicle.html`, `vehicle.js`: individual vehicles, estimates and showroom calls to action.
+- `templates/home.html`, `dist/style.css`, `dist/app.js`, `dist/showroom-card.js`: homepage, hero transition, all inventory, filtering and sorting.
+- `templates/page.html`, `dist/vehicle.js`, `dist/vehicle-view.js`: individual vehicles, estimates and showroom calls to action.
 - `dist/finance.html`, `application.js`, `application-fields.json`: eight-step application, review, optional documents and explicit consent.
 - `dist/finance-utils.js`: shared amortisation and formatting.
 - `dist/pages.css`, `site.js`: native page styling and navigation.
 - `dist/visit.html`, `contact.html`, `privacy.html`: showroom information, sales/workshop contact and privacy information.
 - `lib/finance-application.cjs`, `api/finance-application.js`: server validation and application delivery.
 - `dist/vehicles.json`, `dist/assets/`: inventory snapshot and self-hosted images/fonts.
+
+## Search engine pages
+
+Search engines cannot run the showroom scripts, so the pages they index are rendered on the server by `api/page.js` (`lib/seo.cjs`), using the live inventory from the stock admin:
+
+- `/` — the homepage with every vehicle card already in the HTML (`templates/home.html`).
+- `/vehicles/<make-model-stockcode-278>` — one page per vehicle, the same address scheme as the original website. Old `vehicle.html?id=` links redirect permanently.
+- `/used-cars` and `/used-cars/<make>` — pages per make.
+- `/sitemap.xml` and `dist/robots.txt`.
+
+Each page carries a canonical address, description, Open Graph tags and schema.org structured data (`AutoDealer`, `Car` with its offer, `BreadcrumbList`, `ItemList`). Card and vehicle-page markup is shared with the browser (`dist/showroom-card.js`, `dist/vehicle-view.js`), so the scripts only add behaviour to what the server rendered. Addresses are clean (`/visit`, `/finance`); `vercel.json` holds the rewrites and redirects, and `scripts/dev.cjs` mirrors them locally.
 
 ## Vehicle enquiries
 

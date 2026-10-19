@@ -97,3 +97,15 @@
 /* Touch screens have no hover, so the arrows stay visible but smaller. */
 @media(hover:none){.carousel-btn{opacity:1;width:34px;height:34px;font-size:24px}}
 @media(prefers-reduced-motion:reduce){.carousel-btn,.carousel-dots i{transition:none}}
+
+/* Showroom heading and make links (search-friendly, matches the section design) */
+.showroom-top{align-items:flex-end;margin-bottom:34px}
+.showroom-top h2{font-family:var(--display);font-size:clamp(44px,5.4vw,78px);line-height:.98;letter-spacing:-1px;margin:0}
+.showroom-lead{max-width:460px;font-size:14px;line-height:1.8;color:#626262;margin:0}
+.showroom-lead a{text-decoration:underline;text-underline-offset:4px}
+.make-links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:40px;font-size:12px}
+.make-links>span{font-size:10px;letter-spacing:1.6px;font-weight:600;margin-right:8px}
+.make-links a{border:1px solid var(--line);padding:8px 13px;border-radius:999px;display:inline-flex;gap:6px;align-items:center;transition:border-color .15s,background .15s}
+.make-links a:hover{border-color:var(--ink);background:var(--soft)}
+.make-links small{color:#737373}
+@media (max-width:760px){.showroom-top{flex-direction:column;align-items:flex-start;gap:16px}}

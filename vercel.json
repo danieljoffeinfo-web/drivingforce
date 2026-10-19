@@ -4,17 +4,36 @@
   "buildCommand": "",
   "installCommand": "",
   "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "functions": {
     "api/finance-application.js": {
       "maxDuration": 30
     },
     "api/enquiry.js": {
       "maxDuration": 20
+    },
+    "api/page.js": {
+      "maxDuration": 15,
+      "includeFiles": "templates/**"
     }
   },
+  "redirects": [
+    {"source": "/index.html", "destination": "/", "permanent": true},
+    {"source": "/vehicles", "destination": "/used-cars", "permanent": true}
+  ],
+  "rewrites": [
+    {"source": "/", "destination": "/api/page?route=home"},
+    {"source": "/sitemap.xml", "destination": "/api/page?route=sitemap"},
+    {"source": "/used-cars", "destination": "/api/page?route=makes"},
+    {"source": "/used-cars/:make", "destination": "/api/page?route=make&make=:make"},
+    {"source": "/vehicles/:slug", "destination": "/api/page?route=vehicle&slug=:slug"},
+    {"source": "/vehicle", "has": [{"type": "query", "key": "id"}], "destination": "/api/page?route=legacy"},
+    {"source": "/vehicle", "destination": "/api/page?route=legacy"}
+  ],
   "headers": [
     {
-      "source": "/finance.html",
+      "source": "/finance",
       "headers": [
         {
           "key": "Cache-Control",
@@ -33,6 +52,22 @@
           "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://n39fqfoyvpcatajv.public.blob.vercel-storage.com; font-src 'self'; connect-src 'self' https://n39fqfoyvpcatajv.public.blob.vercel-storage.com https://driving-force-admin.vercel.app; form-action 'self'; base-uri 'self'; frame-ancestors 'none'"
         }
       ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {"key": "X-Content-Type-Options", "value": "nosniff"},
+        {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"},
+        {"key": "X-Frame-Options", "value": "SAMEORIGIN"}
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{"key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=2592000"}]
+    },
+    {
+      "source": "/(.*)\\.(css|js)",
+      "headers": [{"key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400"}]
     }
   ]
 }

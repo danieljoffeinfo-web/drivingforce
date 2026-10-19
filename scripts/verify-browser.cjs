@@ -6,13 +6,16 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {vehicles}=require('../dist/vehicles.json');
 const {estimate,money}=require('../dist/finance-utils.js');
+const {vehicleUrl}=require('../dist/inventory.js');
+const seo=require('../lib/seo.cjs');
+const inventory=require('../dist/vehicles.json');
 const base=process.env.TEST_BASE_URL||'https://project.test';
 const live=Boolean(process.env.TEST_BASE_URL);
 const output=path.join(__dirname,'../evidence',live?'production':'local');
 const failures=[];
 (async()=>{
   await fs.mkdir(output,{recursive:true});
-  const browser=await chromium.launch({headless:true});
+  const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_PATH||undefined});
   const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1,reducedMotion:'reduce'});
   let blockedWrites=0;
   await context.route('**/*',async route=>{
@@ -20,7 +23,11 @@ const failures=[];
     if(live)return route.continue();
     const url=new URL(route.request().url());
     if(url.hostname!=='project.test')return route.abort();
-    const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
+    // Server-rendered pages, as api/page.js serves them on Vercel.
+    if(url.pathname==='/')return route.fulfill({contentType:'text/html',body:seo.renderHome(inventory)});
+    const slug=url.pathname.match(/^\/vehicles\/([^/]+)$/);
+    if(slug){const found=seo.findBySlug(inventory.vehicles,slug[1]);return route.fulfill(found?{contentType:'text/html',body:seo.renderVehicle(found.car,inventory)}:{status:404,contentType:'text/html',body:seo.renderNotFound()});}
+    const name=url.pathname.slice(1)+(path.extname(url.pathname)?'':'.html');
     const file=path.resolve(__dirname,'../dist',name);
     if(!file.startsWith(path.resolve(__dirname,'../dist')+path.sep))return route.abort();
     try{await route.fulfill({path:file});}catch{await route.fulfill({status:404,body:'Not found'});}
@@ -36,15 +43,16 @@ const failures=[];
   for(const width of [1440,390]){
     await page.setViewportSize({width,height:1000});
     for(const car of vehicles){
-      await go('/vehicle.html?id='+car.id);
-      assert.equal(await page.locator('#vehicle-title').innerText(),car.displayName);
-      assert.equal(await page.locator('.vehicle-description').innerText(),car.description.join('\n\n'));
+      await go(vehicleUrl(car));
+      assert.equal(await page.locator('#vehicle-title').innerText(),car.year+' '+car.displayName);
+      // The stored description comes first; the page adds a closing paragraph about the showroom.
+      assert.ok((await page.locator('.vehicle-description').innerText()).startsWith(car.description.join('\n\n')),`description ${car.id}`);
       await page.locator('.detail-photo').evaluate(img=>img.decode());
       assert.ok(await page.locator('.detail-photo').evaluate(img=>img.complete&&img.naturalWidth>0),`photo ${car.id}`);
       const mail=new URL(await page.locator('.vehicle-enquire').getAttribute('href'));
       assert.equal(mail.pathname,'info@drivingforce.biz');
       assert.ok(mail.searchParams.get('subject').includes(car.stock_code));
-      assert.ok(mail.searchParams.get('body').includes('vehicle.html?id='+car.id));
+      assert.ok(mail.searchParams.get('body').includes(vehicleUrl(car)));
       assert.equal(await page.locator('.vehicle-equipment li').count(),car.features.length);
       await noOverflow(`${width}/${car.id}`);
     }
@@ -53,10 +61,10 @@ const failures=[];
   for(const width of [1440,768,390,320]){
     await page.setViewportSize({width,height:1000});
     for(const id of [2746,2583,2726]){
-      await go('/vehicle.html?id='+id);await noOverflow(`${width}/${id}`);
+      await go(vehicleUrl(vehicles.find(c=>c.id===id)));await noOverflow(`${width}/${id}`);
       await page.screenshot({path:path.join(output,`vehicle-${id}-${width}.png`),fullPage:true});
     }
-    await page.goto(base+'/index.html#showroom');
+    await page.goto(base+'/#showroom');
     await page.locator('.vehicle-card').first().waitFor();
     assert.equal(await page.locator('.vehicle-card').count(),49);
     await noOverflow('catalog '+width);
@@ -70,7 +78,7 @@ const failures=[];
   await page.locator('#clear-filters').click();
   assert.equal(await page.locator('.vehicle-card').count(),49);
   await page.locator('#vehicle-sort').selectOption('price-asc');
-  assert.ok((await page.locator('.vehicle-card-link').first().getAttribute('href')).includes('2708'));
+  assert.equal(await page.locator('.vehicle-card-link').first().getAttribute('href'),vehicleUrl(vehicles.find(c=>c.id===2708)));
   await page.locator('#vehicle-search').fill('Porsche');
   assert.equal(await page.locator('.vehicle-card').count(),3);
   const whatsapp=new URL(await page.locator('.vehicle-whatsapp').first().getAttribute('href'));
@@ -96,7 +104,7 @@ const failures=[];
   await page.locator('.vehicle-card-link').first().click();
   await page.locator('.vehicle-description').waitFor();
   // Photo dialog: keyboard entry, close, focus restoration and phone-sized layout.
-  await go('/vehicle.html?id=2746');
+  await go(vehicleUrl(vehicles.find(c=>c.id===2746)));
   await page.locator('.photo-open').focus();await page.keyboard.press('Enter');
   assert.ok(await page.locator('dialog').evaluate(d=>d.open));
   await page.keyboard.press('Escape');
@@ -109,7 +117,9 @@ const failures=[];
   // Finance arithmetic, validation and selected-vehicle handoff (no form submission).
   await page.locator('[name=deposit]').fill('100000');
   const expected=estimate({price:2395995,deposit:100000,tradeIn:0,rate:12,term:72});
-  assert.equal(await page.locator('#estimate-monthly').textContent(),money(expected.monthly));
+  // Node and Chromium can use different thousands-separator spaces for en-ZA, so compare ignoring that.
+  const sameMoney=(a,b)=>assert.equal(a.replace(/\s/g,' '),b.replace(/\s/g,' '));
+  sameMoney(await page.locator('#estimate-monthly').textContent(),money(expected.monthly));
   await page.locator('[name=deposit]').fill('9999999');
   assert.equal(await page.locator('#estimate-monthly').textContent(),'—');
   assert.ok((await page.locator('#estimate-error').innerText()).length>0);
@@ -120,17 +130,19 @@ const failures=[];
   await page.locator('#application-vehicle h2').waitFor();
   assert.ok((await page.locator('.application-aside').innerText()).includes('Porsche 911 Carrera S'));
   // Mobile navigation, missing ID and recoverable fetch failure.
-  await go('/vehicle.html?id=2746');await page.locator('.menu-button').click();
+  await go(vehicleUrl(vehicles.find(c=>c.id===2746)));await page.locator('.menu-button').click();
   assert.equal(await page.locator('.menu-button').getAttribute('aria-expanded'),'true');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('.menu-button').getAttribute('aria-expanded'),'false');
-  await page.goto(base+'/vehicle.html?id=does-not-exist');await page.locator('.page-message').waitFor();
+  await page.goto(base+'/vehicles/does-not-exist-tp0-278');await page.locator('.page-message').waitFor();
   assert.ok((await page.locator('.page-message').innerText()).includes('could not be found'));
+  // With the live and bundled inventory unavailable, the server-rendered page still works from its embedded data.
   await page.route('**/vehicles.json',route=>route.fulfill({status:503,body:'unavailable'}));
-  await page.goto(base+'/vehicle.html?id=2746');await page.locator('.page-message').waitFor();
-  assert.ok((await page.locator('.page-message').innerText()).includes('could not load'));
+  await page.goto(base+vehicleUrl(vehicles.find(c=>c.id===2746)));await page.locator('#estimate-monthly').waitFor();
+  await page.locator('[name=deposit]').fill('100000');
+  sameMoney(await page.locator('#estimate-monthly').textContent(),money(expected.monthly));
   assert.deepEqual(failures,[]);assert.equal(blockedWrites,0);
-  const report={mode:live?'production':'local',base,verifiedAt:new Date().toISOString(),vehicleCount:49,vehiclePageChecks:98,widths:[1440,768,390,320],errors:failures,writeRequests:blockedWrites,interactions:['search','sort','card navigation','photo keyboard/close/focus','finance arithmetic/validation/handoff','mobile navigation','missing vehicle','fetch failure']};
+  const report={mode:live?'production':'local',base,verifiedAt:new Date().toISOString(),vehicleCount:49,vehiclePageChecks:98,widths:[1440,768,390,320],errors:failures,writeRequests:blockedWrites,interactions:['search','sort','card navigation','photo keyboard/close/focus','finance arithmetic/validation/handoff','mobile navigation','missing vehicle','fetch failure fallback']};
   await fs.writeFile(path.join(output,'report.json'),JSON.stringify(report,null,2));
   console.log(JSON.stringify(report,null,2));
   await browser.close();

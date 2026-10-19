@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /vehicle.html
+Disallow: /vehicle
+
+Sitemap: https://www.driving-force.co.za/sitemap.xml
