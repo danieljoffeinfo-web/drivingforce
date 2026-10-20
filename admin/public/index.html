@@ -2,7 +2,14 @@
 <html lang="en-ZA" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0b" id="theme-color">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DF Admin">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
 <meta name="color-scheme" content="dark light">
 <meta name="robots" content="noindex, nofollow">
 <title>Stock admin | Driving Force</title>
@@ -160,6 +167,14 @@
       </div>
     </section>
   </div>
+  <nav class="tabbar" aria-label="Sections">
+    <button type="button" class="tab" data-tab="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
+    <button type="button" class="tab" data-tab="stock"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14M6.5 17l1.6-5.2A2 2 0 0 1 10 10.4h4a2 2 0 0 1 1.9 1.4L17.5 17"/><circle cx="8" cy="17.5" r="1.8"/><circle cx="16" cy="17.5" r="1.8"/><path d="M3 17h2m14 0h2"/></svg><span>Stock</span></button>
+    <button type="button" class="tab" data-tab="enquiries"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span>Enquiries</span><i class="tab-badge" id="tab-enquiry-count"></i></button>
+    <button type="button" class="tab" data-tab="analytics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m6 10V4m6 16v-7m5 7H3"/></svg><span>Analytics</span></button>
+    <button type="button" id="tab-more" aria-label="More: account, website and settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>More</span></button>
+  </nav>
+  <button type="button" class="fab" id="add-fab" aria-label="Add a vehicle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   <div class="scrim" id="scrim" hidden></div>
 </div>
 

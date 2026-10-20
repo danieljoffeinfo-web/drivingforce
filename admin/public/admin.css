@@ -452,3 +452,134 @@ label.check input{width:auto;margin:0}
   .enq-filters{padding:14px 16px}
 }
 #enq-days{width:auto;margin:0}
+
+/* The add / edit form keeps its title and Publish buttons in view on every screen size. */
+#add-dialog .add-form{padding-bottom:0}
+#add-dialog .dialog-head{position:sticky;top:0;z-index:2;margin:-26px -26px 18px;padding:18px 26px;background:var(--panel);border-bottom:1px solid var(--line)}
+#add-dialog .dialog-foot{position:sticky;bottom:0;z-index:2;margin:20px -26px 0;padding:14px 26px;background:var(--panel);border-top:1px solid var(--line)}
+
+/* ======================================================================
+   Phones and tablets: app-style navigation, thumb-sized controls, no zoom
+   ====================================================================== */
+.tabbar,.fab{display:none}
+@media (max-width:900px){
+  /* Sticky top bar under the notch; the bottom tab bar replaces the menu button. */
+  .topbar{position:sticky;top:0;z-index:20;margin:0 -16px 16px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+  .menu-button{display:none}
+  .main{padding:0 16px calc(96px + env(safe-area-inset-bottom))}
+  .sidebar{padding-top:calc(22px + env(safe-area-inset-top));padding-bottom:calc(16px + env(safe-area-inset-bottom));z-index:40}
+  .scrim{z-index:35}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--side) 92%,transparent);backdrop-filter:saturate(1.4) blur(16px);-webkit-backdrop-filter:saturate(1.4) blur(16px);border-top:1px solid var(--line)}
+  .tabbar button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:54px;border:0;border-radius:12px;background:none;color:var(--muted);font:600 11px/1 inherit;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .tabbar svg{width:24px;height:24px}
+  .tabbar button.active{color:var(--red)}
+  .tabbar button.active::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--red)}
+  .tabbar button:active{background:var(--panel-2)}
+  .tab-badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font:700 10px/18px inherit;font-family:inherit;font-style:normal;text-align:center}
+  .tab-badge:empty{display:none}
+  /* Floating add button on the stock screen. */
+  body[data-view="stock"] .fab{display:grid;place-items:center;position:fixed;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:25;width:58px;height:58px;border-radius:50%;border:0;background:var(--red-strong);color:#fff;box-shadow:0 10px 26px rgba(206,32,46,.45),0 2px 6px rgba(0,0,0,.3);cursor:pointer}
+  .fab svg{width:26px;height:26px;stroke-width:2.4}
+  .fab:active{transform:scale(.94)}
+  body[data-view="stock"] .order-bar{bottom:calc(84px + env(safe-area-inset-bottom));top:auto;position:fixed;left:12px;right:84px;margin:0;z-index:24}
+}
+@media (max-width:640px){
+  /* 16px text in fields stops iPhone zooming in on tap. */
+  input,select,textarea{font-size:16px}
+  .vcard .price-form input{font-size:16px}
+  .button{min-height:46px;padding:12px 16px}
+  .button.small{min-height:40px}
+  .icon-button{width:44px;height:44px}
+  .filter-chip{min-height:40px;padding:0 14px}
+  .forgot{padding:10px 0}
+  .login .card{padding:26px 20px}
+  .topbar h1{font-size:20px}
+  .pill{padding:6px 11px}
+  /* Toolbars: search on its own row, controls beside each other. */
+  .toolbar{gap:12px}
+  .toolbar>.muted{font-size:13px;flex-basis:100%}
+  .actions{display:grid;grid-template-columns:1fr auto;gap:10px;width:100%}
+  .actions input{grid-column:1/-1;max-width:none}
+  .actions select{width:100%;margin:0}
+  #stock-view .actions{grid-template-columns:1fr}
+  #stock-view #add-open{display:none}
+  /* Home: today's figures as a compact two-column grid. */
+  .hero{grid-template-columns:1fr 1fr}
+  .hero-today{grid-column:1/-1}
+  .hero-cell:nth-child(2){grid-column:1/-1}
+  .hero-cell:nth-child(n){border-top:1px solid var(--line);border-left:0;padding:14px 16px}
+  .hero-cell:nth-child(2){border-top:0}
+  .hero-cell:nth-child(4),.hero-cell:nth-child(6){border-left:1px solid var(--line)}
+  .hero-label{font-size:13px;gap:8px}
+  .hero-label .panel-icon{width:26px;height:26px}
+  .hero-label .panel-icon svg{width:15px;height:15px}
+  .hero-value{font-size:26px}
+  .hero-sub{font-size:12px}
+  .panel-head{flex-wrap:wrap}
+  .panel-head .legend{width:100%;margin-left:0}
+  .fc-value{font-size:30px;margin:6px 0 10px}
+  .fc-track{height:96px}
+  /* Stock: a compact list, photo on the left, so more cars fit on screen. */
+  .card-grid,.card-grid.size-s,.card-grid.size-m,.card-grid.size-l{grid-template-columns:1fr;gap:10px}
+  .vcard{display:grid;grid-template-columns:118px minmax(0,1fr);border-radius:14px}
+  .vcard img{grid-column:1;grid-row:1;width:118px;height:100%;min-height:104px;aspect-ratio:auto}
+  .vcard .card-body{grid-column:2;grid-row:1;padding:10px 12px 8px;gap:1px}
+  .vcard h3{font-size:15px}
+  .vcard .meta{font-size:12px}
+  .vcard .price-form{margin-top:6px}
+  .vcard .price-form input{padding:6px 8px}
+  .vcard .saved:empty{display:none}
+  .vcard .card-actions{grid-column:1/-1;grid-row:2;padding:0 10px 10px;gap:8px}
+  .vcard .card-actions button{padding:0;min-height:44px;font-size:14px}
+  .vcard .pos{top:6px;left:6px}
+  .vcard .pos input{width:34px;font-size:14px;padding:6px 4px}
+  .vcard .badge{top:auto;bottom:6px;left:6px;right:auto}
+  /* Dialogs become sheets that slide up from the bottom. */
+  dialog{margin:auto 0 0;width:100%;max-width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - 12px);border-radius:20px 20px 0 0;border-width:1px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  dialog[open]{animation:sheet-up .22s ease-out}
+  @keyframes sheet-up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+  dialog::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:var(--line-2);margin:8px auto 0}
+  .add-form,.confirm,.account,.enq-detail{padding:14px 18px 18px}
+  /* The add / edit form fills the screen with its title and Publish buttons pinned. */
+  #add-dialog{height:calc(100dvh - env(safe-area-inset-top) - 12px)}
+  #add-dialog .dialog-head{position:sticky;top:0;z-index:2;margin:-14px -18px 14px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+  #add-dialog .dialog-foot{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom));z-index:2;margin:18px -18px calc(-18px - env(safe-area-inset-bottom));padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  #add-dialog .dialog-foot [data-close]{display:none}
+  #add-dialog .dialog-foot #add-submit{grid-column:1/-1;grid-row:1}
+  #add-dialog .dialog-foot .button{width:100%}
+  #add-dialog .dialog-foot #add-again{grid-column:1/-1}
+  .form-columns .photo-grid{grid-template-columns:repeat(3,1fr)}
+  .photo-add{min-height:96px}
+  .dialog-foot .button{flex:1}
+  .confirm .dialog-foot{display:grid;grid-template-columns:1fr 1fr}
+  .enq-actions{display:grid;grid-template-columns:1fr 1fr}
+  .enq-actions .button:first-child{grid-column:1/-1}
+  .enq-actions .button{text-align:center;display:flex;align-items:center;justify-content:center}
+  /* Enquiries list: bigger rows. */
+  .enq-row{padding:14px}
+  .enq-filters{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;padding:12px 14px}
+  .enq-filters::-webkit-scrollbar{display:none}
+  .filter-chip{flex:none}
+  /* Analytics table scrolls sideways inside its panel only. */
+  .table-wrap{-webkit-overflow-scrolling:touch}
+}
+@media (hover:none){
+  .vcard:hover{box-shadow:none}
+  .enq-row:hover,.data-table tbody tr:hover td{background:none}
+}
+@media (max-width:640px){
+  .vcard .price-form input{min-height:44px;padding:8px 10px}
+  .vcard .price-form .button{min-height:44px}
+  .vcard .pos input{font-size:16px;width:38px}
+  dialog .link[data-close],#remove-dialog .link{min-height:44px;padding:10px 4px;display:inline-flex;align-items:center}
+}
+@media (max-width:640px){
+  #add-dialog .add-form{padding-bottom:0}
+  #add-dialog .dialog-foot{bottom:0;margin:18px -18px 0;padding:10px 18px calc(10px + env(safe-area-inset-bottom));grid-template-columns:1fr 1fr}
+  #add-dialog .dialog-foot #add-submit{grid-column:2;grid-row:1}
+  #add-dialog .dialog-foot #add-again{grid-column:1;grid-row:1;font-size:13px;padding:10px 8px;white-space:normal;line-height:1.15}
+  #add-dialog{padding-bottom:0}
+}
+@media (max-width:640px){
+  .photo-grid .photo-add:only-child{grid-column:1/-1;min-height:120px}
+}

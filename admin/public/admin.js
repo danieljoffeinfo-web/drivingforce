@@ -390,6 +390,7 @@
   let view = 'home', analyticsLoaded = false, homeLoaded = false, homeData = null;
   function go(name) {
     view = titles[name] ? name : 'home';
+    document.body.dataset.view = view;
     document.querySelectorAll('.tab').forEach(t => { const on = t.dataset.tab === view; t.classList.toggle('active', on); if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
     for (const key of Object.keys(titles)) $(`#${key}-view`).hidden = key !== view;
     $('#page-title').textContent = titles[view]; closeMenu();
@@ -403,8 +404,12 @@
   const closeMenu = () => { $('#sidebar').classList.remove('open'); $('#scrim').hidden = true; };
   $('#menu-open').addEventListener('click', () => { $('#sidebar').classList.add('open'); $('#scrim').hidden = false; });
   $('#scrim').addEventListener('click', closeMenu);
+  $('#tab-more').addEventListener('click', () => { $('#sidebar').classList.add('open'); $('#scrim').hidden = false; });
+  $('#add-fab').addEventListener('click', () => openForm('add'));
+  // Scroll to the top when the current section's tab is tapped again, as phone apps do.
+  document.querySelectorAll('.tabbar .tab').forEach(t => t.addEventListener('click', () => { if (t.dataset.tab === view) scrollTo({top: 0, behavior: 'smooth'}); }));
   const themeToggle = $('#theme-toggle');
-  const applyTheme = dark => { document.documentElement.dataset.theme = dark ? 'dark' : 'light'; themeToggle.checked = dark; };
+  const applyTheme = dark => { document.documentElement.dataset.theme = dark ? 'dark' : 'light'; themeToggle.checked = dark; $('#theme-color').content = dark ? '#0a0a0b' : '#f4f4f2'; };
   try { applyTheme(localStorage.getItem('df-theme') !== 'light'); } catch { applyTheme(true); }
   themeToggle.addEventListener('change', () => {
     applyTheme(themeToggle.checked); try { localStorage.setItem('df-theme', themeToggle.checked ? 'dark' : 'light'); } catch {}
@@ -629,7 +634,7 @@
     return [...forms, ...taps].sort((a, b) => new Date(b.at) - new Date(a.at));
   }
   async function enquiryBadge() {
-    try { const d = await api('/api/enquiries?days=7'); const n = enquiryList(d).filter(r => r.kind === 'form' || r.kind === 'whatsapp').length; $('#nav-enquiry-count').textContent = n || ''; } catch {}
+    try { const d = await api('/api/enquiries?days=7'); const n = enquiryList(d).filter(r => r.kind === 'form' || r.kind === 'whatsapp').length; $('#nav-enquiry-count').textContent = n || ''; $('#tab-enquiry-count').textContent = n ? (n > 99 ? '99+' : n) : ''; } catch {}
   }
   async function loadEnquiries() {
     $('#enq-error').textContent = '';
