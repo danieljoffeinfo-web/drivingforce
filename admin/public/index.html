@@ -46,6 +46,7 @@
     <nav class="nav" aria-label="Dashboard sections">
       <button type="button" class="nav-item tab" data-tab="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
       <button type="button" class="nav-item tab" data-tab="stock"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14M6.5 17l1.6-5.2A2 2 0 0 1 10 10.4h4a2 2 0 0 1 1.9 1.4L17.5 17"/><circle cx="8" cy="17.5" r="1.8"/><circle cx="16" cy="17.5" r="1.8"/><path d="M3 17h2m14 0h2"/></svg><span>Stock</span><span class="count" id="nav-stock-count"></span></button>
+      <button type="button" class="nav-item tab" data-tab="enquiries"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span>Enquiries</span><span class="count hot" id="nav-enquiry-count" title="Enquiries in the last 7 days"></span></button>
       <button type="button" class="nav-item tab" data-tab="analytics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10m6 10V4m6 16v-7m5 7H3"/></svg><span>Analytics</span></button>
       <a class="nav-item" id="site-link" href="https://www.driving-force.co.za" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.6 5.7 3.6 9s-1.1 6.3-3.6 9c-2.5-2.7-3.6-5.7-3.6-9S9.5 5.7 12 3z"/></svg><span>View website</span></a>
     </nav>
@@ -111,6 +112,19 @@
       </section>
       <div class="order-bar" id="order-bar" hidden><span>You’ve changed the order. It goes live when you save.</span><div><button class="button ghost small" type="button" id="order-undo">Undo</button><button class="button small" type="button" id="order-save">Save order</button></div></div>
       <ul id="list" class="card-grid size-l" aria-live="polite"></ul>
+    </section>
+
+    <section id="enquiries-view" class="view" hidden>
+      <section class="toolbar">
+        <p class="muted">Everyone who got in touch through the website. Email-form enquiries show who sent them; WhatsApp and call taps show the car and when, and the person's details are in WhatsApp or your call log.</p>
+        <div class="actions"><input id="enq-search" type="search" placeholder="Search name, email, phone or car" aria-label="Search enquiries"><select id="enq-days" aria-label="Date range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option></select><button type="button" class="button ghost" id="enq-export">Download CSV</button></div>
+      </section>
+      <p class="error" id="enq-error" role="alert"></p>
+      <div class="kpis enq-kpis" id="enq-kpis"></div>
+      <section class="panel enq-panel">
+        <div class="enq-filters" id="enq-filters" role="group" aria-label="Filter by channel"></div>
+        <ul class="enq-list" id="enq-list" aria-live="polite"></ul>
+      </section>
     </section>
 
     <section id="analytics-view" class="view" hidden>
@@ -204,6 +218,12 @@
         <li><strong>Table Editor → dashboard_users</strong>: add their email with role <code>staff</code> (or <code>owner</code>). Delete the row to remove their access to this dashboard.</li>
       </ol>
     </section>
+  </div>
+</dialog>
+<dialog id="enquiry-detail" aria-labelledby="enq-detail-title">
+  <div class="enq-detail">
+    <div class="dialog-head"><h2 id="enq-detail-title">Enquiry</h2><button type="button" class="link" data-close>Close</button></div>
+    <div id="enq-detail-body"></div>
   </div>
 </dialog>
 </body>

@@ -20,7 +20,7 @@
     $('#who').textContent = name; $('#who-role').textContent = user.owner ? 'Owner' : 'Staff'; $('#avatar').textContent = name.trim()[0].toUpperCase();
     $('#login-view').hidden = true; $('#app-view').hidden = false;
     let saved = 'home'; try { saved = localStorage.getItem('df-view') || 'home'; } catch {}
-    load().then(() => go(saved));
+    load().then(() => go(saved)); enquiryBadge();
   }
   function notify(message) { const n = $('#notice'); n.textContent = message; n.hidden = !message; }
   const imageFor = url => /^https?:/.test(url) ? url : new URL(url, siteUrl).href;
@@ -386,7 +386,7 @@
   });
 
   // ---- Layout: sidebar sections, theme and mobile menu ----
-  const titles = {home: 'Home', stock: 'Stock', analytics: 'Analytics'};
+  const titles = {home: 'Home', stock: 'Stock', enquiries: 'Enquiries', analytics: 'Analytics'};
   let view = 'home', analyticsLoaded = false, homeLoaded = false, homeData = null;
   function go(name) {
     view = titles[name] ? name : 'home';
@@ -395,6 +395,7 @@
     $('#page-title').textContent = titles[view]; closeMenu();
     try { localStorage.setItem('df-view', view); } catch {}
     if (view === 'analytics' && !analyticsLoaded) loadAnalytics();
+    if (view === 'enquiries') loadEnquiries();
     if (view === 'home') { if (!homeLoaded) loadHome(); else renderHome(); }
     if (view === 'analytics' && lastAnalytics) requestAnimationFrame(() => renderCharts(lastAnalytics));
   }
@@ -606,7 +607,89 @@
     } catch (e) { $('#analytics-error').textContent = e.message; }
   }
   // Keep the "browsing" pill and the overview fresh while the dashboard is open.
-  setInterval(() => { if (!me || document.hidden) return; if (view === 'home') loadHome(); else api('/api/analytics?days=1').then(a => setLive(a.live)).catch(() => {}); }, 60000);
+  setInterval(() => { if (!me || document.hidden) return; if (view === 'home') loadHome(); else api('/api/analytics?days=1').then(a => setLive(a.live)).catch(() => {}); if (view === 'enquiries') loadEnquiries(); else enquiryBadge(); }, 60000);
+
+  // ---- Enquiries: who got in touch, how, and about which car ----
+  const channels = {
+    form: {label: 'Email form', short: 'Email', tone: 'red', icon: '<path d="M3 6h18v12H3z"/><path d="m3.5 6.5 8.5 7 8.5-7"/>'},
+    whatsapp: {label: 'WhatsApp', short: 'WhatsApp', tone: 'teal', icon: '<path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/>'},
+    phone: {label: 'Call', short: 'Calls', tone: 'blue', icon: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>'},
+    finance: {label: 'Finance', short: 'Finance', tone: 'amber', icon: '<path d="M3 7h18v10H3z"/><circle cx="12" cy="12" r="2.5"/>'},
+    directions: {label: 'Directions', short: 'Directions', tone: 'violet', icon: '<path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'}
+  };
+  const tapText = {whatsapp: 'Started a WhatsApp chat', phone: 'Tapped to call the showroom', finance: 'Opened the finance application', directions: 'Asked for directions'};
+  let enquiryRows = [], enquiryFilter = 'all', enquiryMeta = null;
+  const ago = at => { const m = Math.round((Date.now() - new Date(at)) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : m < 2880 ? 'yesterday' : Math.round(m / 1440) + ' days ago'; };
+  const fullTime = at => new Date(at).toLocaleString('en-ZA', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+  const intl = phone => { const d = String(phone || '').replace(/\D/g, ''); return !d ? '' : d.startsWith('27') ? d : d.startsWith('0') ? '27' + d.slice(1) : d; };
+  const icon = (kind, cls = '') => `<span class="panel-icon ${channels[kind].tone} ${cls}"><svg viewBox="0 0 24 24" aria-hidden="true">${channels[kind].icon}</svg></span>`;
+  function enquiryList(data) {
+    const forms = (data.forms || []).map(f => ({...f, kind: 'form'}));
+    const taps = (data.taps || []).map(t => ({...t, kind: t.kind}));
+    return [...forms, ...taps].sort((a, b) => new Date(b.at) - new Date(a.at));
+  }
+  async function enquiryBadge() {
+    try { const d = await api('/api/enquiries?days=7'); const n = enquiryList(d).filter(r => r.kind === 'form' || r.kind === 'whatsapp').length; $('#nav-enquiry-count').textContent = n || ''; } catch {}
+  }
+  async function loadEnquiries() {
+    $('#enq-error').textContent = '';
+    try { enquiryMeta = await api('/api/enquiries?days=' + $('#enq-days').value); enquiryRows = enquiryList(enquiryMeta); renderEnquiries(); }
+    catch (e) { $('#enq-error').textContent = e.message; }
+  }
+  function renderEnquiries() {
+    const count = kind => enquiryRows.filter(r => r.kind === kind).length;
+    const forms = count('form'), opens = enquiryMeta?.form_opens || 0;
+    const kpi = (tone, label, value, sub) => `<div class="kpi ${tone}"><p class="label">${label}</p><p class="value">${fmt(value)}</p><p class="change">${sub}</p></div>`;
+    $('#enq-kpis').innerHTML = kpi('red', 'Email enquiries', forms, `${opens ? `form opened ${fmt(opens)} time${opens === 1 ? '' : 's'} · ${pctOf(forms, opens)}% sent` : 'sent through the website form'}`)
+      + kpi('teal', 'WhatsApp chats', count('whatsapp'), 'started from the website')
+      + kpi('blue', 'Calls', count('phone'), 'taps on a phone number')
+      + kpi('amber', 'Finance', count('finance'), 'opened the finance application');
+    $('#enq-filters').innerHTML = [['all', 'All', enquiryRows.length], ...Object.entries(channels).map(([k, c]) => [k, c.short, count(k)]).filter(([k, , n]) => n || k === 'form' || k === 'whatsapp')]
+      .map(([k, label, n]) => `<button type="button" class="filter-chip${enquiryFilter === k ? ' on' : ''}" data-filter="${k}" aria-pressed="${enquiryFilter === k}">${label} <span>${n}</span></button>`).join('');
+    const q = $('#enq-search').value.trim().toLowerCase();
+    const shown = enquiryRows.filter(r => (enquiryFilter === 'all' || r.kind === enquiryFilter) && (!q || [r.name, r.email, r.phone, r.vehicle, r.message, carName(r.vehicle_id || '', r.vehicle)].join(' ').toLowerCase().includes(q)));
+    $('#enq-list').innerHTML = shown.length ? shown.map((r, i) => {
+      const car = r.vehicle_id ? carById(r.vehicle_id) : null;
+      const thumb = car ? `<img src="${escapeHtml(imageFor(photosOf(car)[0] || ''))}" alt="" loading="lazy">` : '<span class="ph"></span>';
+      const vehicle = r.vehicle_id || r.vehicle ? `<div class="enq-car">${thumb}<span>${escapeHtml(carName(r.vehicle_id || '', r.vehicle))}</span></div>` : '<div class="enq-car none">General enquiry</div>';
+      const who = r.kind === 'form'
+        ? `<strong>${escapeHtml(r.name)}</strong><span>${escapeHtml(r.email)}${r.phone ? ' · ' + escapeHtml(r.phone) : ''}</span>`
+        : `<strong>${tapText[r.kind]}</strong><span>${escapeHtml([r.device && r.device[0].toUpperCase() + r.device.slice(1), r.source && sourceName(r.source), r.country && countryName(r.country)].filter(Boolean).join(' · ') || 'Website visitor')}</span>`;
+      const status = r.kind === 'form' ? (r.delivered >= r.recipients && r.recipients ? `<span class="tag ok">Emailed</span>` : r.delivered ? `<span class="tag warn">Emailed ${r.delivered} of ${r.recipients}</span>` : `<span class="tag bad">Email failed</span>`) : '';
+      return `<li><button type="button" class="enq-row" data-row="${enquiryRows.indexOf(r)}">${icon(r.kind)}<div class="enq-who">${who}${r.kind === 'form' ? `<em>${escapeHtml(r.message.length > 110 ? r.message.slice(0, 110) + '…' : r.message)}</em>` : ''}</div>${vehicle}<div class="enq-when"><span title="${escapeHtml(fullTime(r.at))}">${ago(r.at)}</span>${status}</div></button></li>`;
+    }).join('') : `<li class="empty-note enq-empty">${enquiryRows.length ? 'No enquiries match your search.' : 'No enquiries in this period yet. New ones appear here as soon as they come in.'}</li>`;
+  }
+  function showEnquiry(r) {
+    const car = r.vehicle_id ? carById(r.vehicle_id) : null, name = carName(r.vehicle_id || '', r.vehicle);
+    const carBlock = r.vehicle_id || r.vehicle ? `<div class="enq-detail-car">${car ? `<img src="${escapeHtml(imageFor(photosOf(car)[0] || ''))}" alt="">` : ''}<div><strong>${escapeHtml(name)}</strong>${car ? `<span>${money(car.value)} · ${escapeHtml(car.stock_code)}</span>` : '<span>No longer listed</span>'}</div></div>` : '';
+    let body;
+    if (r.kind === 'form') {
+      const first = r.name.split(/\s+/)[0], about = r.vehicle ? ` about the ${r.vehicle.replace(/ · .*$/, '')}` : '';
+      const mailto = `mailto:${r.email}?` + new URLSearchParams({subject: `Your enquiry${about}`, body: `Hi ${first},\n\nThank you for your enquiry${about}.\n\n`}).toString().replace(/\+/g, '%20');
+      const wa = intl(r.phone);
+      body = `${carBlock}<dl class="enq-facts"><div><dt>Name</dt><dd>${escapeHtml(r.name)}</dd></div><div><dt>Email</dt><dd><a href="mailto:${escapeHtml(r.email)}">${escapeHtml(r.email)}</a></dd></div><div><dt>Phone</dt><dd>${r.phone ? `<a href="tel:+${wa}">${escapeHtml(r.phone)}</a>` : 'Not given'}</dd></div><div><dt>Received</dt><dd>${escapeHtml(fullTime(r.at))}</dd></div><div><dt>Delivery</dt><dd>Emailed to ${r.delivered} of ${r.recipients} inbox${r.recipients === 1 ? '' : 'es'}</dd></div></dl><p class="list-label">Message</p><blockquote class="enq-message">${escapeHtml(r.message).replace(/\n/g, '<br>')}</blockquote><div class="enq-actions"><a class="button" href="${escapeHtml(mailto)}">Reply by email</a>${wa ? `<a class="button ghost" href="https://wa.me/${wa}?text=${encodeURIComponent(`Hi ${first}, this is Driving Force. Thank you for your enquiry${about}.`)}" target="_blank" rel="noopener">WhatsApp ${escapeHtml(first)}</a><a class="button ghost" href="tel:+${wa}">Call</a>` : ''}</div>`;
+    } else {
+      const stock = car?.stock_code || (r.vehicle || '').split(' · ')[1];
+      const hint = r.kind === 'whatsapp' ? `The chat itself, with the person's name and number, is in the Driving Force WhatsApp on 082 425 4253. ${stock ? `Their first message mentions stock <strong>${escapeHtml(stock)}</strong>, so search the chats for it.` : ''}` : r.kind === 'phone' ? 'The call itself is in the showroom call log. The website can only see that the number was tapped.' : r.kind === 'finance' ? 'If they complete the application it arrives through the EazyFin / VMG finance service with their details.' : 'They opened directions to the showroom in Google Maps.';
+      body = `${carBlock}<dl class="enq-facts"><div><dt>What happened</dt><dd>${tapText[r.kind]}</dd></div><div><dt>When</dt><dd>${escapeHtml(fullTime(r.at))}</dd></div><div><dt>Device</dt><dd>${escapeHtml(r.device ? r.device[0].toUpperCase() + r.device.slice(1) : 'Unknown')}</dd></div><div><dt>Came from</dt><dd>${escapeHtml(r.source ? sourceName(r.source) : 'Unknown')}</dd></div><div><dt>Country</dt><dd>${escapeHtml(countryName(r.country))}</dd></div><div><dt>Page</dt><dd>${escapeHtml(pageName(r.path || ''))}</dd></div></dl><p class="enq-hint">${hint}</p>`;
+    }
+    $('#enq-detail-title').innerHTML = `${icon(r.kind, 'sm')} ${r.kind === 'form' ? escapeHtml(r.name) : channels[r.kind].label}`;
+    $('#enq-detail-body').innerHTML = body;
+    $('#enquiry-detail').showModal();
+  }
+  $('#enq-list').addEventListener('click', event => { const row = event.target.closest('[data-row]'); if (row) showEnquiry(enquiryRows[Number(row.dataset.row)]); });
+  $('#enq-filters').addEventListener('click', event => { const b = event.target.closest('[data-filter]'); if (b) { enquiryFilter = b.dataset.filter; renderEnquiries(); } });
+  $('#enq-search').addEventListener('input', renderEnquiries);
+  $('#enq-days').addEventListener('change', loadEnquiries);
+  $('#enquiry-detail [data-close]').addEventListener('click', () => $('#enquiry-detail').close());
+  $('#enquiry-detail').addEventListener('click', event => { if (event.target.id === 'enquiry-detail') event.target.close(); });
+  $('#enq-export').addEventListener('click', () => {
+    const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const rows = [['Received', 'Channel', 'Name', 'Email', 'Phone', 'Vehicle', 'Message', 'Emailed to', 'Device', 'Came from']]
+      .concat(enquiryRows.map(r => [fullTime(r.at), channels[r.kind].label, r.name, r.email, r.phone, r.vehicle_id || r.vehicle ? carName(r.vehicle_id || '', r.vehicle) : '', r.message, r.kind === 'form' ? `${r.delivered} of ${r.recipients}` : '', r.device, r.source && sourceName(r.source)]));
+    const blob = new Blob(['\ufeff' + rows.map(r => r.map(cell).join(',')).join('\r\n')], {type: 'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `driving-force-enquiries-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+  });
 
   if (resetToken) { $('#login-view').hidden = false; showForm('#reset-form'); }
   else api('/api/session').then(data => data.authenticated ? showApp(data.user) : showLogin()).catch(showLogin);

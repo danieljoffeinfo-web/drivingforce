@@ -76,4 +76,16 @@ function analyticsHandler({supabase=createSupabaseAuth()}={}){
     }catch(error){console.error(error);return res.status(500).json({error:'Analytics could not be loaded. Please try again.'});}
   };
 }
-module.exports={trackHandler,analyticsHandler,cleanSource,device,visitorHash};
+// Form enquiries with the people who sent them, plus WhatsApp, call and finance taps from the website.
+function enquiriesHandler({supabase=createSupabaseAuth()}={}){
+  return async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    try{
+      const user=await auth.resolveUser(req,res,supabase);
+      if(!user)return res.status(401).json({error:'Please sign in again.'});
+      const days=Math.max(1,Math.min(730,parseInt(new URL(req.url,'http://admin').searchParams.get('days'),10)||30));
+      return res.status(200).json(await supabase.rpc('dashboard_enquiries',{p_days:days},user.token));
+    }catch(error){console.error(error);return res.status(500).json({error:'Enquiries could not be loaded. Please try again.'});}
+  };
+}
+module.exports={trackHandler,analyticsHandler,enquiriesHandler,cleanSource,device,visitorHash};

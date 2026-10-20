@@ -395,3 +395,60 @@ label.check input{width:auto;margin:0}
   .bar-list li{grid-template-columns:minmax(0,1.2fr) minmax(50px,1fr) minmax(30px,auto);gap:10px}
 }
 @media (max-width:760px){.form-columns{grid-template-columns:1fr}.kbd-tip{display:none}}
+
+/* ---- Enquiries ---- */
+.nav-item .count.hot{background:var(--red);border-color:var(--red);color:#fff}
+.enq-kpis .kpi .change{min-height:1.4em}
+.enq-panel{padding:0;overflow:hidden}
+.enq-filters{display:flex;flex-wrap:wrap;gap:8px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.filter-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--ink-2);font:600 13px/1 inherit;font-family:inherit;cursor:pointer}
+.filter-chip span{font-weight:500;color:var(--muted)}
+.filter-chip:hover{border-color:var(--faint);color:var(--ink)}
+.filter-chip.on{background:var(--red-soft);border-color:rgba(224,49,61,.45);color:var(--red)}
+.filter-chip.on span{color:var(--red)}
+.enq-list{list-style:none;margin:0;padding:0}
+.enq-list>li+li{border-top:1px solid var(--line)}
+.enq-row{display:grid;grid-template-columns:38px minmax(0,1.35fr) minmax(0,1fr) 130px;gap:18px;align-items:center;width:100%;padding:16px 20px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.enq-row:hover{background:var(--panel-2)}
+.enq-row .panel-icon{width:38px;height:38px}
+.enq-who{min-width:0}
+.enq-who strong{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.enq-who span{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.enq-who em{display:block;font-style:normal;font-size:13px;color:var(--ink-2);margin-top:4px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.enq-car{display:flex;align-items:center;gap:12px;min-width:0;font-size:14px;color:var(--ink-2)}
+.enq-car span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.enq-car img,.enq-car .ph{width:56px;height:38px;border-radius:6px;object-fit:cover;background:var(--raise);flex:none}
+.enq-car.none{color:var(--muted)}
+.enq-when{display:flex;flex-direction:column;align-items:flex-end;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap}
+.tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.02em}
+.tag.ok{background:rgba(60,207,122,.14);color:var(--green)}
+.tag.warn{background:var(--amber-soft);color:var(--amber)}
+.tag.bad{background:var(--red-soft);color:var(--red)}
+.enq-empty{padding:28px 20px;text-align:center}
+#enquiry-detail{max-width:min(620px,calc(100vw - 24px))}
+.enq-detail{padding:24px 26px 26px}
+#enq-detail-title{display:flex;align-items:center;gap:12px}
+.panel-icon.sm{width:30px;height:30px}
+.enq-detail-car{display:flex;gap:14px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);margin-bottom:18px}
+.enq-detail-car img{width:96px;height:64px;object-fit:cover;border-radius:8px;flex:none}
+.enq-detail-car strong{display:block;font-size:15px}
+.enq-detail-car span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.enq-facts{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px}
+.enq-facts dt{font-size:12px;color:var(--muted)}
+.enq-facts dd{margin:2px 0 0;font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.enq-facts a{color:inherit}
+.enq-message{margin:0;padding:16px 18px;border-left:3px solid var(--red);background:var(--panel-2);border-radius:0 10px 10px 0;font-size:15px;line-height:1.6;white-space:normal}
+.enq-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.enq-actions .button{text-decoration:none}
+.enq-hint{margin:18px 0 0;padding:14px 16px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);font-size:14px;line-height:1.6;color:var(--ink-2)}
+@media (max-width:900px){
+  .enq-row{grid-template-columns:38px minmax(0,1fr) auto;gap:12px 14px}
+  .enq-car{grid-column:2/-1;grid-row:2}
+  .enq-when{grid-column:3;grid-row:1}
+}
+@media (max-width:640px){
+  .enq-facts{grid-template-columns:1fr}
+  .enq-row{padding:14px 16px}
+  .enq-filters{padding:14px 16px}
+}
+#enq-days{width:auto;margin:0}

@@ -206,3 +206,13 @@ test('analytics needs a dashboard sign-in',async()=>{
   res=response();await analyticsHandler({supabase})({method:'GET',url:'/api/analytics?days=7',headers:{cookie}},res);
   assert.equal(res.statusCode,200);assert.equal(res.data.name,'dashboard_analytics');assert.deepEqual(res.data.body,{p_days:7});assert.ok(res.data.token,'runs as the signed-in person');
 });
+
+test('the enquiry log needs a dashboard sign-in and runs as that person',async()=>{
+  const {enquiriesHandler}=require('../lib/analytics.cjs');
+  const {supabase,login}=setup();
+  supabase.rpc=async(name,body,token)=>({name,body,token});
+  const {cookie}=await signIn(login,'owner@example.com','owner-password-1');
+  let res=response();await enquiriesHandler({supabase})({method:'GET',url:'/api/enquiries?days=30',headers:{}},res);assert.equal(res.statusCode,401);
+  res=response();await enquiriesHandler({supabase})({method:'GET',url:'/api/enquiries?days=9999',headers:{cookie}},res);
+  assert.equal(res.statusCode,200);assert.equal(res.data.name,'dashboard_enquiries');assert.deepEqual(res.data.body,{p_days:730});assert.ok(res.data.token);
+});

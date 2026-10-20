@@ -80,6 +80,32 @@ test('the enquiry email shows and attaches the vehicle photo, with quick replies
     assert.equal(bodies[1].attachments,undefined);assert.ok(bodies[1].html.includes('src="https://www.driving-force.co.za/assets/vehicle-2746.jpg"'));
   }finally{console.error=errors;}
 });
+test('every form enquiry is saved to the staff enquiry log, even when no email is delivered',async()=>{
+  const logEnv={...env,ENQUIRY_TO:'one@example.test',SUPABASE_URL:'https://db.example.test/',SUPABASE_PUBLISHABLE_KEY:'pk',ENQUIRY_LOG_SECRET:'shh'};
+  const logged=[];
+  const fetchImpl=ok=>async(url,options)=>{
+    if(url.startsWith('https://db.example.test')){logged.push({url,headers:options.headers,body:JSON.parse(options.body)});return new Response('1',{status:200});}
+    return new Response('{}',{status:ok?200:500});
+  };
+  const errors=console.error;console.error=()=>{};
+  try{
+    let res=response();const req=request(payload());req.headers.referer='https://example.test/vehicles/porsche-911-tp12828-278?x=1';
+    await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env:logEnv,fetchImpl:fetchImpl(true)})(req,res);
+    assert.equal(res.statusCode,200);
+    assert.equal(logged[0].url,'https://db.example.test/rest/v1/rpc/log_enquiry');assert.equal(logged[0].headers.apikey,'pk');
+    assert.deepEqual(logged[0].body,{p_secret:'shh',p_vehicle_id:'2746',p_vehicle_label:'2020 Porsche 911 Carrera S · TP12828',p_name:'Example Customer',p_email:'customer@example.com',p_phone:'082 000 0000',p_message:'Is this car still available?',p_page:'/vehicles/porsche-911-tp12828-278',p_delivered:1,p_recipients:1});
+    res=response();
+    await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env:logEnv,fetchImpl:fetchImpl(false)})(request(payload()),res);
+    assert.equal(res.statusCode,502);assert.equal(logged[1].body.p_delivered,0);
+    // A log outage never stops the enquiry email, and without the settings nothing is logged.
+    res=response();
+    await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env:logEnv,fetchImpl:async url=>{if(url.startsWith('https://db'))throw new TypeError('offline');return new Response('{}',{status:200});}})(request(payload()),res);
+    assert.equal(res.statusCode,200);
+    res=response();
+    await createHandler({loadVehicles:async()=>require('../dist/vehicles.json').vehicles,env:{...env,ENQUIRY_TO:'one@example.test'},fetchImpl:fetchImpl(true)})(request(payload()),res);
+    assert.equal(logged.length,2);
+  }finally{console.error=errors;}
+});
 test('enquiries accept vehicles that exist only in the live admin inventory',()=>{
   const added={...require('../dist/vehicles.json').vehicles[0],id:9001,stock_code:'NEW1'};
   assert.equal(validate({...payload(),vehicleId:'9001'},[added]).vehicle.stock_code,'NEW1');
