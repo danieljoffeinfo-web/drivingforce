@@ -92,7 +92,11 @@
   });
   const menu = $('.menu-button'), nav = $('#mobile-nav');
   function closeMenu() {menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Open navigation');nav.hidden=true;}
-  menu.addEventListener('click', () => {const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close navigation':'Open navigation');nav.hidden=!open;});
+  // Keep the menu directly beneath the header while the announcement banner is in view.
+  function placeMenu() {if(!nav.hidden) nav.style.top = Math.max(0, $('.header').getBoundingClientRect().bottom) + 'px';}
+  window.addEventListener('scroll', placeMenu, {passive:true});
+  window.addEventListener('resize', placeMenu, {passive:true});
+  menu.addEventListener('click', () => {const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close navigation':'Open navigation');nav.hidden=!open;placeMenu();});
   $$('#mobile-nav a').forEach(a=>a.addEventListener('click',closeMenu));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!nav.hidden){closeMenu();menu.focus();}});
   window.matchMedia('(min-width: 901px)').addEventListener('change',e=>{if(e.matches)closeMenu();});
